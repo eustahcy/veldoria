@@ -946,14 +946,14 @@ export default function Game({ onLogout, onDisconnect }) {
     <div style={{ display:'flex', width:_innerW, height:_innerH, overflow:'hidden', zoom:_zoom, position:'relative' }}>
 
       {/* Czat — pod przyciskami panelu bohatera, szerokość 2× wysokość */}
-      <div style={{ position:'absolute', left:10, bottom:10, width:480, height: chatOpen ? 240 : 'auto', zIndex:80 }}>
+      <div style={{ position:'absolute', left:10, bottom:10, width:440, height: chatOpen ? 220 : 'auto', zIndex:80 }}>
         <Chat socket={socket} isMobile={false} onMessage={handleChatMessage} mode="overlay" fill={chatOpen} playerName={state.postac.nazwa} open={chatOpen} onToggle={toggleChat} />
       </div>
 
       {/* LEFT: panel bohatera */}
       <HeroPanel
         postac={state.postac}
-        reserve={chatOpen ? 256 : 52}
+        reserve={chatOpen ? 232 : 52}
         actions={[
           { icon:'🧍', label:'Postać',       onClick:()=>setShowOutfit(true) },
           { icon:'🎒', label:'Ekwipunek',    skrot:'I', onClick:()=>setShowInv(v=>!v) },
@@ -1049,7 +1049,7 @@ export default function Game({ onLogout, onDisconnect }) {
           </div>
 
           {/* Dół mapy: pasek z kulami HP/EN — przesunięty w prawo, by nie wchodzić na czat */}
-          <div style={{ position:'absolute', left:262, right:10, bottom:8, zIndex:60, display:'flex', alignItems:'flex-end', pointerEvents:'none' }}>
+          <div style={{ position:'absolute', left:222, right:10, bottom:8, zIndex:60, display:'flex', alignItems:'flex-end', pointerEvents:'none' }}>
             <div style={{ flex:1, minWidth:0, display:'flex', justifyContent:'center' }}>
               <div style={{ pointerEvents:'auto' }}>
                 <BottomBar

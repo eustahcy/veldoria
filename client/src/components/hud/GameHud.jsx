@@ -211,9 +211,9 @@ export function HeroPanel({ postac, actions, reserve = 0 }) {
       fontFamily: C.font,
     }}>
       {/* Portret */}
-      <Ornate pad={11} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
+      <Ornate pad={9} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
         <div style={{
-          position: 'relative', width: 84, height: 94, display: 'grid', placeItems: 'center',
+          position: 'relative', width: 66, height: 74, display: 'grid', placeItems: 'center',
           background: 'radial-gradient(ellipse at 50% 88%, rgba(231,193,88,0.22), rgba(6,5,4,0.95) 68%)',
           border: `1px solid ${G.goldDim}`, borderRadius: 3,
           boxShadow: `inset 0 0 22px rgba(0,0,0,0.9), 0 0 16px rgba(231,193,88,0.12)`,
@@ -221,12 +221,12 @@ export function HeroPanel({ postac, actions, reserve = 0 }) {
           <Corner pos={['top', 'left']} /><Corner pos={['top', 'right']} />
           <Corner pos={['bottom', 'left']} /><Corner pos={['bottom', 'right']} />
           <div style={{
-            width: 32, height: 48, transform: 'scale(1.85)', imageRendering: 'pixelated',
+            width: 32, height: 48, transform: 'scale(1.45)', imageRendering: 'pixelated',
             backgroundImage: `url(/assets/${postac.obrazek})`, backgroundPosition: '0 0', backgroundRepeat: 'no-repeat',
             filter: 'drop-shadow(0 4px 6px rgba(0,0,0,0.8))',
           }} />
         </div>
-        <div style={{ fontFamily: G.serif, fontSize: 19, color: G.goldHi, letterSpacing: 1, textShadow: '0 2px 6px rgba(0,0,0,0.8)' }}>
+        <div style={{ fontFamily: G.serif, fontSize: 17, color: G.goldHi, letterSpacing: 1, textShadow: '0 2px 6px rgba(0,0,0,0.8)' }}>
           {postac.nazwa}
         </div>
         <div style={{ display: 'flex', gap: 7, alignItems: 'center' }}>
@@ -258,7 +258,7 @@ export function HeroPanel({ postac, actions, reserve = 0 }) {
         <div style={{ fontFamily: G.serif, fontSize: 10, letterSpacing: 3, color: G.goldDim, textAlign: 'center' }}>STATYSTYKI</div>
         <Rule />
         {stats.map(([icon, label, val]) => (
-          <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '3.5px 0', fontSize: 12 }}>
+          <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '2px 0', fontSize: 12 }}>
             <span style={{ width: 16, textAlign: 'center', opacity: 0.85 }}>{icon}</span>
             <span style={{ color: G.muted }}>{label}</span>
             <span style={{ flex: 1, height: 1, background: 'repeating-linear-gradient(90deg, rgba(231,193,88,0.18) 0 2px, transparent 2px 5px)' }} />
