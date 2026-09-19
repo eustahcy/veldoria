@@ -739,6 +739,14 @@ export default function Game({ onLogout, onDisconnect }) {
     setAutoHunt(v => { addToast(v ? 'Auto-polowanie wyłączone' : 'Auto-polowanie włączone', 'info'); return !v; });
   }, [addToast]);
 
+  // Po walce okno zostaje z podsumowaniem; w trybie Auto zamyka się samo, by polować dalej
+  const autoRef = useRef(false);
+  autoRef.current = autoHunt;
+  const handleBattleEnd = useCallback(() => {
+    loadState();
+    if (autoRef.current) setTimeout(() => { setBattle(null); setTarget(null); }, 1500);
+  }, [loadState]);
+
   hotkeys.current = { inBattle: !!battle, attack: attackOrEngage, potions, usePotion, auto: toggleAuto };
 
   // Auto: po każdej walce sam wybiera najbliższego potwora; wyłącza się przy niskim HP
@@ -809,7 +817,7 @@ export default function Game({ onLogout, onDisconnect }) {
           {battle     && (
             <BattleModal mob={battle.mob} postac={battle.postac} mapa={state.mapa}
               onClose={() => { setBattle(null); setTarget(null); loadState(); }}
-              onEnd={() => { loadState(); setTimeout(()=>setBattle(null),600); }}
+              onEnd={handleBattleEnd}
               onLog={entries => setCombatLog(p => [...p.slice(-40), ...entries])}
             />
           )}
@@ -1011,7 +1019,7 @@ export default function Game({ onLogout, onDisconnect }) {
         {battle    && (
           <BattleModal mob={battle.mob} postac={battle.postac} mapa={state.mapa}
             onClose={() => { setBattle(null); setTarget(null); loadState(); }}
-            onEnd={() => { loadState(); setTimeout(()=>setBattle(null),600); }}
+            onEnd={handleBattleEnd}
             onLog={entries => setCombatLog(p => [...p.slice(-40), ...entries])}
           />
         )}
@@ -1250,7 +1258,7 @@ export default function Game({ onLogout, onDisconnect }) {
       {battle     && (
         <BattleModal mob={battle.mob} postac={battle.postac} mapa={state.mapa}
           onClose={() => { setBattle(null); setTarget(null); loadState(); }}
-          onEnd={() => { loadState(); setTimeout(()=>setBattle(null),600); }}
+          onEnd={handleBattleEnd}
           onLog={entries => setCombatLog(p => [...p.slice(-40), ...entries])}
         />
       )}
