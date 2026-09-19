@@ -1,0 +1,7 @@
+# Skrypty i pliki wdrożenia uruchamiane na Linuksie — zawsze LF
+*.sh text eol=lf
+*.py text eol=lf
+*.service text eol=lf
+*.timer text eol=lf
+Dockerfile text eol=lf
+*.yml text eol=lf
