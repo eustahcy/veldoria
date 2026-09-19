@@ -51,8 +51,9 @@ const Entity = memo(function Entity({ e, kind, sx, sy, onClick, bubble, children
         position: 'absolute', left: 0, top: 0,
         transform: `translate(${Math.round(sx - HERO_W / 2)}px, ${Math.round(sy - HERO_H + TILE_H / 2)}px)`,
         width: HERO_W, height: HERO_H,
-        zIndex: 10 + Math.round(sy),
+        zIndex: Math.max(1, Math.round(sy)),   // głębokość w obrębie warstwy postaci
         cursor: onClick ? 'pointer' : 'default',
+        pointerEvents: 'auto',
         transition: 'transform 215ms linear',
       }}
     >
@@ -167,6 +168,8 @@ export default function IsoGameMap({
         );
       })()}
 
+      {/* Warstwa postaci — własny kontekst układania, żeby nie przebijała okien */}
+      <div style={{ position: 'absolute', inset: 0, zIndex: 20, pointerEvents: 'none', isolation: 'isolate' }}>
       {/* NPC */}
       {npcs.map(n => {
         const { sx, sy } = pos(n.x, n.y);
@@ -217,15 +220,16 @@ export default function IsoGameMap({
         );
       })()}
 
+      </div>
       {/* Winieta + pogoda */}
       <div style={{
-        position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 900,
+        position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 30,
         background: 'radial-gradient(ellipse at center, transparent 55%, rgba(4,3,1,0.6) 100%)',
       }} />
       <WorldOverlay pora={worldState.pora} pogoda={worldState.pogoda} />
 
       {isMobile && (
-        <div style={{ position: 'absolute', top: 54, right: 8, color: T.textDim, fontSize: 9, pointerEvents: 'none', zIndex: 950 }}>
+        <div style={{ position: 'absolute', top: 54, right: 8, color: T.textDim, fontSize: 9, pointerEvents: 'none', zIndex: 40 }}>
           ({postac.x},{postac.y})
         </div>
       )}
