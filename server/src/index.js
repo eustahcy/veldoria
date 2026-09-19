@@ -10,6 +10,7 @@ const db             = require('./db');
 const characterRoute = require('./routes/character');
 const MySQLStore     = require('./middleware/sessionStore');
 const worldCycle     = require('./game/worldCycle');
+const { chatMeta } = require('./game/chatMeta');
 const { logError }   = require('./game/log');
 const { expireAuction } = require('./game/economy');
 
@@ -313,7 +314,7 @@ io.on('connection', (socket) => {
       const [[postac]] = await db.query('SELECT nazwa FROM postac WHERE id=?', [postacId]);
       const [[gc]] = await db.query('SELECT gildia_id FROM gildia_czlonkowie WHERE postac_id=?', [postacId]);
       if (!gc) return;
-      io.to(`guild_${gc.gildia_id}`).emit('guild_message', { kto: postac?.nazwa, tresc });
+      io.to(`guild_${gc.gildia_id}`).emit('guild_message', { kto: postac?.nazwa, tresc, ...(await chatMeta(db, postacId)) });
     } catch(e) { logError('socket:guild_message')(e); }
   });
 
@@ -338,7 +339,7 @@ io.on('connection', (socket) => {
         [postac.nazwa, tresc, postac.mapa, postacId, kanal]
       );
 
-      const msg = { kto: postac.nazwa, tresc, kanal };
+      const msg = { kto: postac.nazwa, tresc, kanal, ...(await chatMeta(db, postacId)) };
       if (kanal === 'lokalny') io.to(`map_${postac.mapa}`).emit('chat_message', msg);
       else io.emit('chat_message', msg);
     } catch(e) { logError('socket:chat_message')(e); }

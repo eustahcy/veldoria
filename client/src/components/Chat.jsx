@@ -23,8 +23,50 @@ const PLACEHOLDER = {
 // Komunikaty serwera (bossy, eventy, admin) nie mają kanału — rozpoznajemy je po nadawcy
 const kanalOf = (m) => m.kanal || (/SYSTEM|BOSS|ADMIN/.test(m.kto || '') ? 'system' : 'lokalny');
 
+// ── Linia wiadomości: [godzina] | gildia | poziom | prestiż | nadawca : treść ─
+const ICON = {
+  clock: <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></svg>,
+  shield: <svg width="13" height="14" viewBox="0 0 24 26" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="M12 2l9 3.5v7c0 5.5-3.8 9.6-9 11.5-5.2-1.9-9-6-9-11.5v-7z" /><path d="M12 8c-1.6 1.8-3 3-3 4.8a3 3 0 006 0C15 11 13.6 9.8 12 8z" fill="currentColor" stroke="none" /></svg>,
+  crown: <svg width="16" height="13" viewBox="0 0 28 22" fill="currentColor"><path d="M2 6l6 5 6-9 6 9 6-5-2.5 13h-19z" /><rect x="4.5" y="19" width="19" height="2.5" rx="1" /></svg>,
+};
+const Sep = () => <span style={{ display: 'inline-block', width: 1, height: '0.95em', margin: '0 7px', verticalAlign: '-1px', background: '#7a5f2a' }} />;
+const fmtCzas = (c) => (c ? new Date(c).toLocaleTimeString('pl-PL', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : '--:--:--');
+
+function MessageLine({ m, own, kanal, labelColor }) {
+  const sys = kanal === 'system';
+  return (
+    <div style={{ fontSize: 12.5, lineHeight: 1.55, textShadow: '0 1px 2px #000', padding: '1px 0' }}>
+      <span style={{ color: '#8c8577', whiteSpace: 'nowrap' }}>
+        <span style={{ verticalAlign: '-2px', marginRight: 4 }}>{ICON.clock}</span>[{fmtCzas(m.czas)}]
+      </span>
+      <Sep />
+      {sys ? (
+        <span style={{ color: labelColor }}>[System]</span>
+      ) : (
+        <>
+          <span style={{ color: '#5fd07a', whiteSpace: 'nowrap' }}>
+            <span style={{ verticalAlign: '-2px', marginRight: 4 }}>{ICON.shield}</span>[{m.gildia || 'Brak'}]
+          </span>
+          <Sep />
+          <span style={{ color: '#4fa3ff', whiteSpace: 'nowrap' }}>Lv. <b>{m.poziom ?? '?'}</b></span>
+          <Sep />
+          <span style={{ color: '#4fa3ff', whiteSpace: 'nowrap' }}>
+            <span style={{ verticalAlign: '-1px', marginRight: 4 }}>{ICON.crown}</span><b>P{m.prestige || 0}</b>
+          </span>
+          {kanal !== 'lokalny' && <><Sep /><span style={{ color: labelColor }}>{ETYKIETA[kanal]}</span></>}
+        </>
+      )}
+      <Sep />
+      {!sys && <span style={{ color: '#e7c158', marginRight: 5 }}>✧</span>}
+      <b style={{ color: sys ? labelColor : own ? '#9be8ac' : '#5fd07a' }}>{sys ? '' : m.kto}</b>
+      {!sys && <span style={{ color: '#e7c158', margin: '0 5px' }}>:</span>}
+      <span style={{ color: sys ? '#d9c8f5' : '#f2ede2' }}>{m.tresc}</span>
+    </div>
+  );
+}
+
 // mode: 'docked' (bottom panel, always visible) | 'floating' (mobile overlay)
-export default function Chat({ socket, isMobile, onMessage, mode='floating', playerName, fill, compact }) {
+export default function Chat({ socket, isMobile, onMessage, mode='floating', playerName, fill, compact, open: openCtl, onToggle }) {
   const [messages, setMessages]   = useState([]);
   const [input,    setInput]      = useState('');
   const [open,     setOpen]       = useState(!isMobile);
@@ -97,6 +139,9 @@ export default function Chat({ socket, isMobile, onMessage, mode='floating', pla
 
   // ── OVERLAY MODE (półprzezroczyste okno na mapie, lewy dolny róg) ─────────────
   if (mode === 'overlay') {
+    // Zwijanie może kontrolować rodzic (Game dostosowuje wtedy resztę układu)
+    const isOpen = openCtl ?? dockOpen;
+    const toggle = onToggle ?? (() => setDockOpen(o => !o));
     const shown = tab === 'wszystkie' ? messages : messages.filter(m => kanalOf(m) === tab);
     const OV = { globalny: '#ff8a5c', handel: '#5ec8ff', gildia: '#7fd67a', system: '#c79bff', lokalny: '#e8e2d4' };
     const OT = TABS.filter(t => t.id !== 'lokalny');
@@ -112,7 +157,7 @@ export default function Chat({ socket, isMobile, onMessage, mode='floating', pla
           {OT.map(t => {
             const on = tab === t.id;
             return (
-              <button key={t.id} onClick={() => { setTab(t.id); setDockOpen(true); }} style={{
+              <button key={t.id} onClick={() => { setTab(t.id); if (!isOpen) toggle(); }} style={{
                 flex: 1, minWidth: 0, padding: compact ? '6px 1px' : '6px 4px', cursor: 'pointer', border: 'none', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
                 borderRight: '1px solid rgba(122,95,42,0.35)',
                 background: on ? 'linear-gradient(180deg, rgba(231,193,88,0.22), rgba(231,193,88,0.04))' : 'transparent',
@@ -122,23 +167,16 @@ export default function Chat({ socket, isMobile, onMessage, mode='floating', pla
               }}>{!compact && <span style={{ color: on ? '#e7c158' : '#5e584c', fontSize: 8, marginRight: 4 }}>◆</span>}{compact && t.id === 'wszystkie' ? 'Wszyst.' : t.label}</button>
             );
           })}
-          <button onClick={() => setDockOpen(o => !o)} title={dockOpen ? 'Zwiń' : 'Rozwiń'} style={{
-            padding: '0 9px', border: 'none', background: 'none', cursor: 'pointer', color: '#9a9182', fontSize: 10,
-          }}>{dockOpen ? '▼' : '▲'}</button>
+          <button onClick={toggle} title={isOpen ? 'Zwiń czat' : 'Rozwiń czat'} style={{
+            padding: '0 11px', border: 'none', background: 'none', cursor: 'pointer', color: '#e7c158', fontSize: 11,
+          }}>{isOpen ? '▼' : '▲'}</button>
         </div>
-        {dockOpen && <>
+        {isOpen && <>
           <div ref={listRef} style={{ height: fill ? undefined : 120, flex: fill ? 1 : undefined, minHeight: fill ? 60 : undefined, overflowY: 'auto', padding: '5px 10px', display: 'flex', flexDirection: 'column', gap: 1 }}>
             {shown.length === 0 && <div style={{ color: '#5e584c', fontSize: 11.5, textAlign: 'center', marginTop: 12, fontStyle: 'italic' }}>{tab === 'system' ? 'Brak komunikatów' : 'Cisza…'}</div>}
             {shown.map((m, i) => {
               const k = kanalOf(m);
-              const own = m.kto === playerName;
-              return (
-                <div key={i} style={{ fontSize: 12.5, lineHeight: 1.45, textShadow: '0 1px 2px #000' }}>
-                  {k !== 'lokalny' && <span style={{ color: OV[k] }}>[{ETYKIETA[k]}] </span>}
-                  <span style={{ color: own ? '#9be8ac' : k === 'system' ? OV.system : '#f0c060' }}>{m.kto}:</span>{' '}
-                  <span style={{ color: k === 'system' ? '#d9c8f5' : '#e8e2d4' }}>{m.tresc}</span>
-                </div>
-              );
+              return <MessageLine key={i} m={m} own={m.kto === playerName} kanal={k} labelColor={OV[k]} />;
             })}
             <div ref={bottomRef} />
           </div>

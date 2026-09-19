@@ -188,7 +188,7 @@ export function TopBar({ postac, mapa, worldState, tokens, onAuction, onRanking,
 }
 
 // ── Lewy panel bohatera ──────────────────────────────────────────────────────
-export function HeroPanel({ postac, actions, footer }) {
+export function HeroPanel({ postac, actions, reserve = 0 }) {
   const exp = expInfo(postac);
   const [hov, setHov] = useState(null);
 
@@ -298,8 +298,8 @@ export function HeroPanel({ postac, actions, footer }) {
         ))}
       </div>
 
-      {/* Czat pod przyciskami menu — zajmuje resztę wysokości panelu */}
-      {footer && <div style={{ flex: 1, minHeight: 250, display: 'flex', flexDirection: 'column' }}>{footer}</div>}
+      {/* Miejsce na czat, który leży w lewym dolnym rogu ekranu */}
+      {reserve > 0 && <div style={{ flexShrink: 0, height: reserve }} />}
     </aside>
   );
 }

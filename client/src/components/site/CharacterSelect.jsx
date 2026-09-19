@@ -45,7 +45,7 @@ function CharCard({ ch, mapName, onEnter, onDelete, busy }) {
     <div
       onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}
       style={{
-        ...panel, width: 300, padding: 16,
+        ...panel, width: '100%', maxWidth: 340, padding: 16, boxSizing: 'border-box',
         border: `1px solid ${hover ? S.gold : S.line}`,
         boxShadow: hover ? '0 24px 60px rgba(0,0,0,0.8), 0 0 0 1px rgba(231,193,88,0.25)' : panel.boxShadow,
         transition: 'border-color .15s, box-shadow .15s, transform .15s',
@@ -143,7 +143,7 @@ function EmptySlot({ onCreate }) {
       onClick={onCreate}
       onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}
       style={{
-        width: 300, minHeight: 386, borderRadius: 14, cursor: 'pointer',
+        width: '100%', maxWidth: 340, minHeight: 386, boxSizing: 'border-box', borderRadius: 14, cursor: 'pointer',
         background: hover ? 'rgba(231,193,88,0.06)' : 'rgba(6,9,18,0.5)',
         border: `1px dashed ${hover ? S.gold : S.line}`,
         display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 12,
@@ -166,6 +166,7 @@ export default function CharacterSelect({
   chars = [], me, stats, mapNames = {}, onEnterGame, onCreate, onDelete, onLogout, onHome, onAdmin, loading, error,
 }) {
   const narrow = useNarrow();
+  const medium = useNarrow(1100);
   const slots = Math.max(MAX_SLOTS, chars.length);
   const canCreate = chars.length < MAX_SLOTS;
 
@@ -209,7 +210,7 @@ export default function CharacterSelect({
       </header>
 
       <main style={{
-        position: 'relative', zIndex: 2, maxWidth: 1240, margin: '0 auto',
+        position: 'relative', zIndex: 2, maxWidth: 1360, margin: '0 auto',
         padding: narrow ? '18px 14px 40px' : '26px 28px 50px',
       }}>
         <div style={{ textAlign: 'center', marginBottom: 6 }}><Ornament>Wybierz bohatera</Ornament></div>
@@ -233,8 +234,10 @@ export default function CharacterSelect({
         <div style={{ display: 'flex', gap: 22, alignItems: 'flex-start', flexDirection: narrow ? 'column' : 'row' }}>
           {menu}
           <div style={{
-            flex: 1, display: 'flex', flexWrap: 'wrap', gap: 18,
-            justifyContent: narrow ? 'center' : 'flex-start',
+            // trzy kafelki obok siebie (na telefonie jeden pod drugim)
+            flex: 1, minWidth: 0, display: 'grid', gap: 18,
+            gridTemplateColumns: narrow ? 'minmax(0, 340px)' : `repeat(${medium ? 2 : 3}, minmax(0, 1fr))`,
+            justifyContent: narrow ? 'center' : 'stretch', justifyItems: 'center',
           }}>
             {chars.map(ch => (
               <CharCard key={ch.id} ch={ch} mapName={mapNames[ch.mapa]}

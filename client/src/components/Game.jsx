@@ -286,6 +286,9 @@ export default function Game({ onLogout, onDisconnect }) {
   const [mapFocus,      setMapFocus]     = useState(null);
   const [autoHunt,      setAutoHunt]     = useState(false);
   const [mChat,         setMChat]        = useState(false);
+  // Czat na komputerze: prostokąt 2:1 w lewym dolnym rogu, zwijany (pamiętany w przeglądarce)
+  const [chatOpen,      setChatOpen]     = useState(() => { try { return localStorage.getItem('veldoria_chat') !== '0'; } catch { return true; } });
+  const toggleChat = useCallback(() => setChatOpen(o => { try { localStorage.setItem('veldoria_chat', o ? '0' : '1'); } catch { /* bez pamięci */ } return !o; }), []);
   // Ruch innych graczy na żywo (socket) — { [id]: { x, y, kier, step, t } | { gone, t } }
   const [liveMoves,     setLiveMoves]    = useState({});
   const [skillBar,      setSkillBar]     = useState([]);   // umiejętności klasy na pasek 1–4
@@ -940,12 +943,17 @@ export default function Game({ onLogout, onDisconnect }) {
   const _innerH = uiScale < 1 ? `${(100 / uiScale).toFixed(2)}vh` : '100vh';
   return (
     <div style={{ width:'100vw', height:'100vh', overflow:'hidden', position:'relative', background:'#2A1A08' }}>
-    <div style={{ display:'flex', width:_innerW, height:_innerH, overflow:'hidden', zoom:_zoom }}>
+    <div style={{ display:'flex', width:_innerW, height:_innerH, overflow:'hidden', zoom:_zoom, position:'relative' }}>
+
+      {/* Czat — pod przyciskami panelu bohatera, szerokość 2× wysokość */}
+      <div style={{ position:'absolute', left:10, bottom:10, width:480, height: chatOpen ? 240 : 'auto', zIndex:80 }}>
+        <Chat socket={socket} isMobile={false} onMessage={handleChatMessage} mode="overlay" fill={chatOpen} playerName={state.postac.nazwa} open={chatOpen} onToggle={toggleChat} />
+      </div>
 
       {/* LEFT: panel bohatera */}
       <HeroPanel
         postac={state.postac}
-        footer={<Chat socket={socket} isMobile={false} onMessage={handleChatMessage} mode="overlay" fill compact playerName={state.postac.nazwa} />}
+        reserve={chatOpen ? 256 : 52}
         actions={[
           { icon:'🧍', label:'Postać',       onClick:()=>setShowOutfit(true) },
           { icon:'🎒', label:'Ekwipunek',    skrot:'I', onClick:()=>setShowInv(v=>!v) },
@@ -1040,8 +1048,8 @@ export default function Game({ onLogout, onDisconnect }) {
             <QuestTracker onOpen={()=>setShowQuests(true)} />
           </div>
 
-          {/* Dół mapy: pasek z kulami HP/EN (czat jest w lewym panelu) */}
-          <div style={{ position:'absolute', left:10, right:10, bottom:8, zIndex:60, display:'flex', alignItems:'flex-end', pointerEvents:'none' }}>
+          {/* Dół mapy: pasek z kulami HP/EN — przesunięty w prawo, by nie wchodzić na czat */}
+          <div style={{ position:'absolute', left:262, right:10, bottom:8, zIndex:60, display:'flex', alignItems:'flex-end', pointerEvents:'none' }}>
             <div style={{ flex:1, minWidth:0, display:'flex', justifyContent:'center' }}>
               <div style={{ pointerEvents:'auto' }}>
                 <BottomBar

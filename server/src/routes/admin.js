@@ -371,7 +371,7 @@ router.post('/broadcast', requireAdmin, async (req, res, next) => {
         'INSERT INTO chat (kto, tresc, mapa_id, postac_id, kanal) VALUES (?,?,?,?,?)',
         ['[SYSTEM]', tresc, 0, req.adminPostac.id, 'system']
       );
-      io?.emit('chat_message', { kto: '[SYSTEM]', tresc, kanal: 'system' });
+      io?.emit('chat_message', { kto: '[SYSTEM]', tresc, kanal: 'system', czas: new Date().toISOString() });
     }
     // Komunikat na środku ekranu (opcjonalnie z dźwiękiem) — dla wszystkich zalogowanych
     if (center) io?.emit('admin_announce', { message: text, sound: !!sound, from: req.adminPostac.nazwa });

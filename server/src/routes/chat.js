@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const db = require('../db');
 const { requireSession } = require('../middleware/auth');
+const { chatMeta } = require('../game/chatMeta');
 
 const KANALY = ['lokalny', 'globalny', 'handel'];
 
@@ -11,9 +12,13 @@ router.get('/', requireSession, async (req, res, next) => {
     const [[postac]] = await db.query('SELECT mapa, id FROM postac WHERE id = ?', [req.session.postacId]);
     if (!postac) return res.json([]);
     const [rows] = await db.query(
-      `SELECT kto, tresc, kanal FROM chat
-       WHERE kanal IN ('globalny','handel','system') OR (kanal = 'lokalny' AND mapa_id = ?)
-       ORDER BY id DESC LIMIT 40`,
+      `SELECT c.kto, c.tresc, c.kanal, c.czas, p.poziom, p.prestige, g.tag AS gildia
+       FROM chat c
+       LEFT JOIN postac p ON p.id = c.postac_id
+       LEFT JOIN gildia_czlonkowie gm ON gm.postac_id = c.postac_id
+       LEFT JOIN gilde g ON g.id = gm.gildia_id
+       WHERE c.kanal IN ('globalny','handel','system') OR (c.kanal = 'lokalny' AND c.mapa_id = ?)
+       ORDER BY c.id DESC LIMIT 40`,
       [postac.mapa]
     );
     res.json(rows.reverse());
@@ -53,7 +58,7 @@ router.post('/', requireSession, async (req, res, next) => {
       [postac.nazwa, text, postac.mapa, postac.id, kanal]
     );
     const io = req.app.locals.io;
-    const msg = { kto: postac.nazwa, tresc: text, kanal };
+    const msg = { kto: postac.nazwa, tresc: text, kanal, ...(await chatMeta(db, postac.id)) };
     if (io) {
       if (kanal === 'lokalny') io.to(`map_${postac.mapa}`).emit('chat_message', msg);
       else io.emit('chat_message', msg);
