@@ -1,0 +1,51 @@
+# Veldoria — osobny projekt compose, niezależny od stosu Metin2 na tym VPS.
+# Baza jest dostępna tylko w wewnętrznej sieci projektu (bez portu na hoście).
+name: veldoria
+
+services:
+  db:
+    image: mariadb:11.8
+    restart: unless-stopped
+    environment:
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASS}
+      MARIADB_DATABASE: ${DB_NAME}
+      MARIADB_USER: ${DB_USER}
+      MARIADB_PASSWORD: ${DB_PASS}
+    # Kod gry pisany pod luźny sql_mode (jak XAMPP) — ścisły tryb MariaDB 11 odrzucałby część zapytań
+    command: ["--sql-mode=NO_ENGINE_SUBSTITUTION", "--character-set-server=utf8mb4", "--collation-server=utf8mb4_polish_ci"]
+    volumes:
+      - db-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    mem_limit: 768m
+
+  app:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+    image: veldoria-app:latest
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DB_HOST: db
+      DB_USER: ${DB_USER}
+      DB_PASS: ${DB_PASS}
+      DB_NAME: ${DB_NAME}
+      PORT: 3002
+      CLIENT_URL: ${CLIENT_URL}
+      SESSION_SECRET: ${SESSION_SECRET}
+      TRUST_PROXY: ${TRUST_PROXY:-}
+      COOKIE_SECURE: ${COOKIE_SECURE:-}
+    ports:
+      - "${APP_PORT:-3002}:3002"
+    volumes:
+      - ${ASSETS_DIR}:/app/original/MAEGONEM_pliki
+    mem_limit: 768m
+
+volumes:
+  db-data:

@@ -1,0 +1,18 @@
+[Unit]
+Description=Veldoria Panel - start/stop/restart/backup gry Veldoria
+After=network-online.target docker.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+EnvironmentFile=/etc/veldoria-panel.env
+WorkingDirectory=/opt/veldoria/panel
+# 1 worker: blokada logowania i stan akcji trzymane w pamięci procesu
+ExecStart=/opt/veldoria/panel/venv/bin/gunicorn --bind 0.0.0.0:${PANEL_PORT} --workers 1 --threads 8 --timeout 900 app:app
+Restart=always
+RestartSec=3
+# Root, bo panel steruje Dockerem (docker compose up/down/build)
+User=root
+
+[Install]
+WantedBy=multi-user.target

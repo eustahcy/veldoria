@@ -1,0 +1,8 @@
+[Unit]
+Description=Kopia bazy Veldoria
+After=docker.service
+
+[Service]
+Type=oneshot
+Environment=VELDORIA_DIR=/opt/veldoria
+ExecStart=/bin/sh /opt/veldoria/app/deploy/backup.sh

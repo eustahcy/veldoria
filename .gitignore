@@ -1,0 +1,15 @@
+node_modules/
+dist/
+*.log
+.env
+server/.env
+
+# Kopie zapasowe i śmieci
+.backup-*.tar.gz
+Thumbs.db
+__pycache__/
+
+# Z original/ trzymamy tylko grafiki gry (MAEGONEM_pliki) — reszta to archiwum
+original/*
+!original/MAEGONEM_pliki/
+original/.git-OldMargonem/

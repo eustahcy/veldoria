@@ -1,0 +1,9 @@
+**/node_modules
+client/dist
+original/nie uzywane grafiki
+original/*.sql
+.backup-*.tar.gz
+deploy/panel
+**/.env
+**/Thumbs.db
+*.log
