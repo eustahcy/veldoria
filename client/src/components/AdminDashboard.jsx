@@ -619,6 +619,9 @@ export default function AdminDashboard({ onEnterGame, onLogout }) {
   const loadAll = useCallback(async () => {
     setLoading(true); setLoadErr(null);
     try {
+      // Ustawia sesję admina, gdy panel otwierany jest bez wchodzenia do gry
+      const who = await api.adminDash.sessionCheck();
+      if (!who?.isAdmin) { setLoadErr('To konto nie ma postaci z rangą GameAdmin'); return; }
       const [st, sv, cfg] = await Promise.all([api.adminDash.stats(), api.adminDash.status(), api.adminDash.config()]);
       if (st.error || sv.error) { setLoadErr(st.error || sv.error || 'Brak uprawnień'); return; }
       setStats(st); setStatus(sv);

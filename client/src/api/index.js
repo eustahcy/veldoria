@@ -22,6 +22,7 @@ export const api = {
     servers: () => req('GET', '/auth/servers'),
   },
   adminDash: {
+    sessionCheck:  ()           => req('POST',  '/admin/session-check'),
     status:        ()           => req('GET',   '/admin/server-status'),
     config:        ()           => req('GET',   '/admin/server-config'),
     saveConfig:    (changes)    => req('POST',  '/admin/server-config', { changes }),
