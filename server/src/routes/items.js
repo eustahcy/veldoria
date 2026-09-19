@@ -231,7 +231,7 @@ router.get('/guild-board', requireSession, async (req, res) => {
       `SELECT gw.*, g1.nazwa as atakujacy_nazwa, g2.nazwa as bronicy_nazwa
        FROM gildia_wojny gw
        LEFT JOIN gilde g1 ON g1.id=gw.gildia_atakujaca
-       LEFT JOIN gilde g2 ON g2.id=gw.gildia_broniona
+       LEFT JOIN gilde g2 ON g2.id=gw.gildia_broniac
        ORDER BY gw.id DESC LIMIT 5`
     ).catch(() => [[]]);
 

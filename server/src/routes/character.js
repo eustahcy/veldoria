@@ -189,14 +189,17 @@ async function grantTitle(dbConn, postacId, klucz) {
 module.exports.grantTitle = grantTitle;
 
 // GET /api/character/friends
-router.get('/friends', requireSession, async (req, res) => {
-  const [friends] = await db.query(
-    `SELECT p.id, p.nazwa, p.poziom, p.profesja, p.zalogowany, p.obrazek
-     FROM przyjaciele f JOIN postac p ON f.przyjaciel_id = p.id
-     WHERE f.postac_id = ?`,
-    [req.session.postacId]
-  );
-  res.json(friends);
+router.get('/friends', requireSession, async (req, res, next) => {
+  try {
+    // Kolumny tabeli przyjaciele to postac / przyjaciel (tak jak w social.js)
+    const [friends] = await db.query(
+      `SELECT p.id, p.nazwa, p.poziom, p.profesja, p.zalogowany, p.obrazek
+       FROM przyjaciele f JOIN postac p ON f.przyjaciel = p.id
+       WHERE f.postac = ?`,
+      [req.session.postacId]
+    );
+    res.json(friends);
+  } catch (e) { next(e); }
 });
 
 // ── Prestige system ───────────────────────────────────────────────────────────

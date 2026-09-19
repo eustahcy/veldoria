@@ -111,8 +111,8 @@ async function checkAbilities(boss, bossHp, io) {
         const ox = Math.floor(Math.random() * 5) - 2;
         const oy = Math.floor(Math.random() * 5) - 2;
         await db.query(
-          `INSERT INTO mob (nazwa, mapa, x, y, zycie, zycie_max, poziom, exp, obrazenia_min, obrazenia_max, sa, ac, respawn, respawn_time, obrazek)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 180, 'potwor1.gif')`,
+          `INSERT INTO mob (nazwa, mapa, x, y, zycie, zycie_max, poziom, exp, obr_min, obr_max, sa, ac, respawn, respawn_time, obrazek)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 180, 'mob/gaunt1.gif')`,
           [`Sługa ${boss.nazwa}`, boss.mapa_id,
            Math.max(0, (boss.x_pos || 30) + ox),
            Math.max(0, (boss.y_pos || 30) + oy),

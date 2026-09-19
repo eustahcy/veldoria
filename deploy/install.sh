@@ -58,7 +58,13 @@ done
 echo "   baza: $(docker inspect -f '{{.State.Health.Status}}' veldoria-db-1)"
 
 echo "== 5/6 Gra"
-"${COMPOSE[@]}" up -d app
+TABLES=$(docker exec veldoria-db-1 sh -c 'mariadb -N -uroot -p"$MARIADB_ROOT_PASSWORD" -e "SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA=\"$MARIADB_DATABASE\""')
+if [ "$TABLES" = "0" ]; then
+  echo "   pusta baza — inicjalizacja"
+  VELDORIA_DIR="$BASE" sh "$BASE/app/deploy/init-db.sh"
+else
+  "${COMPOSE[@]}" up -d app
+fi
 
 echo "== 6/6 Panel"
 mkdir -p "$BASE/panel"
