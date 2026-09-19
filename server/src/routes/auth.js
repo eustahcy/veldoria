@@ -84,11 +84,25 @@ router.get('/my-characters', async (req, res, next) => {
     if (!req.session.accountId) return res.status(401).json({ error: 'Nie zalogowany' });
     const [chars] = await db.query(
       // Limit 3 dotyczy tworzenia nowych postaci; wyświetlamy wszystkie przypisane do konta
-      'SELECT id,nazwa,poziom,profesja,obrazek,ranga,zycie,zycie_max,exp,prestige,zloto,sila,zrecznosc,intelekt FROM postac WHERE account_id=? ORDER BY id ASC LIMIT 10',
+      'SELECT id,nazwa,poziom,profesja,obrazek,ranga,zycie,zycie_max,exp,prestige,zloto,sila,zrecznosc,intelekt,mapa,zalogowany FROM postac WHERE account_id=? ORDER BY id ASC LIMIT 10',
       [req.session.accountId]
     );
     res.json(chars);
   } catch(e) { next(e); }
+});
+
+// GET /api/auth/me — kto jest zalogowany (ekran wyboru postaci)
+router.get('/me', async (req, res, next) => {
+  try {
+    if (!req.session.accountId) return res.status(401).json({ error: 'Nie zalogowany' });
+    const [[acc]] = await db.query('SELECT id, login, data_rejestracji FROM accounts WHERE id=?', [req.session.accountId]);
+    if (!acc) return res.status(401).json({ error: 'Nie zalogowany' });
+    const [[{ ile }]] = await db.query('SELECT COUNT(*) AS ile FROM postac WHERE account_id=?', [acc.id]);
+    const [[admin]] = await db.query(
+      "SELECT id FROM postac WHERE account_id=? AND ranga='GameAdmin' LIMIT 1", [acc.id]
+    );
+    res.json({ login: acc.login, od: acc.data_rejestracji, postaci: ile, isAdmin: !!admin });
+  } catch (e) { next(e); }
 });
 
 // POST /api/auth/create-character

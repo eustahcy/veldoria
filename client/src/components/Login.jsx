@@ -1,4 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import Landing from './site/Landing';
+import AuthScreen from './site/AuthScreen';
+import CharacterSelect from './site/CharacterSelect';
 
 // ── API helper ────────────────────────────────────────────────────────────────
 async function apiFetch(method, path, body) {
@@ -168,437 +171,6 @@ function StatBar({ label, val, max=10, color }) {
 // ═════════════════════════════════════════════════════════════════════════════
 // LANDING SCREEN
 // ═════════════════════════════════════════════════════════════════════════════
-function LandingScreen({ stats, classes, onDirectLogin, onDirectRegister }) {
-  const w = useW();
-  const sm = w < 640;
-  const xs = w < 400;
-  const [mode, setMode]   = useState('home');  // home | login | register
-  const [hover, setHover] = useState(null);
-
-  // Login
-  const [lLogin,  setLLogin]  = useState('');
-  const [lPass,   setLPass]   = useState('');
-  const [lRemem,  setLRemem]  = useState(false);
-  const [lErr,    setLErr]    = useState('');
-  const [lLoad,   setLLoad]   = useState(false);
-
-  // Register
-  const [rLogin,  setRLogin]  = useState('');
-  const [rPass,   setRPass]   = useState('');
-  const [rPass2,  setRPass2]  = useState('');
-  const [rErr,    setRErr]    = useState('');
-  const [rLoad,   setRLoad]   = useState(false);
-
-  const passMismatch = rPass2 && rPass !== rPass2;
-
-  const doLogin = async e => {
-    e.preventDefault(); setLErr(''); setLLoad(true);
-    try {
-      const r = await apiFetch('POST','/auth/login',{login:lLogin.trim(),haslo:lPass,rememberMe:lRemem});
-      r.ok ? onDirectLogin(r.isAdmin) : setLErr(r.error||'Błąd logowania');
-    } finally { setLLoad(false); }
-  };
-
-  const doRegister = async e => {
-    e.preventDefault(); setRErr(''); setRLoad(true);
-    try {
-      const r = await apiFetch('POST','/auth/register',{login:rLogin.trim(),haslo:rPass,powtorzHaslo:rPass2});
-      r.ok ? onDirectRegister() : setRErr(r.error||'Błąd rejestracji');
-    } finally { setRLoad(false); }
-  };
-
-  return (
-    <div style={{ minHeight:'100vh', display:'flex', flexDirection:'column', position:'relative', zIndex:1 }}>
-
-      {/* ── Top bar ── */}
-      <div style={{ position:'fixed', top:0, left:0, right:0, zIndex:50, height:sm?48:44, display:'flex', alignItems:'center', justifyContent:'space-between', padding:`0 ${sm?14:24}px`, background:'rgba(4,8,15,0.9)', backdropFilter:'blur(20px)', borderBottom:'1px solid rgba(200,150,40,0.12)' }}>
-        <div style={{ display:'flex', gap:6, alignItems:'center' }}>
-          <span style={{ color:'rgba(200,150,40,0.85)', fontSize:sm?12:13, fontFamily:SERIF, fontWeight:700, letterSpacing:sm?2:3 }}>VELDORIA</span>
-          {!sm && <><span style={{ color:'rgba(200,150,40,0.2)', fontSize:10 }}>◈</span><span style={{ color:'rgba(200,150,40,0.4)', fontSize:9, letterSpacing:1 }}>Online RPG</span></>}
-        </div>
-        <div style={{ display:'flex', alignItems:'center', gap:sm?10:20 }}>
-          {stats && !xs && (
-            <div style={{ display:'flex', alignItems:'center', gap:5, fontSize:9 }}>
-              <span style={{ width:7, height:7, borderRadius:'50%', background:stats.online>0?'#40D060':'#404060', boxShadow:stats.online>0?'0 0 6px #40D060':'none', display:'inline-block' }} />
-              <span style={{ color:stats.online>0?'#40D060':'rgba(200,150,40,0.4)' }}>{stats.online||0} online</span>
-            </div>
-          )}
-          <div style={{ display:'flex', gap:sm?6:8 }}>
-            <button onClick={()=>setMode('login')} style={{ padding:sm?'7px 14px':'6px 18px', background:'transparent', border:'1px solid rgba(200,150,40,0.3)', borderRadius:5, color:'rgba(200,150,40,0.8)', fontSize:sm?11:10, fontFamily:SERIF, cursor:'pointer' }}>
-              Zaloguj
-            </button>
-            <button onClick={()=>setMode('register')} style={{ padding:sm?'7px 14px':'6px 18px', background:'rgba(160,100,10,0.25)', border:'1px solid rgba(200,150,40,0.45)', borderRadius:5, color:'#E8C040', fontSize:sm?11:10, fontFamily:SERIF, cursor:'pointer' }}>
-              {xs ? 'Rejestracja' : 'Zarejestruj'}
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* ── Hero ── */}
-      <div style={{ flex:1, display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', textAlign:'center', padding:`${sm?56:72}px ${sm?16:20}px ${sm?40:60}px`, minHeight:'100vh' }}>
-        <div style={{ animation:'fadeUp .8s ease both' }}>
-          <Rune style={{ opacity:.5, marginBottom:sm?10:16 }} />
-          <div style={{ fontSize:sm?8:10, letterSpacing:sm?'4px':'8px', color:'rgba(200,150,40,0.55)', textTransform:'uppercase', marginBottom:sm?8:12, fontFamily:SERIF }}>
-            ◈ Klasyczne RPG Online ◈
-          </div>
-          <h1 style={{
-            margin:'0 0 8px',
-            fontSize:`clamp(${xs?36:44}px,${sm?14:9}vw,110px)`,
-            fontWeight:900, letterSpacing:`clamp(${xs?6:10}px,${sm?2:2.5}vw,28px)`,
-            fontFamily:SERIF, lineHeight:1,
-            background:'linear-gradient(135deg, #6A4010 0%, #C89030 25%, #F0D060 45%, #E8C040 55%, #B07020 75%, #7A5020 100%)',
-            backgroundClip:'text', WebkitBackgroundClip:'text', color:'transparent',
-            backgroundSize:'200% auto', animation:'shimmer 4s linear infinite',
-          }}>VELDORIA</h1>
-          <p style={{ margin:`0 0 ${sm?20:32}px`, color:'rgba(180,160,120,0.7)', fontSize:sm?11:14, letterSpacing:'1.5px', fontFamily:SERIF, fontStyle:'italic' }}>
-            Odkryj świat pełen magii, niebezpieczeństw i chwały
-          </p>
-
-          {/* Feature badges */}
-          <div style={{ display:'flex', gap:6, justifyContent:'center', flexWrap:'wrap', marginBottom:sm?28:48 }}>
-            {([['⚔','Walka'],['🗺','Świat'],['✨','6 klas'],['👥','Gildie'],['🏰','Dungeony'],['🎣','Wędka']]
-              .filter((_,i) => xs ? i<3 : true))
-              .map(([icon,label])=>(
-                <span key={label} style={{ padding:`${sm?4:5}px ${sm?10:14}px`, borderRadius:20, fontSize:sm?10:9, fontFamily:SANS, background:'rgba(15,22,40,0.8)', border:'1px solid rgba(200,150,40,0.18)', color:'rgba(180,155,100,0.85)', backdropFilter:'blur(10px)' }}>
-                  {icon} {label}
-                </span>
-              ))
-            }
-          </div>
-
-          {/* CTA buttons */}
-          <div style={{ display:'flex', gap:10, justifyContent:'center', flexDirection:sm?'column':'row', alignItems:'center', width:sm?'100%':'auto', maxWidth:sm?320:'none' }}>
-            <button onClick={()=>setMode('register')} style={{
-              padding:sm?'13px 0':'14px 40px', borderRadius:8, cursor:'pointer', width:sm?'100%':'auto',
-              background:'linear-gradient(135deg,rgba(140,90,10,0.8),rgba(180,120,20,0.6))',
-              border:'1px solid rgba(220,170,50,0.5)', color:'#F0D060',
-              fontSize:sm?13:14, fontWeight:700, fontFamily:SERIF, letterSpacing:'1.5px',
-              boxShadow:'0 8px 32px rgba(180,130,20,0.25)',
-            }}>⚔ Zacznij Przygodę</button>
-            <button onClick={()=>setMode('login')} style={{
-              padding:sm?'13px 0':'14px 40px', borderRadius:8, cursor:'pointer', width:sm?'100%':'auto',
-              background:'rgba(8,14,28,0.7)', border:'1px solid rgba(200,150,40,0.25)',
-              color:'rgba(200,150,40,0.8)', fontSize:sm?13:14, fontFamily:SERIF, letterSpacing:'1.5px',
-              backdropFilter:'blur(10px)',
-            }}>Zaloguj się</button>
-          </div>
-        </div>
-      </div>
-
-      {/* ── Class showcase ── */}
-      {!xs && (
-        <div style={{ padding:`0 ${sm?12:20}px 60px`, zIndex:1 }}>
-          <Divider label="Wybierz ścieżkę" />
-          <div style={{ maxWidth:900, margin:'16px auto 0', display:'grid', gridTemplateColumns:`repeat(auto-fill,minmax(${sm?100:130}px,1fr))`, gap:8 }}>
-            {Object.entries(CLASS_DATA).map(([name,{icon,col,sila,zrecznosc,intelekt,lore}])=>{
-              const hov = hover===name;
-              return (
-                <div key={name} onMouseEnter={()=>setHover(name)} onMouseLeave={()=>setHover(null)}
-                  onClick={()=>setHover(hov?null:name)}
-                  style={{
-                    padding:'14px 10px', borderRadius:10, textAlign:'center', cursor:'default',
-                    background: hov ? `linear-gradient(170deg,${col}18,rgba(8,14,28,0.95))` : 'rgba(8,14,28,0.7)',
-                    border:`1px solid ${hov?col+'50':'rgba(200,150,40,0.1)'}`,
-                    boxShadow: hov ? `0 8px 24px rgba(0,0,0,0.6), 0 0 16px ${col}18` : 'none',
-                    transform: hov ? 'translateY(-4px)' : 'none',
-                    transition:'all .2s', backdropFilter:'blur(10px)',
-                  }}>
-                  <div style={{ fontSize:22, marginBottom:5, filter:hov?`drop-shadow(0 0 8px ${col})`:'none' }}>{icon}</div>
-                  <div style={{ color: hov?col:'rgba(180,155,100,0.7)', fontWeight:700, fontSize:10, fontFamily:SERIF, marginBottom:hov?5:0 }}>{name}</div>
-                  {hov && !sm && <>
-                    <div style={{ fontSize:7.5, color:'rgba(160,140,100,0.65)', lineHeight:1.5, marginBottom:7 }}>{lore}</div>
-                    <StatBar label="STR" val={sila}      color="#E05050" />
-                    <StatBar label="DEX" val={zrecznosc} color="#50C060" />
-                    <StatBar label="INT" val={intelekt}  color="#9070F0" />
-                  </>}
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
-
-      {/* ── Login/Register modal ── */}
-      {(mode==='login'||mode==='register') && (
-        <div onClick={e=>e.target===e.currentTarget&&setMode('home')}
-          style={{ position:'fixed', inset:0, zIndex:100, background:'rgba(2,5,12,0.85)', backdropFilter:'blur(8px)', display:'flex', alignItems:sm?'flex-end':'center', justifyContent:'center', padding:sm?0:16 }}>
-          <div style={{
-            width:'100%', maxWidth:sm?'100%':440,
-            borderRadius:sm?'16px 16px 0 0':14, overflow:'hidden',
-            background:'linear-gradient(170deg,rgba(12,18,36,0.99),rgba(6,10,22,0.99))',
-            border:`1px solid rgba(200,150,40,0.22)`,
-            boxShadow:'0 -8px 40px rgba(0,0,0,0.8)',
-            animation:'fadeUp .25s ease both',
-            maxHeight:sm?'90vh':'auto', overflowY:sm?'auto':'visible',
-          }}>
-            <div style={{ height:3, background: mode==='login' ? 'linear-gradient(90deg,transparent,#C8920A,transparent)' : 'linear-gradient(90deg,transparent,#20A040,transparent)' }} />
-            {/* Drag handle on mobile */}
-            {sm && <div style={{ display:'flex', justifyContent:'center', padding:'10px 0 4px' }}><div style={{ width:36, height:4, borderRadius:2, background:'rgba(200,150,40,0.3)' }} /></div>}
-
-            <div style={{ padding:sm?'16px 20px 28px':'28px 32px 32px' }}>
-              <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:16 }}>
-                <div>
-                  <div style={{ color:'#E8D080', fontWeight:700, fontSize:sm?16:18, fontFamily:SERIF }}>
-                    {mode==='login' ? '⚔ Powrót do Veldorii' : '🌿 Dołącz do Veldorii'}
-                  </div>
-                  <div style={{ color:'rgba(200,150,40,0.45)', fontSize:9, marginTop:2 }}>
-                    {mode==='login' ? 'Zaloguj się na swoje konto' : 'Utwórz konto za darmo'}
-                  </div>
-                </div>
-                <button onClick={()=>setMode('home')} style={{ background:'none', border:'none', color:'rgba(200,150,40,0.4)', cursor:'pointer', fontSize:22, lineHeight:1, padding:6 }}>✕</button>
-              </div>
-
-              <div style={{ display:'flex', background:'rgba(4,8,20,0.6)', borderRadius:7, padding:3, marginBottom:18 }}>
-                {[['login','⚔ Logowanie'],['register','🌿 Rejestracja']].map(([k,l])=>(
-                  <button key={k} onClick={()=>setMode(k)} style={{
-                    flex:1, padding:'9px 4px', borderRadius:5, cursor:'pointer',
-                    background: mode===k ? 'rgba(200,150,40,0.18)' : 'transparent',
-                    border:`1px solid ${mode===k?'rgba(200,150,40,0.38)':'transparent'}`,
-                    color: mode===k ? '#E8C040' : 'rgba(200,150,40,0.4)',
-                    fontSize:sm?11:10, fontWeight:700, fontFamily:SERIF, transition:'all .15s',
-                  }}>{l}</button>
-                ))}
-              </div>
-
-              {mode==='login' && (
-                <form onSubmit={doLogin} style={{ display:'flex', flexDirection:'column', gap:14 }}>
-                  <Field label="Login" value={lLogin} onChange={e=>setLLogin(e.target.value)} placeholder="Twój login" autoComplete="username" autoFocus />
-                  <Field label="Hasło" type="password" value={lPass} onChange={e=>setLPass(e.target.value)} placeholder="••••••••" autoComplete="current-password" />
-                  <label style={{ display:'flex', alignItems:'center', gap:8, cursor:'pointer', userSelect:'none' }}>
-                    <div onClick={()=>setLRemem(m=>!m)} style={{ width:18, height:18, borderRadius:3, flexShrink:0, background:lRemem?'rgba(200,150,40,0.2)':'rgba(8,14,28,0.8)', border:`1px solid ${lRemem?'rgba(200,150,40,0.5)':'rgba(200,150,40,0.15)'}`, display:'flex', alignItems:'center', justifyContent:'center' }}>
-                      {lRemem && <span style={{ color:'#E8C040', fontSize:11 }}>✓</span>}
-                    </div>
-                    <span style={{ fontSize:10, color:'rgba(200,150,40,0.45)' }}>Pamiętaj mnie 30 dni</span>
-                  </label>
-                  <Err msg={lErr} />
-                  <Btn type="submit" disabled={lLoad} variant="gold" style={{ padding:'13px' }}>{lLoad?'Logowanie…':'⚔ Wejdź do Veldorii'}</Btn>
-                  <div style={{ textAlign:'center', fontSize:10, color:'rgba(200,150,40,0.3)' }}>
-                    Brak konta?{' '}
-                    <button type="button" onClick={()=>setMode('register')} style={{ background:'none', border:'none', color:'#50C070', cursor:'pointer', fontSize:10, textDecoration:'underline', fontFamily:SERIF }}>Zarejestruj się</button>
-                  </div>
-                </form>
-              )}
-
-              {mode==='register' && (
-                <form onSubmit={doRegister} style={{ display:'flex', flexDirection:'column', gap:13 }}>
-                  <Field label="Login" value={rLogin} onChange={e=>setRLogin(e.target.value)} placeholder="3–24 znaków" autoComplete="username" autoFocus hint={rLogin.trim().length>0?`${rLogin.trim().length}/24`:''} />
-                  <Field label="Hasło" type="password" value={rPass} onChange={e=>setRPass(e.target.value)} placeholder="Minimum 4 znaki" autoComplete="new-password" />
-                  <Field label="Powtórz hasło" type="password" value={rPass2} onChange={e=>setRPass2(e.target.value)} placeholder="••••••••" autoComplete="new-password" error={passMismatch?'Hasła się nie zgadzają':null} hint={rPass2&&!passMismatch?'✓ Hasła pasują':null} />
-                  <Err msg={rErr} />
-                  <Btn type="submit" disabled={rLoad||!!passMismatch} variant="green" style={{ padding:'13px' }}>{rLoad?'Tworzenie konta…':'🌿 Utwórz konto'}</Btn>
-                  <div style={{ textAlign:'center', fontSize:10, color:'rgba(200,150,40,0.3)' }}>
-                    Masz już konto?{' '}
-                    <button type="button" onClick={()=>setMode('login')} style={{ background:'none', border:'none', color:'#E8C040', cursor:'pointer', fontSize:10, textDecoration:'underline', fontFamily:SERIF }}>Zaloguj się</button>
-                  </div>
-                </form>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
-// ═════════════════════════════════════════════════════════════════════════════
-// CHARACTER SLOT
-// ═════════════════════════════════════════════════════════════════════════════
-function CharSlot({ char, selected, onSelect, onCreate, onDelete, compact }) {
-  const [hov, setHov]     = useState(false);
-  const [del, setDel]     = useState(false);
-  const minH = compact ? 200 : 300;
-
-  const fmt = n => { n=Number(n)||0; return n>=1e6?(n/1e6).toFixed(1)+'M':n>=1e3?(n/1e3).toFixed(1)+'K':String(n); };
-
-  if (!char) return (
-    <button onClick={onCreate} onMouseEnter={()=>setHov(true)} onMouseLeave={()=>setHov(false)}
-      style={{
-        minHeight:minH, borderRadius:12, cursor:'pointer',
-        background: hov?'rgba(12,20,38,0.9)':'rgba(6,12,24,0.6)',
-        border:`2px dashed rgba(200,150,40,${hov?.3:.12})`,
-        display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', gap:compact?8:12,
-        transition:'all .2s', transform:hov?'translateY(-3px)':'none',
-        backdropFilter:'blur(10px)', padding:'12px 8px',
-      }}>
-      <div style={{ width:compact?44:60, height:compact?44:60, borderRadius:'50%', border:`2px dashed rgba(200,150,40,${hov?.45:.2})`, display:'flex', alignItems:'center', justifyContent:'center', background:hov?'rgba(200,150,40,0.08)':'transparent', transition:'all .2s' }}>
-        <span style={{ fontSize:compact?22:30, color:`rgba(200,150,40,${hov?.7:.3})`, lineHeight:1 }}>+</span>
-      </div>
-      <div style={{ color:`rgba(200,150,40,${hov?.75:.4})`, fontSize:compact?11:14, fontFamily:SERIF }}>Nowa Postać</div>
-    </button>
-  );
-
-  const cls    = CLASS_DATA[char.profesja] || { col:'#C8920A', icon:'⚔' };
-  const hpPct  = char.zycie_max>0 ? Math.min(100,(char.zycie/char.zycie_max)*100) : 0;
-  const hpCol  = hpPct>50?'#40C060':hpPct>25?'#E0A030':'#E04040';
-  const lvl    = char.poziom;
-  const e1     = lvl>1 ? Math.pow(lvl-1,4)+10 : 0;
-  const e2     = Math.pow(lvl,4)+10;
-  const xpPct  = (e2-e1)>0 ? Math.min(100,((char.exp-e1)/(e2-e1))*100) : 0;
-  const active = selected || hov;
-  const hH     = compact ? 56 : 72;
-
-  return (
-    <div style={{ position:'relative' }} onMouseEnter={()=>setHov(true)} onMouseLeave={()=>setHov(false)}>
-      <button onClick={()=>onSelect(char.id)} style={{
-        position:'relative', width:'100%', minHeight:minH, borderRadius:12,
-        cursor:'pointer', padding:0, overflow:'hidden', display:'block',
-        background: selected ? `linear-gradient(170deg, ${cls.col}22, rgba(6,12,24,0.98))` : `linear-gradient(170deg, rgba(10,16,30,0.95), rgba(6,12,24,0.98))`,
-        border:`${selected?2:1}px solid ${selected?cls.col+'80':hov?cls.col+'30':'rgba(200,150,40,0.12)'}`,
-        boxShadow: selected ? `0 0 40px ${cls.col}28, 0 16px 40px rgba(0,0,0,0.7)` : hov ? `0 10px 32px rgba(0,0,0,0.6)` : 'none',
-        transition:'all .22s', transform:active?`translateY(${compact?-2:-4}px)`:'none',
-        backdropFilter:'blur(12px)',
-      }}>
-        {/* Header */}
-        <div style={{ height:hH, background:`linear-gradient(180deg, ${cls.col}28 0%, transparent 100%)`, display:'flex', alignItems:'center', justifyContent:'center', position:'relative' }}>
-          <div style={{ fontSize:compact?24:34, filter:active?`drop-shadow(0 0 14px ${cls.col})`:'none', transition:'filter .2s' }}>{cls.icon}</div>
-          {selected && <div style={{ position:'absolute', inset:0, background:`radial-gradient(ellipse at 50% 0%, ${cls.col}18, transparent 70%)` }} />}
-          <div style={{ position:'absolute', bottom:0, left:0, right:0, height:1, background:`linear-gradient(90deg,transparent,${cls.col}60,transparent)` }} />
-        </div>
-
-        <div style={{ padding:compact?'10px 12px 12px':'14px 16px 16px' }}>
-          {char.prestige>0 && (
-            <div style={{ position:'absolute', top:8, left:8, padding:'1px 7px', borderRadius:8, background:'rgba(200,146,42,0.15)', border:'1px solid rgba(200,146,42,0.4)' }}>
-              <span style={{ color:'#E8B848', fontSize:7, fontWeight:700 }}>✦ P{char.prestige}</span>
-            </div>
-          )}
-
-          {/* Avatar */}
-          {!compact && (
-            <div style={{ display:'flex', justifyContent:'center', marginBottom:8 }}>
-              <div style={{ width:52, height:72, backgroundImage:`url(/assets/${char.obrazek})`, backgroundPosition:'0 0', backgroundRepeat:'no-repeat', imageRendering:'pixelated', transform:'scale(1.4)', transformOrigin:'bottom center', filter:active?`drop-shadow(0 0 10px ${cls.col}90)`:'none', transition:'filter .2s' }} />
-            </div>
-          )}
-
-          {/* Name */}
-          <div style={{ textAlign:'center', marginBottom:compact?6:8 }}>
-            <div style={{ color:selected?'#F0D870':hov?'#E8D070':'#C0B090', fontWeight:700, fontSize:compact?13:15, fontFamily:SERIF, letterSpacing:compact?0:1, marginBottom:3 }}>{char.nazwa}</div>
-            <div style={{ display:'flex', alignItems:'center', gap:5, justifyContent:'center', flexWrap:'wrap' }}>
-              <span style={{ padding:'2px 7px', borderRadius:8, background:`${cls.col}22`, border:`1px solid ${cls.col}40`, color:cls.col, fontSize:8, fontWeight:700 }}>{char.profesja}</span>
-              <span style={{ color:'#F0C840', fontSize:compact?10:11, fontWeight:700 }}>Lv.{char.poziom}</span>
-            </div>
-          </div>
-
-          {!compact && <div style={{ textAlign:'center', color:'#D0A830', fontSize:9, marginBottom:8 }}>🪙 {fmt(char.zloto)}g</div>}
-
-          {/* HP bar */}
-          <div style={{ marginBottom:4 }}>
-            <div style={{ display:'flex', justifyContent:'space-between', marginBottom:2 }}>
-              <span style={{ fontSize:7, color:'rgba(200,150,40,0.4)' }}>❤ HP</span>
-              <span style={{ fontSize:7, color:hpCol }}>{char.zycie}/{char.zycie_max}</span>
-            </div>
-            <div style={{ height:5, background:'rgba(0,0,0,0.5)', borderRadius:3, overflow:'hidden' }}>
-              <div style={{ width:`${hpPct}%`, height:'100%', background:`linear-gradient(90deg,${hpCol}99,${hpCol})`, borderRadius:3 }} />
-            </div>
-          </div>
-
-          {/* EXP bar */}
-          <div>
-            <div style={{ display:'flex', justifyContent:'space-between', marginBottom:2 }}>
-              <span style={{ fontSize:7, color:'rgba(200,150,40,0.4)' }}>✦ EXP</span>
-              <span style={{ fontSize:7, color:'#50D080' }}>{Math.round(xpPct)}%</span>
-            </div>
-            <div style={{ height:3, background:'rgba(0,0,0,0.5)', borderRadius:2, overflow:'hidden' }}>
-              <div style={{ width:`${xpPct}%`, height:'100%', background:'linear-gradient(90deg,#1A5020,#40C060)', borderRadius:2 }} />
-            </div>
-          </div>
-        </div>
-      </button>
-
-      {!del
-        ? <button onClick={e=>{e.stopPropagation();setDel(true)}} style={{ position:'absolute', bottom:10, right:10, background:'none', border:'none', color:'rgba(200,80,80,0.35)', cursor:'pointer', fontSize:13, opacity:hov?1:0, transition:'opacity .2s', padding:4 }} title="Usuń">🗑</button>
-        : <div style={{ position:'absolute', inset:0, background:'rgba(4,6,16,0.96)', borderRadius:12, display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', gap:10 }}>
-            <div style={{ color:'#F07070', fontSize:11, textAlign:'center', fontFamily:SERIF, padding:'0 12px' }}>Usunąć <b>{char.nazwa}</b>?</div>
-            <div style={{ color:'rgba(200,150,40,0.4)', fontSize:9 }}>Nie można cofnąć.</div>
-            <div style={{ display:'flex', gap:8 }}>
-              <button onClick={()=>onDelete(char.id)} style={{ padding:'6px 16px', background:'rgba(60,8,8,0.8)', color:'#F07070', border:'1px solid rgba(200,60,60,0.4)', borderRadius:6, cursor:'pointer', fontSize:10, fontFamily:SERIF }}>Usuń</button>
-              <button onClick={()=>setDel(false)} style={{ padding:'6px 16px', background:'rgba(8,14,28,0.8)', color:'rgba(200,150,40,0.6)', border:'1px solid rgba(200,150,40,0.2)', borderRadius:6, cursor:'pointer', fontSize:10, fontFamily:SERIF }}>Anuluj</button>
-            </div>
-          </div>
-      }
-    </div>
-  );
-}
-
-// ═════════════════════════════════════════════════════════════════════════════
-// CHARACTER SELECT SCREEN
-// ═════════════════════════════════════════════════════════════════════════════
-function CharacterSelect({ chars, onEnterGame, onCreate, onDelete, onLogout, isAdmin, onAdminPanel, loading, error }) {
-  const w = useW();
-  const sm = w < 640;
-  const xs = w < 420;
-  const [sel, setSel] = useState(null);
-  const chosen = chars.find(c=>c.id===sel);
-  const cls    = chosen ? (CLASS_DATA[chosen.profesja]||{col:'#C8920A'}) : null;
-  const slots  = [chars[0]||null, chars[1]||null, chars[2]||null];
-  // On phones: 3 compact cards in a row; tablets+: normal grid
-  const compact = xs;
-
-  return (
-    <div style={{ minHeight:'100vh', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', padding:`${sm?20:28}px ${sm?12:20}px`, position:'relative', zIndex:1 }}>
-
-      {/* Header */}
-      <div style={{ textAlign:'center', marginBottom:sm?20:28, animation:'fadeUp .5s ease both' }}>
-        {!sm && <Rune style={{ opacity:.35, marginBottom:10 }} />}
-        <div style={{ fontSize:sm?7:8, letterSpacing:sm?'4px':'6px', color:'rgba(200,150,40,0.5)', textTransform:'uppercase', marginBottom:6, fontFamily:SERIF }}>◈ Wybierz bohatera ◈</div>
-        <h2 style={{ margin:'0 0 5px', color:'#F0D870', fontSize:sm?22:30, fontFamily:SERIF, fontWeight:700, letterSpacing:sm?2:4 }}>Twoje Postacie</h2>
-        <p style={{ margin:0, color:'rgba(200,150,40,0.35)', fontSize:9, fontStyle:'italic', fontFamily:SERIF }}>{chars.length}/3 miejsc</p>
-      </div>
-
-      {/* Slot grid */}
-      <div style={{
-        width:'100%', maxWidth:sm?480:900,
-        display:'grid',
-        gridTemplateColumns: compact
-          ? 'repeat(3,1fr)'
-          : sm ? 'repeat(auto-fill,minmax(180px,1fr))' : 'repeat(auto-fill,minmax(240px,1fr))',
-        gap: compact ? 8 : sm ? 10 : 16,
-        marginBottom: sm ? 16 : 24,
-        animation:'fadeUp .6s ease .1s both',
-      }}>
-        {slots.map((char,i)=>(
-          <CharSlot key={i} char={char} selected={sel===char?.id} onSelect={setSel} onCreate={onCreate} onDelete={onDelete} compact={compact} />
-        ))}
-      </div>
-
-      {error && <div style={{ marginBottom:12, width:'100%', maxWidth:sm?480:900 }}><Err msg={error} /></div>}
-
-      {/* Action strip */}
-      <div style={{ width:'100%', maxWidth:sm?480:540, display:'flex', flexDirection:'column', gap:sm?8:10, animation:'fadeUp .7s ease .2s both' }}>
-        {/* Enter button */}
-        <button onClick={()=>onEnterGame(sel)} disabled={!sel||loading} style={{
-          padding:sm?'13px':'15px', borderRadius:9, cursor:(!sel||loading)?'not-allowed':'pointer',
-          background: (!sel||loading)
-            ? 'rgba(8,14,28,0.5)'
-            : cls ? `linear-gradient(135deg,${cls.col}30,rgba(8,14,28,0.9))` : 'rgba(140,90,10,0.3)',
-          border:`1px solid ${(!sel||loading)?'rgba(200,150,40,0.08)':cls?cls.col+'55':'rgba(200,150,40,0.4)'}`,
-          color:(!sel||loading)?'rgba(200,150,40,0.2)':cls?cls.col:'#E8C040',
-          fontSize:sm?12:13, fontWeight:700, fontFamily:SERIF, letterSpacing:'1px',
-          boxShadow:(!sel||loading)?'none':cls?`0 8px 28px ${cls.col}22`:'0 8px 28px rgba(200,140,20,0.15)',
-          transition:'all .2s',
-        }}>
-          {loading ? 'Wchodzę do świata…' : sel ? `⚔ Graj jako ${chosen?.nazwa}` : '— Wybierz postać —'}
-        </button>
-
-        <Divider />
-
-        <div style={{ display:'flex', gap:8 }}>
-          {isAdmin && (
-            <button onClick={onAdminPanel} style={{ flex:1, padding:'10px', background:'rgba(40,6,6,0.6)', border:'1px solid rgba(200,60,60,0.25)', borderRadius:8, cursor:'pointer', color:'#E06060', fontSize:sm?10:10, fontWeight:700, fontFamily:SERIF }}>
-              🛡 Admin
-            </button>
-          )}
-          <button onClick={onLogout} style={{ flex:1, padding:'10px', background:'rgba(8,14,28,0.6)', border:'1px solid rgba(200,150,40,0.1)', borderRadius:8, cursor:'pointer', color:'rgba(200,150,40,0.4)', fontSize:10, fontFamily:SERIF }}>
-            🚪 Wyloguj się
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ═════════════════════════════════════════════════════════════════════════════
-// CREATE CHARACTER SCREEN
-// ═════════════════════════════════════════════════════════════════════════════
 function CreateCharacter({ classes, onBack, onSuccess }) {
   const w = useW();
   const sm = w < 640;
@@ -732,33 +304,38 @@ function CreateCharacter({ classes, onBack, onSuccess }) {
 // ROOT EXPORT
 // ═════════════════════════════════════════════════════════════════════════════
 export default function Login({ onLogin }) {
-  const [screen, setScreen] = useState('loading'); // loading|landing|charselect|create
-  const [stats,  setStats]  = useState(null);
-  const [classes,setClasses]= useState([]);
-  const [chars,  setChars]  = useState([]);
-  const [isAdmin,setIsAdmin]= useState(false);
-  const [selErr, setSelErr] = useState('');
-  const [selLoad,setSelLoad]= useState(false);
+  const [screen,  setScreen]  = useState('landing'); // landing | auth | charselect | create
+  const [authMode, setAuthMode] = useState('login');
+  const [stats,   setStats]   = useState(null);
+  const [classes, setClasses] = useState([]);
+  const [chars,   setChars]   = useState([]);
+  const [me,      setMe]      = useState(null);
+  const [mapNames, setMapNames] = useState({});
+  const [selErr,  setSelErr]  = useState('');
+  const [selLoad, setSelLoad] = useState(false);
 
   const refreshChars = useCallback(async () => {
-    const r = await apiFetch('GET','/auth/my-characters');
-    if (Array.isArray(r)) setChars(r);
+    const [list, who] = await Promise.all([
+      apiFetch('GET', '/auth/my-characters'),
+      apiFetch('GET', '/auth/me'),
+    ]);
+    if (Array.isArray(list)) setChars(list);
+    if (who && !who.error) setMe(who);
   }, []);
 
   useEffect(() => {
-    apiFetch('GET','/auth/stats').then(s => s && !s.error && setStats(s)).catch(()=>{});
-    apiFetch('GET','/auth/classes').then(c => Array.isArray(c) && setClasses(c)).catch(()=>{});
-    setScreen('landing');
-  }, []);
+    apiFetch('GET', '/auth/stats').then(s => s && !s.error && setStats(s)).catch(() => {});
+    apiFetch('GET', '/auth/classes').then(c => Array.isArray(c) && setClasses(c)).catch(() => {});
+    apiFetch('GET', '/game/map-list').then(m => {
+      if (Array.isArray(m)) setMapNames(Object.fromEntries(m.map(x => [x.id, x.nazwa])));
+    }).catch(() => {});
+    // Sesja mogła przetrwać (rememberMe) — wtedy od razu wybór postaci
+    apiFetch('GET', '/auth/me').then(who => {
+      if (who && !who.error) { setMe(who); refreshChars(); setScreen('charselect'); }
+    }).catch(() => {});
+  }, [refreshChars]);
 
-  const handleDirectLogin = async (admin) => {
-    setIsAdmin(!!admin);
-    await refreshChars();
-    setScreen('charselect');
-  };
-
-  const handleDirectRegister = async () => {
-    setIsAdmin(false);
+  const afterAuth = async () => {
     await refreshChars();
     setScreen('charselect');
   };
@@ -767,32 +344,57 @@ export default function Login({ onLogin }) {
     if (!charId) return;
     setSelErr(''); setSelLoad(true);
     try {
-      const r = await apiFetch('POST','/auth/select-character',{postacId:charId});
-      r.ok ? onLogin() : setSelErr(r.error||'Błąd wyboru postaci');
+      const r = await apiFetch('POST', '/auth/select-character', { postacId: charId });
+      r.ok ? onLogin() : setSelErr(r.error || 'Nie udało się wejść do gry');
     } finally { setSelLoad(false); }
   };
 
   const deleteChar = async (charId) => {
-    await apiFetch('POST','/auth/delete-character',{postacId:charId,confirm:'USUŃ'});
+    const r = await apiFetch('POST', '/auth/delete-character', { postacId: charId, confirm: 'USUŃ' });
+    if (r?.error) setSelErr(r.error);
     await refreshChars();
   };
 
-  if (screen==='loading') return (
+  if (screen === 'auth') return (
+    <AuthScreen
+      mode={authMode} stats={stats} apiFetch={apiFetch}
+      onBack={() => setScreen('landing')}
+      onDone={afterAuth}
+    />
+  );
+
+  if (screen === 'charselect') return (
+    <CharacterSelect
+      chars={chars} me={me} stats={stats} mapNames={mapNames}
+      onEnterGame={enterGame}
+      onCreate={() => setScreen('create')}
+      onDelete={deleteChar}
+      onHome={() => setScreen('landing')}
+      onLogout={async () => {
+        await apiFetch('POST', '/auth/logout');
+        setChars([]); setMe(null); setScreen('landing');
+      }}
+      loading={selLoad} error={selErr}
+    />
+  );
+
+  if (screen === 'create') return (
     <>
       <Background />
-      <div style={{ position:'relative', zIndex:1, height:'100vh', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', gap:16 }}>
-        <Rune style={{ opacity:.4, animation:'spin 8s linear infinite' }} />
-        <div style={{ color:'rgba(200,150,40,0.5)', fontSize:11, fontFamily:SERIF, letterSpacing:3 }}>Łączenie z Veldorią…</div>
-      </div>
+      <CreateCharacter
+        classes={classes}
+        onBack={() => setScreen('charselect')}
+        onSuccess={async () => { await refreshChars(); setScreen('charselect'); }}
+      />
     </>
   );
 
   return (
-    <>
-      <Background />
-      {screen==='landing'    && <LandingScreen stats={stats} classes={classes} onDirectLogin={handleDirectLogin} onDirectRegister={handleDirectRegister} />}
-      {screen==='charselect' && <CharacterSelect chars={chars} onEnterGame={enterGame} onCreate={()=>setScreen('create')} onDelete={deleteChar} onLogout={async()=>{await apiFetch('POST','/auth/logout');setChars([]);setScreen('landing');}} isAdmin={isAdmin} onAdminPanel={()=>{}} loading={selLoad} error={selErr} />}
-      {screen==='create'     && <CreateCharacter classes={classes} onBack={()=>setScreen('charselect')} onSuccess={async()=>{await refreshChars();setScreen('charselect');}} />}
-    </>
+    <Landing
+      stats={stats} classes={classes}
+      onPlay={() => { setAuthMode(me ? 'login' : 'register'); setScreen(me ? 'charselect' : 'auth'); }}
+      onLogin={() => { setAuthMode('login'); setScreen(me ? 'charselect' : 'auth'); }}
+      onSection={() => { setAuthMode('register'); setScreen('auth'); }}
+    />
   );
 }
