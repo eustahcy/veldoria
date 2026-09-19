@@ -1062,7 +1062,7 @@ export default function Game({ onLogout, onDisconnect }) {
           <DungeonHUD addToast={addToast} onLeave={() => { loadState(); }} />
 
           {/* Śledzenie zadań */}
-          <div style={{ position:'absolute', top:116, right:10, width:268, zIndex:55 }}>
+          <div style={{ position:'absolute', top:170, right:10, width:268, zIndex:55 }}>
             <QuestTracker onOpen={()=>setShowQuests(true)} />
           </div>
 

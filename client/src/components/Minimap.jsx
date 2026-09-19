@@ -160,7 +160,7 @@ export default function Minimap({ state }) {
 
   const posStyle = pos
     ? { position: 'absolute', left: pos.left, top: pos.top }
-    : { position: 'absolute', top: 8, left: 8 };
+    : { position: 'absolute', top: 8, right: 8 };   // domyślnie w prawym górnym rogu (można przeciągnąć)
 
   const GOLD   = 'rgba(200,150,32,0.75)';
   const GOLDDIM = 'rgba(200,150,32,0.3)';
