@@ -411,7 +411,7 @@ export default function BattleModal2({ mob: initMob, postac: initPostac, mapa, o
   const px = initPostac.x ?? 0, py = initPostac.y ?? 0;
 
   const mobW = mobData.szerokosc || 32, mobH = mobData.dlugosc || 48;
-  const mobScale = Math.max(1.5, Math.min(4, 130 / mobH));
+  const mobScale = Math.max(1.5, Math.min(narrow ? 2.6 : 4, (narrow ? 100 : 130) / mobH));
 
   const effectsList = (list, side) => list.length === 0
     ? <span style={{ color: B.dim, fontSize: 11.5 }}>Brak efektów</span>
@@ -504,7 +504,7 @@ export default function BattleModal2({ mob: initMob, postac: initPostac, mapa, o
         <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
           <div style={{ display: 'flex', flexDirection: narrow ? 'column' : 'row', flexShrink: 0 }}>
             {/* ── ARENA ── */}
-            <div style={{ flex: narrow ? 'none' : 1, position: 'relative', height: narrow ? 300 : 330, overflow: 'hidden', background: 'linear-gradient(180deg,#1d2a17,#0f140b)' }}>
+            <div style={{ flex: narrow ? 'none' : 1, position: 'relative', height: narrow ? 350 : 330, overflow: 'hidden', background: 'linear-gradient(180deg,#1d2a17,#0f140b)' }}>
               {mapa?.obrazek && (
                 <div style={{
                   position: 'absolute', left: '50%', top: '58%', width: W * TILE_BG, height: H * TILE_BG,
@@ -553,7 +553,7 @@ export default function BattleModal2({ mob: initMob, postac: initPostac, mapa, o
 
               {/* VS */}
               <div style={{
-                position: 'absolute', left: '50%', top: narrow ? '56%' : '48%', transform: 'translate(-50%,-50%)',
+                position: 'absolute', left: '50%', top: narrow ? '70%' : '48%', transform: 'translate(-50%,-50%)',
                 display: 'flex', alignItems: 'center', gap: 10, pointerEvents: 'none',
               }}>
                 <span style={{ width: 50, height: 1, background: `linear-gradient(90deg,transparent,${B.gold})` }} />
@@ -568,11 +568,11 @@ export default function BattleModal2({ mob: initMob, postac: initPostac, mapa, o
               {/* Postacie na arenie */}
               {[
                 { side: 'hero', left: narrow ? '24%' : '30%', ring: B.gold, flash: flashHero,
-                  sprite: <span style={{ width: 32, height: 48, transform: 'scale(2.6)', transformOrigin: 'bottom center', imageRendering: 'pixelated', backgroundImage: `url(/assets/${initPostac.obrazek})`, backgroundPosition: '0 -96px', backgroundRepeat: 'no-repeat', filter: flashHero ? 'brightness(3) saturate(3)' : isBerserk ? 'drop-shadow(0 0 6px #ff4500)' : 'none', display: 'block' }} /> },
+                  sprite: <span style={{ width: 32, height: 48, transform: `scale(${narrow ? 2 : 2.6})`, transformOrigin: 'bottom center', imageRendering: 'pixelated', backgroundImage: `url(/assets/${initPostac.obrazek})`, backgroundPosition: '0 -96px', backgroundRepeat: 'no-repeat', filter: flashHero ? 'brightness(3) saturate(3)' : isBerserk ? 'drop-shadow(0 0 6px #ff4500)' : 'none', display: 'block' }} /> },
                 { side: 'mob', left: narrow ? '76%' : '70%', ring: '#e5624c', flash: flashMob,
                   sprite: <span style={{ width: mobW, height: mobH, transform: `scale(${mobScale})`, transformOrigin: 'bottom center', imageRendering: 'pixelated', backgroundImage: `url(/assets/${mobData.obrazek})`, backgroundPosition: '0 0', backgroundRepeat: 'no-repeat', filter: flashMob ? 'brightness(3) saturate(3)' : status === 'won' ? 'grayscale(1) brightness(0.35)' : 'none', display: 'block', transition: 'filter .15s' }} /> },
               ].map(f => (
-                <div key={f.side} style={{ position: 'absolute', left: f.left, bottom: narrow ? 28 : 40, transform: 'translateX(-50%)', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                <div key={f.side} style={{ position: 'absolute', left: f.left, bottom: narrow ? 18 : 40, transform: 'translateX(-50%)', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                   <span style={{
                     position: 'absolute', left: '50%', bottom: -12, transform: 'translateX(-50%)', width: 90, height: 24, borderRadius: '50%',
                     border: `2px solid ${f.ring}`, boxShadow: `0 0 14px ${f.ring}aa, inset 0 0 10px ${f.ring}66`,
