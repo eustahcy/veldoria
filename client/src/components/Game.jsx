@@ -6,7 +6,7 @@ import { usePathfinding, buildBlockSet } from '../hooks/usePathfinding';
 import GameMap              from './GameMap';
 import IsoGameMap           from './IsoGameMap';
 import { applyTilePatch }   from '../ui/iso';
-import { TopBar, HeroPanel, QuestTracker, BottomBar } from './hud/GameHud';
+import { TopBar, HeroPanel, QuestTracker, BottomBar, LocationBox } from './hud/GameHud';
 
 // Widok świata: izometryczny dla map z iso=1, inaczej klasyczny z góry.
 // Gdy mapa ma włączoną izometrię, ale nie została jeszcze pomalowana, pokazujemy
@@ -1061,8 +1061,9 @@ export default function Game({ onLogout, onDisconnect }) {
           <Minimap state={state} />
           <DungeonHUD addToast={addToast} onLeave={() => { loadState(); }} />
 
-          {/* Śledzenie zadań */}
-          <div style={{ position:'absolute', top:170, right:10, width:268, zIndex:55 }}>
+          {/* Lokalizacja + śledzenie zadań pod minimapą */}
+          <div style={{ position:'absolute', top:158, right:10, width:268, zIndex:55, display:'flex', flexDirection:'column', gap:10 }}>
+            <LocationBox mapa={state.mapa} postac={state.postac} />
             <QuestTracker onOpen={()=>setShowQuests(true)} />
           </div>
 

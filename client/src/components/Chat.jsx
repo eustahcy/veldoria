@@ -69,9 +69,9 @@ export default function Chat({ socket, isMobile, onMessage, mode='floating', pla
         height: dockOpen ? 130 : 26,
         flexShrink:0, overflow:'hidden',
         display:'flex', flexDirection:'column',
-        background:'linear-gradient(180deg, rgba(46,28,8,0.99), rgba(36,20,5,0.99))',
-        borderTop:'1px solid rgba(185,145,50,0.22)',
-        boxShadow:'inset 0 4px 12px rgba(0,0,0,0.35)',
+        background:'linear-gradient(180deg, #17130f 0%, #0d0b09 100%)',
+        borderTop:'2px solid #7a5f2a',
+        boxShadow:'inset 0 6px 16px rgba(0,0,0,0.6)',
         transition:'height 0.2s ease',
       }}>
         {/* Chat header — klikalne zwijanie */}

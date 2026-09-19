@@ -1,28 +1,59 @@
-// Ekran rozgrywki (komputer): górny pasek, panel bohatera, kolumna z minimapą
-// i zadaniami, dolny pasek z kulami HP/EN i skrótami.
+// Ekran rozgrywki (komputer): górny pasek, panel bohatera, śledzenie zadań,
+// dolny pasek z kulami HP/EN i skrótami. Oprawa: ciemny kamień + złote ramki.
 import { useEffect, useState } from 'react';
 import { api } from '../../api';
 import { C, fmtNum } from '../../ui/kit';
 
 const G = {
-  gold: '#e7c158', goldDim: '#96793a',
-  bg: 'rgba(10,9,14,0.92)',
-  bgSoft: 'rgba(18,16,22,0.9)',
-  line: 'rgba(231,193,88,0.25)',
-  lineSoft: 'rgba(231,193,88,0.12)',
+  gold: '#e7c158', goldHi: '#f7e3a4', goldDim: '#96793a', bronze: '#7a5f2a',
   text: '#e8e2d4', muted: '#9a9182', dim: '#5e584c',
-  hp: '#c0392b', hpHi: '#e5624c',
-  en: '#2a62c4', enHi: '#4b8ef0',
-  exp: '#d8ab3d', expHi: '#f0d071',
+  hp: '#8e1f18', hpHi: '#e5624c',
+  en: '#1b3f8f', enHi: '#4b8ef0',
+  exp: '#9a7422', expHi: '#f0d071',
   serif: "'Cinzel','Palatino Linotype',Palatino,serif",
+  stone: 'linear-gradient(180deg,#221d18 0%,#17130f 45%,#0d0b09 100%)',
+  stoneSoft: 'linear-gradient(180deg,#1d1914 0%,#120f0c 100%)',
 };
 
-const frame = {
-  background: G.bg,
-  border: `1px solid ${G.line}`,
-  borderRadius: 8,
-  boxShadow: '0 10px 30px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.04)',
-};
+// ── Ozdobna ramka z rombami w rogach ─────────────────────────────────────────
+function Corner({ pos }) {
+  const [v, h] = pos;
+  return (
+    <span style={{
+      position: 'absolute', [v]: -3, [h]: -3, width: 6, height: 6,
+      transform: 'rotate(45deg)', background: G.gold, boxShadow: `0 0 6px ${G.gold}aa`,
+      pointerEvents: 'none',
+    }} />
+  );
+}
+
+export function Ornate({ children, style, pad = 10, soft }) {
+  return (
+    <div style={{
+      position: 'relative',
+      background: soft ? G.stoneSoft : G.stone,
+      border: `1px solid ${G.bronze}`,
+      borderRadius: 4,
+      padding: pad,
+      boxShadow: 'inset 0 0 0 1px rgba(0,0,0,0.75), inset 0 1px 0 rgba(255,255,255,0.05), 0 8px 22px rgba(0,0,0,0.6)',
+      ...style,
+    }}>
+      <Corner pos={['top', 'left']} /><Corner pos={['top', 'right']} />
+      <Corner pos={['bottom', 'left']} /><Corner pos={['bottom', 'right']} />
+      {children}
+    </div>
+  );
+}
+
+function Rule({ w = '100%' }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 6, width: w, margin: '6px 0' }}>
+      <span style={{ flex: 1, height: 1, background: `linear-gradient(90deg, transparent, ${G.bronze})` }} />
+      <span style={{ width: 5, height: 5, transform: 'rotate(45deg)', border: `1px solid ${G.goldDim}` }} />
+      <span style={{ flex: 1, height: 1, background: `linear-gradient(270deg, transparent, ${G.bronze})` }} />
+    </div>
+  );
+}
 
 export function expInfo(postac) {
   const lvl = postac?.poziom || 1;
@@ -32,25 +63,31 @@ export function expInfo(postac) {
   return { pct, a, b };
 }
 
-function Bar({ value, max, from, to, label, height = 13, showText = true }) {
+// ── Pasek z połyskiem ────────────────────────────────────────────────────────
+function Bar({ value, max, from, to, label, height = 14 }) {
   const pct = max > 0 ? Math.max(0, Math.min(100, (value / max) * 100)) : 0;
   return (
     <div style={{
-      position: 'relative', height, flex: 1, borderRadius: 3, overflow: 'hidden',
-      background: '#0a0a0c', border: '1px solid rgba(0,0,0,0.9)',
-      boxShadow: 'inset 0 2px 5px rgba(0,0,0,0.8)',
+      position: 'relative', height, flex: 1, overflow: 'hidden', borderRadius: 2,
+      background: 'linear-gradient(180deg,#08070a,#121016)',
+      border: '1px solid #000',
+      boxShadow: `inset 0 2px 5px rgba(0,0,0,0.9), 0 0 0 1px ${G.bronze}55`,
     }}>
       <div style={{
-        width: `${pct}%`, height: '100%',
-        background: `linear-gradient(180deg, ${to} 0%, ${from} 55%, ${from} 100%)`,
-        boxShadow: `0 0 10px ${to}66`, transition: 'width .3s',
-      }} />
-      {showText && (
-        <div style={{
-          position: 'absolute', inset: 0, display: 'grid', placeItems: 'center',
-          fontSize: height - 4, color: '#fff', textShadow: '0 1px 2px #000', fontWeight: 600,
-        }}>{label ?? `${fmtNum(value)} / ${fmtNum(max)}`}</div>
-      )}
+        width: `${pct}%`, height: '100%', position: 'relative',
+        background: `linear-gradient(180deg, ${to} 0%, ${from} 60%, #000 190%)`,
+        boxShadow: `0 0 12px ${to}55`, transition: 'width .3s',
+      }}>
+        <span style={{
+          position: 'absolute', inset: '0 0 55% 0',
+          background: 'linear-gradient(180deg, rgba(255,255,255,0.28), transparent)',
+        }} />
+      </div>
+      <div style={{
+        position: 'absolute', inset: 0, display: 'grid', placeItems: 'center',
+        fontSize: Math.max(9, height - 5), color: '#fff', fontWeight: 600,
+        textShadow: '0 1px 2px #000, 0 0 6px rgba(0,0,0,0.9)', letterSpacing: 0.3,
+      }}>{label ?? `${fmtNum(value)} / ${fmtNum(max)}`}</div>
     </div>
   );
 }
@@ -64,70 +101,90 @@ export function TopBar({ postac, mapa, worldState, tokens, onAuction, onRanking,
     return () => clearInterval(id);
   }, []);
 
+  const Sep = () => <span style={{ width: 1, alignSelf: 'stretch', margin: '2px 4px', background: `linear-gradient(180deg,transparent,${G.bronze},transparent)` }} />;
+
   const btn = (icon, label, onClick, badge) => (
     <button onClick={onClick} title={label} style={{
-      display: 'flex', alignItems: 'center', gap: 6, padding: '6px 10px', cursor: 'pointer',
-      background: 'transparent', border: `1px solid transparent`, borderRadius: 6,
-      color: G.muted, fontSize: 12, fontFamily: G.serif, position: 'relative',
+      display: 'flex', alignItems: 'center', gap: 7, padding: '7px 11px', cursor: 'pointer',
+      background: 'transparent', border: '1px solid transparent', borderRadius: 4,
+      color: G.muted, fontSize: 12.5, fontFamily: G.serif, position: 'relative', letterSpacing: 0.4,
     }}
-      onMouseEnter={e => { e.currentTarget.style.color = G.gold; e.currentTarget.style.borderColor = G.lineSoft; }}
-      onMouseLeave={e => { e.currentTarget.style.color = G.muted; e.currentTarget.style.borderColor = 'transparent'; }}
+      onMouseEnter={e => { e.currentTarget.style.color = G.goldHi; e.currentTarget.style.background = 'rgba(231,193,88,0.08)'; e.currentTarget.style.borderColor = `${G.bronze}`; }}
+      onMouseLeave={e => { e.currentTarget.style.color = G.muted; e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = 'transparent'; }}
     >
-      <span style={{ fontSize: 14 }}>{icon}</span>{label}
+      <span style={{ fontSize: 15 }}>{icon}</span>{label}
       {badge > 0 && (
         <span style={{
-          position: 'absolute', top: 2, right: 2, minWidth: 15, height: 15, borderRadius: 8,
-          background: '#c0392b', color: '#fff', fontSize: 9, display: 'grid', placeItems: 'center', padding: '0 3px',
+          position: 'absolute', top: 3, right: 3, minWidth: 15, height: 15, borderRadius: 8,
+          background: '#a8281c', border: '1px solid #e5624c', color: '#fff', fontSize: 9,
+          display: 'grid', placeItems: 'center', padding: '0 3px',
         }}>{badge}</span>
       )}
     </button>
   );
 
+  const pill = (icon, value, color) => (
+    <span style={{
+      display: 'inline-flex', alignItems: 'center', gap: 6, padding: '4px 11px', whiteSpace: 'nowrap',
+      background: 'linear-gradient(180deg,#191510,#0d0b08)', border: `1px solid ${G.bronze}`,
+      borderRadius: 999, color, fontSize: 12.5, fontWeight: 600,
+      boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.06)',
+    }}>{icon} {value}</span>
+  );
+
   return (
     <header style={{
-      display: 'flex', alignItems: 'center', gap: 14, padding: '6px 14px', flexShrink: 0,
-      background: 'linear-gradient(180deg,#14121a,#0b0a0f)',
-      borderBottom: `1px solid ${G.line}`, fontFamily: C.font,
+      display: 'flex', alignItems: 'center', gap: 10, padding: '7px 14px', flexShrink: 0,
+      background: 'linear-gradient(180deg,#1d1811 0%,#12100c 60%,#0a0907 100%)',
+      borderBottom: `2px solid ${G.bronze}`,
+      boxShadow: '0 6px 18px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.05)',
+      fontFamily: C.font, position: 'relative', zIndex: 70,
     }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, paddingRight: 12, borderRight: `1px solid ${G.lineSoft}` }}>
-        <span style={{ fontFamily: G.serif, fontSize: 17, letterSpacing: 3, color: G.gold }}>VELDORIA</span>
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', lineHeight: 1, paddingRight: 6 }}>
+        <span style={{
+          fontFamily: G.serif, fontSize: 19, letterSpacing: 4, fontWeight: 700,
+          background: 'linear-gradient(180deg,#f7e3a4,#d8ab3d 60%,#9a7526)',
+          WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
+        }}>VELDORIA</span>
+        <span style={{ fontFamily: G.serif, fontSize: 7, letterSpacing: 4, color: G.goldDim, marginTop: 2 }}>ONLINE RPG</span>
       </div>
+      <Sep />
 
       <div style={{
-        width: 26, height: 34, flexShrink: 0, imageRendering: 'pixelated',
-        backgroundImage: `url(/assets/${postac.obrazek})`, backgroundPosition: '0 0', backgroundRepeat: 'no-repeat',
+        width: 30, height: 38, flexShrink: 0, imageRendering: 'pixelated', borderRadius: 3,
+        border: `1px solid ${G.bronze}`, background: '#0c0a08',
+        backgroundImage: `url(/assets/${postac.obrazek})`, backgroundPosition: 'center -2px', backgroundRepeat: 'no-repeat',
       }} />
-      <span style={{ color: G.text, fontSize: 13, whiteSpace: 'nowrap' }}>
-        Lv. {postac.poziom} <b style={{ color: G.gold }}>{postac.nazwa}</b>
+      <span style={{ color: G.text, fontSize: 13, whiteSpace: 'nowrap', fontFamily: G.serif }}>
+        Lv. {postac.poziom} <b style={{ color: G.goldHi }}>{postac.nazwa}</b>
       </span>
       <span style={{
-        padding: '2px 9px', borderRadius: 999, fontSize: 11, whiteSpace: 'nowrap',
-        background: 'rgba(192,57,43,0.18)', border: '1px solid rgba(229,98,76,0.45)', color: '#ff9a88',
+        padding: '3px 10px', borderRadius: 999, fontSize: 11, whiteSpace: 'nowrap',
+        background: 'linear-gradient(180deg,rgba(168,40,28,0.35),rgba(80,18,12,0.35))',
+        border: '1px solid rgba(229,98,76,0.5)', color: '#ffb0a0',
       }}>{postac.profesja}</span>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 190, maxWidth: 260, flex: 1 }}>
-        <Bar value={exp.pct} max={100} from={G.exp} to={G.expHi} height={11} label={`${exp.pct.toFixed(2)}%`} />
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 170, maxWidth: 300, flex: 1 }}>
+        <Bar value={exp.pct} max={100} from={G.exp} to={G.expHi} height={12} label={`${exp.pct.toFixed(2)}%`} />
       </div>
 
-      <span style={{ display: 'flex', alignItems: 'center', gap: 6, color: G.gold, fontSize: 13, whiteSpace: 'nowrap' }}>
-        🪙 {fmtNum(postac.zloto)}
-      </span>
-      {tokens > 0 && (
-        <span style={{ display: 'flex', alignItems: 'center', gap: 6, color: '#e06ad0', fontSize: 13 }}>💎 {fmtNum(tokens)}</span>
-      )}
+      {pill('🪙', fmtNum(postac.zloto), G.goldHi)}
+      {tokens > 0 && pill('💎', fmtNum(tokens), '#e88ad8')}
 
       <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 2 }}>
         {btn('🏪', 'Aukcja', onAuction)}
         {btn('🏆', 'Ranking', onRanking)}
         {btn('✉', 'Poczta', onMail, unread)}
         {btn('⚙', 'System', onSettings)}
-        <span style={{ marginLeft: 10, color: G.muted, fontSize: 12 }}>
+        <Sep />
+        <span style={{ color: G.muted, fontSize: 12.5, whiteSpace: 'nowrap', fontFamily: G.serif }}>
           {worldState?.pora === 'noc' ? '🌙' : worldState?.pora === 'swit' ? '🌅' : worldState?.pora === 'zmierzch' ? '🌇' : '☀'}{' '}
           {zegar.toLocaleTimeString('pl-PL', { hour: '2-digit', minute: '2-digit' })}
         </span>
         <span style={{
-          marginLeft: 8, padding: '3px 10px', borderRadius: 6, fontSize: 11,
-          border: `1px solid ${G.lineSoft}`, color: G.muted,
+          marginLeft: 6, padding: '4px 11px', borderRadius: 4, fontSize: 11, whiteSpace: 'nowrap',
+          border: `1px solid ${G.bronze}`, color: G.gold, background: 'linear-gradient(180deg,#191510,#0d0b08)',
+          fontFamily: G.serif, letterSpacing: 1,
         }}>{mapa?.nazwa || 'Veldoria'}</span>
       </div>
     </header>
@@ -137,8 +194,7 @@ export function TopBar({ postac, mapa, worldState, tokens, onAuction, onRanking,
 // ── Lewy panel bohatera ──────────────────────────────────────────────────────
 export function HeroPanel({ postac, actions }) {
   const exp = expInfo(postac);
-  const en = postac.energia ?? 0;
-  const enMax = postac.energia_max ?? 100;
+  const [hov, setHov] = useState(null);
 
   const stats = [
     ['⚔', 'Atak', `${postac.obrazenia_min} – ${postac.obrazenia_max}`],
@@ -151,76 +207,96 @@ export function HeroPanel({ postac, actions }) {
 
   return (
     <aside style={{
-      width: 236, flexShrink: 0, display: 'flex', flexDirection: 'column', gap: 10,
-      padding: 10, overflowY: 'auto',
-      background: 'linear-gradient(180deg,#14121a,#0b0a0f)', borderRight: `1px solid ${G.line}`,
+      width: 244, flexShrink: 0, display: 'flex', flexDirection: 'column', gap: 12,
+      padding: 12, overflowY: 'auto',
+      background: 'linear-gradient(180deg,#171309 0%,#0f0c08 55%,#080706 100%)',
+      borderRight: `2px solid ${G.bronze}`,
+      boxShadow: 'inset -10px 0 24px rgba(0,0,0,0.55)',
       fontFamily: C.font,
     }}>
       {/* Portret */}
-      <div style={{ ...frame, padding: 12, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
+      <Ornate pad={14} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 7 }}>
         <div style={{
-          width: 86, height: 96, display: 'grid', placeItems: 'center', borderRadius: 8,
-          background: 'radial-gradient(ellipse at 50% 90%, rgba(231,193,88,0.18), rgba(6,6,10,0.9) 70%)',
-          border: `1px solid ${G.line}`,
+          position: 'relative', width: 96, height: 106, display: 'grid', placeItems: 'center',
+          background: 'radial-gradient(ellipse at 50% 88%, rgba(231,193,88,0.22), rgba(6,5,4,0.95) 68%)',
+          border: `1px solid ${G.goldDim}`, borderRadius: 3,
+          boxShadow: `inset 0 0 22px rgba(0,0,0,0.9), 0 0 16px rgba(231,193,88,0.12)`,
         }}>
+          <Corner pos={['top', 'left']} /><Corner pos={['top', 'right']} />
+          <Corner pos={['bottom', 'left']} /><Corner pos={['bottom', 'right']} />
           <div style={{
-            width: 32, height: 48, transform: 'scale(1.7)', imageRendering: 'pixelated',
+            width: 32, height: 48, transform: 'scale(1.85)', imageRendering: 'pixelated',
             backgroundImage: `url(/assets/${postac.obrazek})`, backgroundPosition: '0 0', backgroundRepeat: 'no-repeat',
+            filter: 'drop-shadow(0 4px 6px rgba(0,0,0,0.8))',
           }} />
         </div>
-        <div style={{ fontFamily: G.serif, fontSize: 18, color: G.text }}>{postac.nazwa}</div>
-        <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-          <span style={{ color: G.muted, fontSize: 12 }}>Lv. {postac.poziom}</span>
+        <div style={{ fontFamily: G.serif, fontSize: 19, color: G.goldHi, letterSpacing: 1, textShadow: '0 2px 6px rgba(0,0,0,0.8)' }}>
+          {postac.nazwa}
+        </div>
+        <div style={{ display: 'flex', gap: 7, alignItems: 'center' }}>
+          <span style={{ color: G.muted, fontSize: 12, fontFamily: G.serif }}>Lv. {postac.poziom}</span>
           <span style={{
-            padding: '2px 8px', borderRadius: 999, fontSize: 10,
-            background: 'rgba(192,57,43,0.18)', border: '1px solid rgba(229,98,76,0.45)', color: '#ff9a88',
+            padding: '2px 9px', borderRadius: 999, fontSize: 10,
+            background: 'linear-gradient(180deg,rgba(168,40,28,0.35),rgba(80,18,12,0.35))',
+            border: '1px solid rgba(229,98,76,0.5)', color: '#ffb0a0',
           }}>{postac.profesja}</span>
         </div>
-      </div>
+      </Ornate>
 
       {/* Paski */}
-      <div style={{ ...frame, padding: 10, display: 'flex', flexDirection: 'column', gap: 6 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
-          <span style={{ width: 26, color: '#ff8b78', fontSize: 11 }}>HP</span>
-          <Bar value={postac.zycie} max={postac.zycie_max} from={G.hp} to={G.hpHi} />
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
-          <span style={{ width: 26, color: '#7fb0ff', fontSize: 11 }}>EN</span>
-          <Bar value={en} max={enMax} from={G.en} to={G.enHi} />
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
-          <span style={{ width: 26, color: G.gold, fontSize: 11 }}>EXP</span>
-          <Bar value={exp.pct} max={100} from={G.exp} to={G.expHi} label={`${exp.pct.toFixed(2)}%`} />
-        </div>
-      </div>
-
-      {/* Statystyki */}
-      <div style={{ ...frame, padding: '8px 10px' }}>
-        {stats.map(([icon, label, val]) => (
-          <div key={label} style={{
-            display: 'flex', alignItems: 'center', gap: 8, padding: '3px 0',
-            borderBottom: `1px solid rgba(255,255,255,0.03)`, fontSize: 12,
-          }}>
-            <span style={{ width: 16, textAlign: 'center', opacity: 0.8 }}>{icon}</span>
-            <span style={{ flex: 1, color: G.muted }}>{label}</span>
-            <span style={{ color: G.text, fontWeight: 600 }}>{val}</span>
+      <Ornate pad={11} soft style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
+        {[
+          ['HP', postac.zycie, postac.zycie_max, G.hp, G.hpHi, '#ff9b8b', null],
+          ['EN', postac.energia ?? 0, postac.energia_max ?? 100, G.en, G.enHi, '#8fbaff', null],
+          ['EXP', exp.pct, 100, G.exp, G.expHi, G.gold, `${exp.pct.toFixed(2)}%`],
+        ].map(([label, v, m, from, to, col, txt]) => (
+          <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span style={{ width: 28, color: col, fontSize: 10.5, fontFamily: G.serif, letterSpacing: 0.5 }}>{label}</span>
+            <Bar value={v} max={m} from={from} to={to} label={txt} />
           </div>
         ))}
-      </div>
+      </Ornate>
+
+      {/* Statystyki */}
+      <Ornate pad="10px 12px" soft>
+        <div style={{ fontFamily: G.serif, fontSize: 10, letterSpacing: 3, color: G.goldDim, textAlign: 'center' }}>STATYSTYKI</div>
+        <Rule />
+        {stats.map(([icon, label, val]) => (
+          <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '3.5px 0', fontSize: 12 }}>
+            <span style={{ width: 16, textAlign: 'center', opacity: 0.85 }}>{icon}</span>
+            <span style={{ color: G.muted }}>{label}</span>
+            <span style={{ flex: 1, height: 1, background: 'repeating-linear-gradient(90deg, rgba(231,193,88,0.18) 0 2px, transparent 2px 5px)' }} />
+            <span style={{ color: G.text, fontWeight: 700, fontFamily: G.serif }}>{val}</span>
+          </div>
+        ))}
+      </Ornate>
 
       {/* Menu */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 7 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
         {actions.map(a => (
-          <button key={a.label} onClick={a.onClick} title={a.skrot ? `${a.label} (${a.skrot})` : a.label} style={{
-            ...frame, padding: '10px 4px', cursor: 'pointer', position: 'relative',
-            display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4,
-            color: G.text, fontSize: 11, fontFamily: C.font,
-            borderColor: a.uwaga ? 'rgba(231,193,88,0.6)' : G.line,
-          }}>
-            <span style={{ fontSize: 17 }}>{a.icon}</span>{a.label}
+          <button key={a.label} onClick={a.onClick}
+            onMouseEnter={() => setHov(a.label)} onMouseLeave={() => setHov(null)}
+            title={a.skrot ? `${a.label} (${a.skrot})` : a.label}
+            style={{
+              position: 'relative', padding: '11px 4px', cursor: 'pointer', borderRadius: 4,
+              display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5,
+              background: hov === a.label ? 'linear-gradient(180deg,#2c2418,#171208)' : G.stone,
+              border: `1px solid ${hov === a.label ? G.gold : G.bronze}`,
+              boxShadow: hov === a.label
+                ? `0 0 14px rgba(231,193,88,0.25), inset 0 0 0 1px rgba(0,0,0,0.7)`
+                : 'inset 0 0 0 1px rgba(0,0,0,0.7)',
+              color: hov === a.label ? G.goldHi : G.text,
+              fontSize: 11, fontFamily: G.serif, letterSpacing: 0.3,
+              transition: 'all .12s',
+            }}>
+            <span style={{ fontSize: 18, filter: 'drop-shadow(0 2px 3px rgba(0,0,0,0.7))' }}>{a.icon}</span>
+            {a.label}
+            {a.skrot && (
+              <span style={{ position: 'absolute', top: 3, right: 5, fontSize: 8, color: G.dim }}>{a.skrot}</span>
+            )}
             {a.uwaga && <span style={{
-              position: 'absolute', top: 4, right: 6, width: 7, height: 7, borderRadius: '50%',
-              background: G.gold, boxShadow: `0 0 6px ${G.gold}`,
+              position: 'absolute', top: 5, left: 6, width: 7, height: 7, borderRadius: '50%',
+              background: G.gold, boxShadow: `0 0 8px ${G.gold}`,
             }} />}
           </button>
         ))}
@@ -229,123 +305,167 @@ export function HeroPanel({ postac, actions }) {
   );
 }
 
-// ── Prawa kolumna: minimapa + zadania ────────────────────────────────────────
+// ── Lokalizacja pod minimapą ─────────────────────────────────────────────────
+export function LocationBox({ mapa, postac }) {
+  return (
+    <Ornate pad="8px 12px" soft style={{ textAlign: 'center', minWidth: 150 }}>
+      <div style={{ fontFamily: G.serif, fontSize: 13, color: G.goldHi, letterSpacing: 1 }}>{mapa?.nazwa}</div>
+      <div style={{ color: G.muted, fontSize: 11, marginTop: 2 }}>X: {postac.x} &nbsp; Y: {postac.y}</div>
+    </Ornate>
+  );
+}
+
+// ── Śledzenie zadań ──────────────────────────────────────────────────────────
+const QUEST_MARK = {
+  kill:     { icon: '!', bg: 'rgba(168,40,28,0.25)', bd: '#e5624c', fg: '#ff9b8b' },
+  location: { icon: '?', bg: 'rgba(40,120,60,0.25)', bd: '#5fd07a', fg: '#9be8ac' },
+  item:     { icon: '!', bg: 'rgba(231,193,88,0.2)', bd: G.gold, fg: G.goldHi },
+};
+
 export function QuestTracker({ onOpen }) {
   const [quests, setQuests] = useState([]);
   const [open, setOpen] = useState(true);
 
   useEffect(() => {
     let alive = true;
-    const load = () => api.quests.list().then(r => { if (alive && Array.isArray(r)) setQuests(r.filter(q => q.status === 'aktywny')); }).catch(() => {});
+    const load = () => api.quests.list()
+      .then(r => { if (alive && Array.isArray(r)) setQuests(r.filter(q => q.status === 'aktywny')); })
+      .catch(() => {});
     load();
     const id = setInterval(load, 20000);
     return () => { alive = false; clearInterval(id); };
   }, []);
 
   return (
-    <div style={{ ...frame, overflow: 'hidden', fontFamily: C.font }}>
+    <Ornate pad={0} style={{ overflow: 'hidden', fontFamily: C.font }}>
       <button onClick={() => setOpen(o => !o)} style={{
-        width: '100%', display: 'flex', alignItems: 'center', gap: 8, padding: '8px 10px',
-        background: 'linear-gradient(90deg, rgba(231,193,88,0.12), transparent)',
-        border: 'none', borderBottom: `1px solid ${G.lineSoft}`, cursor: 'pointer',
-        color: G.gold, fontFamily: G.serif, fontSize: 13,
+        width: '100%', display: 'flex', alignItems: 'center', gap: 8, padding: '9px 12px',
+        background: 'linear-gradient(90deg, rgba(231,193,88,0.16), rgba(231,193,88,0.02))',
+        border: 'none', borderBottom: `1px solid ${G.bronze}`, cursor: 'pointer',
+        color: G.goldHi, fontFamily: G.serif, fontSize: 13, letterSpacing: 0.5,
       }}>
         Aktywne zadania ({quests.length})
         <span style={{ marginLeft: 'auto', color: G.muted, fontSize: 11 }}>{open ? '▲' : '▼'}</span>
       </button>
       {open && (
-        <div style={{ maxHeight: 210, overflowY: 'auto' }}>
+        <div style={{ maxHeight: 230, overflowY: 'auto' }}>
           {quests.length === 0 && (
-            <div style={{ padding: '12px 10px', color: G.dim, fontSize: 12 }}>Brak aktywnych zadań</div>
+            <div style={{ padding: '14px 12px', color: G.dim, fontSize: 12 }}>Brak aktywnych zadań</div>
           )}
-          {quests.map(q => (
-            <button key={q.quest_id} onClick={onOpen} style={{
-              width: '100%', textAlign: 'left', display: 'flex', gap: 8, padding: '8px 10px',
-              background: 'none', border: 'none', borderBottom: `1px solid rgba(255,255,255,0.03)`, cursor: 'pointer',
-            }}>
-              <span style={{
-                width: 18, height: 18, flexShrink: 0, borderRadius: 4, display: 'grid', placeItems: 'center',
-                background: 'rgba(231,193,88,0.15)', color: G.gold, fontSize: 11, fontWeight: 'bold',
-              }}>!</span>
-              <span style={{ minWidth: 0 }}>
-                <span style={{ display: 'block', color: G.text, fontSize: 12.5 }}>{q.nazwa}</span>
-                <span style={{ display: 'block', color: G.muted, fontSize: 11 }}>
-                  {q.typ === 'kill' ? `Pokonaj: ${q.postep}/${q.cel_ilosc}` : q.opis?.slice(0, 44) || 'W toku'}
+          {quests.map(q => {
+            const m = QUEST_MARK[q.typ] || QUEST_MARK.item;
+            return (
+              <button key={q.quest_id} onClick={onOpen} style={{
+                width: '100%', textAlign: 'left', display: 'flex', gap: 9, padding: '9px 12px',
+                background: 'none', border: 'none', borderBottom: '1px solid rgba(231,193,88,0.07)', cursor: 'pointer',
+              }}>
+                <span style={{
+                  width: 20, height: 20, flexShrink: 0, borderRadius: 3, display: 'grid', placeItems: 'center',
+                  background: m.bg, border: `1px solid ${m.bd}`, color: m.fg, fontSize: 12, fontWeight: 'bold',
+                }}>{m.icon}</span>
+                <span style={{ minWidth: 0 }}>
+                  <span style={{ display: 'block', color: G.text, fontSize: 12.5, fontFamily: G.serif }}>{q.nazwa}</span>
+                  <span style={{ display: 'block', color: G.muted, fontSize: 11, marginTop: 1 }}>
+                    {q.typ === 'kill' ? `Pokonaj: ${q.postep}/${q.cel_ilosc}` : (q.opis?.slice(0, 46) || 'W toku')}
+                  </span>
                 </span>
-              </span>
-            </button>
-          ))}
+              </button>
+            );
+          })}
         </div>
       )}
-    </div>
+    </Ornate>
   );
 }
 
-// ── Dolny pasek: kule + sloty ────────────────────────────────────────────────
-function Orb({ value, max, from, to, label }) {
+// ── Kula zasobu ──────────────────────────────────────────────────────────────
+function Orb({ value, max, from, to, label, size = 84 }) {
   const pct = max > 0 ? Math.max(0, Math.min(1, value / max)) : 0;
   return (
-    <div title={`${label}: ${value}/${max}`} style={{
-      width: 72, height: 72, borderRadius: '50%', position: 'relative', flexShrink: 0,
-      background: '#0a0a0c', border: `2px solid ${G.line}`, overflow: 'hidden',
-      boxShadow: '0 6px 20px rgba(0,0,0,0.7), inset 0 0 16px rgba(0,0,0,0.9)',
+    <div title={`${label}: ${value} / ${max}`} style={{
+      width: size, height: size, borderRadius: '50%', position: 'relative', flexShrink: 0,
+      background: '#07060a',
+      border: `2px solid ${G.bronze}`,
+      boxShadow: `0 10px 26px rgba(0,0,0,0.75), inset 0 0 22px rgba(0,0,0,0.95), 0 0 0 1px rgba(0,0,0,0.9)`,
+      overflow: 'hidden',
     }}>
       <div style={{
         position: 'absolute', left: 0, right: 0, bottom: 0, height: `${pct * 100}%`,
-        background: `linear-gradient(180deg, ${to}, ${from})`, transition: 'height .3s',
-        boxShadow: `0 0 18px ${to}88`,
+        background: `linear-gradient(180deg, ${to}, ${from} 75%, #000 160%)`,
+        boxShadow: `0 0 26px ${to}99`, transition: 'height .35s',
+      }} />
+      {/* połysk szkła */}
+      <span style={{
+        position: 'absolute', top: '8%', left: '16%', width: '52%', height: '32%', borderRadius: '50%',
+        background: 'linear-gradient(180deg, rgba(255,255,255,0.35), rgba(255,255,255,0))',
+        pointerEvents: 'none',
+      }} />
+      <span style={{
+        position: 'absolute', inset: 0, borderRadius: '50%', pointerEvents: 'none',
+        boxShadow: 'inset 0 -10px 18px rgba(0,0,0,0.7), inset 0 6px 14px rgba(255,255,255,0.07)',
       }} />
       <div style={{
         position: 'absolute', inset: 0, display: 'grid', placeItems: 'center',
-        color: '#fff', fontSize: 11, fontWeight: 700, textShadow: '0 1px 3px #000',
-      }}>{Math.round(pct * 100)}%</div>
+        color: '#fff', fontSize: 12, fontWeight: 700, textShadow: '0 1px 3px #000, 0 0 8px rgba(0,0,0,0.9)',
+        fontFamily: G.serif,
+      }}>{fmtNum(value)}</div>
     </div>
   );
 }
 
+// ── Dolny pasek ──────────────────────────────────────────────────────────────
 export function BottomBar({ postac, potions = [], onUsePotion, shortcuts = [] }) {
   const exp = expInfo(postac);
+  const slot = (key, content, title, onClick, badge) => (
+    <button key={key} onClick={onClick} title={title} style={{
+      width: 48, height: 48, borderRadius: 3, cursor: 'pointer', position: 'relative',
+      background: 'linear-gradient(180deg,#221c14,#0c0a08)',
+      border: `1px solid ${G.bronze}`,
+      boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.07), inset 0 -6px 10px rgba(0,0,0,0.6)',
+      display: 'grid', placeItems: 'center', color: G.text, fontSize: 20,
+    }}
+      onMouseEnter={e => { e.currentTarget.style.borderColor = G.gold; }}
+      onMouseLeave={e => { e.currentTarget.style.borderColor = G.bronze; }}
+    >
+      {content}
+      {badge != null && (
+        <span style={{
+          position: 'absolute', bottom: 1, left: 4, fontSize: 9, color: G.goldHi,
+          textShadow: '0 1px 2px #000', fontWeight: 700,
+        }}>{badge}</span>
+      )}
+      {key && <span style={{ position: 'absolute', bottom: 1, right: 4, fontSize: 8, color: G.dim }}>{key}</span>}
+    </button>
+  );
+
   return (
     <div style={{
       position: 'absolute', left: 0, right: 0, bottom: 0, zIndex: 60,
-      display: 'flex', alignItems: 'flex-end', justifyContent: 'center', gap: 18,
-      padding: '0 16px 10px', pointerEvents: 'none', fontFamily: C.font,
+      display: 'flex', alignItems: 'flex-end', justifyContent: 'center', gap: 16,
+      padding: '0 16px 12px', pointerEvents: 'none', fontFamily: C.font,
     }}>
       <div style={{ pointerEvents: 'auto' }}>
         <Orb value={postac.zycie} max={postac.zycie_max} from={G.hp} to={G.hpHi} label="Życie" />
       </div>
 
-      <div style={{ pointerEvents: 'auto', ...frame, padding: 8, display: 'flex', flexDirection: 'column', gap: 6 }}>
-        <div style={{ display: 'flex', gap: 6 }}>
-          {shortcuts.map((s, i) => (
-            <button key={s.label} onClick={s.onClick} title={`${s.label} (${s.skrot || i + 1})`} style={{
-              width: 46, height: 46, borderRadius: 6, cursor: 'pointer', position: 'relative',
-              background: 'linear-gradient(180deg,#1b1922,#0d0c11)', border: `1px solid ${G.lineSoft}`,
-              color: G.text, fontSize: 19, display: 'grid', placeItems: 'center',
-            }}>
-              {s.icon}
-              <span style={{ position: 'absolute', bottom: 1, right: 3, fontSize: 8, color: G.dim }}>{s.skrot || i + 1}</span>
-            </button>
-          ))}
-          <span style={{ width: 1, background: G.lineSoft, margin: '2px 4px' }} />
-          {potions.slice(0, 4).map(p => (
-            <button key={p.id} onClick={() => onUsePotion?.(p)} title={p.nazwa} style={{
-              width: 46, height: 46, borderRadius: 6, cursor: 'pointer', position: 'relative',
-              background: 'linear-gradient(180deg,#1b1922,#0d0c11)', border: `1px solid ${G.lineSoft}`,
-              display: 'grid', placeItems: 'center',
-            }}>
+      <div style={{ pointerEvents: 'auto' }}>
+        <Ornate pad={9} style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
+          <div style={{ display: 'flex', gap: 7 }}>
+            {shortcuts.map(s => slot(s.skrot, s.icon, `${s.label} (${s.skrot})`, s.onClick))}
+            <span style={{ width: 1, margin: '2px 3px', background: `linear-gradient(180deg,transparent,${G.bronze},transparent)` }} />
+            {potions.slice(0, 4).map((p, i) => slot(
+              `F${i + 1}`,
               <span style={{
-                width: 30, height: 30, imageRendering: 'pixelated',
+                width: 32, height: 32, imageRendering: 'pixelated', display: 'block',
                 backgroundImage: `url(/assets/${p.obrazek})`, backgroundSize: 'contain',
-                backgroundPosition: 'center', backgroundRepeat: 'no-repeat', display: 'block',
-              }} />
-              {p.ilosc > 1 && (
-                <span style={{ position: 'absolute', bottom: 1, left: 3, fontSize: 9, color: G.text, textShadow: '0 1px 2px #000' }}>{p.ilosc}</span>
-              )}
-            </button>
-          ))}
-        </div>
-        <Bar value={exp.pct} max={100} from={G.exp} to={G.expHi} height={8} label={`${exp.pct.toFixed(2)}%`} />
+                backgroundPosition: 'center', backgroundRepeat: 'no-repeat',
+              }} />,
+              p.nazwa, () => onUsePotion?.(p), p.ilosc > 1 ? p.ilosc : null,
+            ))}
+            {potions.length === 0 && slot('F1', <span style={{ color: G.dim, fontSize: 12 }}>—</span>, 'Brak mikstur w plecaku')}
+          </div>
+          <Bar value={exp.pct} max={100} from={G.exp} to={G.expHi} height={9} label={`${exp.pct.toFixed(2)}%`} />
+        </Ornate>
       </div>
 
       <div style={{ pointerEvents: 'auto' }}>
@@ -355,4 +475,4 @@ export function BottomBar({ postac, potions = [], onUsePotion, shortcuts = [] })
   );
 }
 
-export { frame as hudFrame, G as hudColors };
+export { G as hudColors };
