@@ -4,6 +4,13 @@ import { T } from '../theme';
 import { useSocket } from '../hooks/useSocket';
 import { usePathfinding, buildBlockSet } from '../hooks/usePathfinding';
 import GameMap              from './GameMap';
+import IsoGameMap           from './IsoGameMap';
+import { applyTilePatch }   from '../ui/iso';
+
+// Widok świata: izometryczny dla map z iso=1, inaczej klasyczny z góry
+function MapRenderer({ iso, tiles, ...props }) {
+  return iso ? <IsoGameMap {...props} tiles={tiles} /> : <GameMap {...props} />;
+}
 import Chat                from './Chat';
 import CombatLog           from './CombatLog';
 import Inventory           from './Inventory';
@@ -236,6 +243,7 @@ function Hotbar({ postac, onInventory, onHeal, onPvpToggle, onQuests, onSocial, 
 // ─────────────────────────────────────────────────────────────────────────────
 export default function Game({ onLogout, onDisconnect }) {
   const [state,       setState]      = useState(null);
+  const [tiles,       setTiles]      = useState({});   // kafle izometryczne bieżącej mapy
   const [direction,   setDirection]  = useState(0);
   const [animStep,    setAnimStep]   = useState(0);
   const [combatLog,   setCombatLog]  = useState([]);
@@ -360,6 +368,26 @@ export default function Game({ onLogout, onDisconnect }) {
   }, [loadState]);
 
   const socket = useSocket(state?.mapa?.id);
+
+  // ── Kafle izometryczne: pobierz przy wejściu na mapę, aktualizuj na żywo ──
+  const mapaId = state?.mapa?.id;
+  const mapaIso = state?.mapa?.iso;
+  useEffect(() => {
+    if (!mapaId || !mapaIso) { setTiles({}); return; }
+    let alive = true;
+    api.game.tiles(mapaId).then(r => { if (alive && r && !r.error) setTiles(r.kafle || {}); });
+    return () => { alive = false; };
+  }, [mapaId, mapaIso]);
+
+  useEffect(() => {
+    if (!socket) return;
+    const onTiles = ({ mapa_id, patch }) => {
+      if (Number(mapa_id) !== Number(stateRef.current?.mapa?.id)) return;
+      setTiles(prev => applyTilePatch({ ...prev }, patch));
+    };
+    socket.on('map_tiles', onTiles);
+    return () => socket.off('map_tiles', onTiles);
+  }, [socket]);
 
   // ── PvP challenge socket listeners ────────────────────────────────────────
   useEffect(() => {
@@ -711,7 +739,7 @@ export default function Game({ onLogout, onDisconnect }) {
       return (
         <div style={{ position:'relative', width:'100vw', height:'100vh', overflow:'hidden', background:'#2A1A08' }}>
           {/* Full-screen map */}
-          <GameMap
+          <MapRenderer iso={!!state.mapa?.iso} tiles={tiles}
             state={stateForMap} direction={direction} animStep={animStep}
             chatBubbles={chatBubbles}
             onMobClick={handleMobClick} onPlayerClick={handlePlayerClick}
@@ -762,7 +790,7 @@ export default function Game({ onLogout, onDisconnect }) {
     return (
       <div style={{ position:'relative', width:'100vw', height:'100vh', overflow:'hidden', background:'#2A1A08' }}>
         {/* Full-screen map */}
-        <GameMap
+        <MapRenderer iso={!!state.mapa?.iso} tiles={tiles}
           state={stateForMap} direction={direction} animStep={animStep}
           chatBubbles={chatBubbles}
           onMobClick={handleMobClick} onPlayerClick={handlePlayerClick}
@@ -940,7 +968,7 @@ export default function Game({ onLogout, onDisconnect }) {
 
         {/* Map area (fills remaining vertical space) */}
         <div style={{ flex:1, position:'relative', overflow:'hidden' }}>
-          <GameMap
+          <MapRenderer iso={!!state.mapa?.iso} tiles={tiles}
             state={stateForMap} direction={direction} animStep={animStep}
             chatBubbles={chatBubbles}
             onMobClick={handleMobClick} onPlayerClick={handlePlayerClick}

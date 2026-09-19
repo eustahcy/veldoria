@@ -83,7 +83,8 @@ router.get('/my-characters', async (req, res, next) => {
   try {
     if (!req.session.accountId) return res.status(401).json({ error: 'Nie zalogowany' });
     const [chars] = await db.query(
-      'SELECT id,nazwa,poziom,profesja,obrazek,ranga,zycie,zycie_max,exp,prestige,zloto,sila,zrecznosc,intelekt FROM postac WHERE account_id=? ORDER BY id ASC LIMIT 3',
+      // Limit 3 dotyczy tworzenia nowych postaci; wyświetlamy wszystkie przypisane do konta
+      'SELECT id,nazwa,poziom,profesja,obrazek,ranga,zycie,zycie_max,exp,prestige,zloto,sila,zrecznosc,intelekt FROM postac WHERE account_id=? ORDER BY id ASC LIMIT 10',
       [req.session.accountId]
     );
     res.json(chars);

@@ -146,3 +146,18 @@ export function tileBlocks(tile) {
   if (tile.t && TERRAIN_BY_ID[tile.t]?.blok) return true;
   return false;
 }
+
+// Nakłada zmiany kafli (ten sam format co na serwerze) — używane przez edytor i grę.
+export function applyTilePatch(store, patch) {
+  for (const p of patch || []) {
+    const k = `${p.x},${p.y}`;
+    const cur = store[k] || {};
+    const t = p.t === null ? undefined : (p.t ?? cur.t);
+    const o = p.o === null ? undefined : (p.o ?? cur.o);
+    const next = {};
+    if (t) next.t = t;
+    if (o) next.o = o;
+    if (next.t || next.o) store[k] = next; else delete store[k];
+  }
+  return store;
+}

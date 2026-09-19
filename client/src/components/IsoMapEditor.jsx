@@ -28,6 +28,7 @@ export default function IsoMapEditor({ mapId }) {
   const [object, setObject]   = useState(OBJECTS[0].id);
   const [brush, setBrush]     = useState(1);
   const [grid, setGrid]       = useState(true);
+  const [syncBlok, setSyncBlok] = useState(true);   // czy malowanie ustawia blokady przejścia
   const [iso, setIso]         = useState(false);
   const [cam, setCam]         = useState({ x: 0, y: 0, z: 1 });
   const [hover, setHover]     = useState(null);
@@ -119,6 +120,12 @@ export default function IsoMapEditor({ mapId }) {
         else if (tool === 'guma')   p = { x, y, t: null, o: null };
         if (!p) continue;
 
+        // Blokady przejścia aktualizują się razem z kaflem (można wyłączyć)
+        if (syncBlok) {
+          const after = { ...(prev || {}), ...(p.t === null ? { t: undefined } : p.t ? { t: p.t } : {}), ...(p.o === null ? { o: undefined } : p.o ? { o: p.o } : {}) };
+          p.blok = tileBlocks(after);
+        }
+
         applyPatch(p, tilesRef.current);
         queue(p);
         touched.push({ k, prev });
@@ -128,7 +135,7 @@ export default function IsoMapEditor({ mapId }) {
     if (undoRef.current.length > 60) undoRef.current.shift();
     setCount(Object.keys(tilesRef.current).length);
     redraw();
-  }, [mapa, brush, tool, terrain, object, queue, redraw]);
+  }, [mapa, brush, tool, terrain, object, queue, redraw, syncBlok]);
 
   const undo = useCallback(() => {
     const step = undoRef.current.pop();
@@ -407,7 +414,11 @@ export default function IsoMapEditor({ mapId }) {
           <button onClick={() => setCam({ x: 0, y: 0, z: 1 })} style={S.btn(false)}>⌖ Wyśrodkuj</button>
           <button onClick={fillAll} style={S.btn(false)}>🪣 Wypełnij mapę</button>
           <button onClick={clearAll} style={{ ...S.btn(false), color: C.bad, borderColor: 'rgba(255,90,74,0.4)' }}>🗑 Wyczyść</button>
-          <label style={{ display: 'flex', alignItems: 'center', gap: 5, color: iso ? C.ok : C.textMuted, fontSize: 11, marginLeft: 6, cursor: 'pointer' }}>
+          <label style={{ display: 'flex', alignItems: 'center', gap: 5, color: syncBlok ? C.ok : C.textMuted, fontSize: 11, marginLeft: 6, cursor: 'pointer' }}>
+            <input type="checkbox" checked={syncBlok} onChange={e => setSyncBlok(e.target.checked)} />
+            Ustawiaj blokady przejścia
+          </label>
+          <label style={{ display: 'flex', alignItems: 'center', gap: 5, color: iso ? C.ok : C.textMuted, fontSize: 11, cursor: 'pointer' }}>
             <input type="checkbox" checked={iso} onChange={e => { setIso(e.target.checked); flushSave(e.target.checked); }} />
             Widok izometryczny w grze
           </label>

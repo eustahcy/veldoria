@@ -54,6 +54,21 @@ router.put('/tiles/:mapaId', requireAdmin, async (req, res, next) => {
 
     const kafle = parseTiles(mapa.kafle);
     applyTilePatch(kafle, patch, mapa);
+
+    // Obiekty blokujące (mury, drzewa, woda) trafiają też do blokadaprzejscia,
+    // żeby narysowana przeszkoda naprawdę zatrzymywała gracza
+    for (const p of Array.isArray(patch) ? patch : []) {
+      if (p?.blok === undefined) continue;
+      const x = Number(p.x), y = Number(p.y);
+      if (!Number.isInteger(x) || !Number.isInteger(y)) continue;
+      if (p.blok) {
+        await db.query('INSERT IGNORE INTO blokadaprzejscia (mapa,x,y) VALUES (?,?,?)', [mapaId, x, y])
+          .catch(logError('worldEditor:blokada'));
+      } else {
+        await db.query('DELETE FROM blokadaprzejscia WHERE mapa=? AND x=? AND y=?', [mapaId, x, y])
+          .catch(logError('worldEditor:blokada'));
+      }
+    }
     if (Object.keys(kafle).length > MAX_TILES) return res.status(400).json({ error: 'Za dużo kafli' });
 
     const fields = ['kafle=?'];
