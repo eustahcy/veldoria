@@ -21,7 +21,6 @@ function MapRenderer({ iso, tiles, ...props }) {
 import Chat                from './Chat';
 import CombatLog           from './CombatLog';
 import Inventory           from './Inventory';
-import MobileControls      from './MobileControls';
 import NpcDialog           from './NpcDialog';
 import BattleModal         from './BattleModal2';
 import AdminPanel          from './AdminPanel';
@@ -46,7 +45,6 @@ const DungeonFinder   = lazy(() => import('./DungeonFinder2'));
 import DungeonHUD from './DungeonHUD';
 import WorldBossUI from './WorldBossUI';
 import { OfflineRewardModal } from './OfflineProgress';
-import { LandscapeHUD } from './LandscapeControls';
 import { MobileHud, MenuScreen, InventoryScreen, CharacterScreen, SkillsScreen, QuestsScreen, MapScreen } from './mobile/MobileUI';
 
 const DIR_ROW    = { dol:0, lewo:1, prawo:2, gora:3 };
@@ -54,9 +52,10 @@ const MOVE_MS    = 215;
 const BUBBLE_TTL = 6000;
 
 function useIsMobile() {
-  const [m, setM] = useState(() => window.innerWidth < 860 || 'ontouchstart' in window);
+  const test = () => window.innerWidth < 860 || ('ontouchstart' in window && Math.min(window.innerWidth, window.innerHeight) < 600);
+  const [m, setM] = useState(test);
   useEffect(() => {
-    const fn = () => setM(window.innerWidth < 860 || 'ontouchstart' in window);
+    const fn = () => setM(test());
     window.addEventListener('resize', fn);
     return () => window.removeEventListener('resize', fn);
   }, []);
@@ -303,11 +302,6 @@ export default function Game({ onLogout, onDisconnect }) {
     return () => { window.removeEventListener('resize', fn); window.removeEventListener('orientationchange', onOrient); };
   }, []);
 
-  // Landscape-specific chat state
-  const [lsChatOpen,  setLsChatOpen]  = useState(false);
-  const [lsMessages,  setLsMessages]  = useState([]);
-  const [lsChatInput, setLsChatInput] = useState('');
-  const lsBottomRef = useRef(null);
 
   const posRef           = useRef({ x:null, y:null, mapa:null });
   const stateRef         = useRef(null);
@@ -524,25 +518,6 @@ export default function Game({ onLogout, onDisconnect }) {
       if (r && r.active && r.event) setActiveEvent(r.event);
     }).catch(() => {});
   }, []);
-
-  // ── Landscape chat: load messages + socket listener ───────────────────────
-  useEffect(() => {
-    if (!isLandscape) return;
-    api.chat.get().then(m => setLsMessages(m)).catch(() => {});
-  }, [isLandscape]);
-
-  useEffect(() => {
-    if (!socket || !isLandscape) return;
-    const handler = (msg) => {
-      setLsMessages(p => [...p.slice(-49), msg]);
-    };
-    socket.on('chat_message', handler);
-    return () => socket.off('chat_message', handler);
-  }, [socket, isLandscape]);
-
-  useEffect(() => {
-    if (lsChatOpen) lsBottomRef.current?.scrollIntoView({ behavior:'smooth' });
-  }, [lsMessages, lsChatOpen]);
 
   // ── World Boss polling ────────────────────────────────────────────────────
   useEffect(() => {
@@ -784,170 +759,14 @@ export default function Game({ onLogout, onDisconnect }) {
   const liveMob    = target ? state.mobs?.find(m => m.id === target.id) : null;
 
   // ── MOBILE LAYOUT (portrait only — landscape uses desktop layout) ────────────
-  if (isMobile && !isLandscape) {
+  // Telefon (pionowo i poziomo) — mapa na cały ekran i pływający HUD
+  if (isMobile) {
     const lastLog = combatLog.length > 0 ? combatLog[combatLog.length-1] : null;
     const pillTxt = lastLog?.type==='mob_dead'
       ? `+${lastLog.exp} EXP`
       : lastLog?.type==='hit'
       ? `-${lastLog.dmg} HP`
       : null;
-
-    // Helper for landscape chat send
-    const lsSendChat = async (e) => {
-      e.preventDefault();
-      const text = lsChatInput.trim();
-      if (!text) return;
-      setLsChatInput('');
-      handleChatMessage({ kto: state.postac.nazwa, tresc: text });
-      if (socket?.connected) socket.emit('chat_message', { tresc: text });
-      else { await api.chat.send(text); api.chat.get().then(m => setLsMessages(m)); }
-    };
-
-    // ── LANDSCAPE LAYOUT ─────────────────────────────────────────────────────
-    if (isLandscape) {
-      const modals = (
-        <>
-          {showInv    && <Inventory onClose={()=>setShowInv(false)} onRefresh={()=>{ loadState(); loadPotions(); }} postac={state.postac} onNavigate={openPanel} />}
-          {npcDialog  && <NpcDialog npc={npcDialog} postac={state.postac} onClose={()=>setNpcDialog(null)} onBought={loadState} onQuestReward={msg=>{ addToast(msg,'info'); loadState(); }} />}
-          {showQuests && <QuestPanel onClose={()=>setShowQuests(false)} onReward={msg=>{ addToast(msg,'info'); loadState(); setShowQuests(false); }} />}
-          {showSocial && <SocialPanel onClose={()=>setShowSocial(false)} onViewProfile={id=>{ setViewProfile(id); setShowSocial(false); }} />}
-          {showGuild  && <GuildPanel  onClose={()=>setShowGuild(false)} socket={socket} postacId={state.postac.id} />}
-          {showAdmin  && <AdminPanel postac={state.postac} onClose={()=>setShowAdmin(false)} onLogout={()=>(onDisconnect || onLogout)()} />}
-          {showOutfit && <OutfitSelector postac={state.postac} onClose={()=>setShowOutfit(false)} onChanged={()=>{ loadState(); setShowOutfit(false); }} />}
-          {battle     && (
-            <BattleModal mob={battle.mob} postac={battle.postac} mapa={state.mapa}
-              onClose={() => { setBattle(null); setTarget(null); loadState(); }}
-              onEnd={handleBattleEnd}
-              onLog={entries => setCombatLog(p => [...p.slice(-40), ...entries])}
-            />
-          )}
-          {pvpChallenge && (
-            <PvpChallengeModal challenge={pvpChallenge}
-              onAccept={() => {
-                socket?.emit('pvp_accept', { challengerId: pvpChallenge.challengerId });
-                api.combat.pvp(pvpChallenge.challengerId).then(res => {
-                  if (res.ok) { setCombatLog(p => [...p.slice(-30), ...res.log]); loadState(); }
-                });
-                setPvpChallenge(null);
-              }}
-              onDecline={() => { socket?.emit('pvp_decline', {}); setPvpChallenge(null); }}
-            />
-          )}
-          {viewProfile && <PlayerProfile postacId={viewProfile} myId={state.postac.id} onClose={()=>setViewProfile(null)} socket={socket}
-            onSendMessage={() => { setViewProfile(null); setShowSocial(true); }}
-            onChallengePvp={id => { socket?.emit('pvp_challenge',{targetId:id}); addToast('Wyzwanie PvP wysłane','info'); }}
-            onTradeRequest={id => socket?.emit('trade_request', { targetId: id })}
-          />}
-          {showTrade && (
-            <TradeModal socket={socket} postacId={state.postac.id} myInventory={state.items || []} onClose={() => { setShowTrade(false); socket?.emit('trade_cancel', {}); }} />
-          )}
-          {tradeRequest && (
-            <div style={{ position:'fixed', inset:0, background:'rgba(20,10,3,0.80)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:450, fontFamily:'Verdana,sans-serif' }}>
-              <div style={{ padding:'16px 20px', background:'rgba(10,16,7,0.99)', border:'1px solid rgba(200,150,32,0.3)', borderRadius:8, textAlign:'center', maxWidth:'90vw' }}>
-                <div style={{ color:'#E8B84B', fontWeight:'bold', marginBottom:8 }}>🤝 {tradeRequest.from?.nazwa} proponuje handel</div>
-                <div style={{ display:'flex', gap:8, justifyContent:'center' }}>
-                  <button onClick={() => { socket?.emit('trade_accept', { sessionId: tradeRequest.sessionId }); setShowTrade(true); setTradeRequest(null); }} style={{ padding:'6px 16px', background:'rgba(74,122,42,0.3)', color:'#4ADE80', border:'1px solid rgba(74,122,42,0.5)', borderRadius:4, cursor:'pointer', fontFamily:'Verdana,sans-serif' }}>Tak</button>
-                  <button onClick={() => { socket?.emit('trade_decline', { sessionId: tradeRequest.sessionId }); setTradeRequest(null); }} style={{ padding:'6px 16px', background:'rgba(120,30,30,0.3)', color:'#F87171', border:'1px solid rgba(180,30,30,0.5)', borderRadius:4, cursor:'pointer', fontFamily:'Verdana,sans-serif' }}>Nie</button>
-                </div>
-              </div>
-            </div>
-          )}
-          {showAuction && (
-            <Suspense fallback={null}>
-              <AuctionHouse onClose={() => setShowAuction(false)} postac={state.postac} socket={socket} />
-            </Suspense>
-          )}
-          {showCraft && (
-            <Suspense fallback={null}>
-              <CraftingPanel onClose={() => setShowCraft(false)} postac={state.postac} />
-            </Suspense>
-          )}
-          {showFishing && (
-            <Suspense fallback={null}>
-              <FishingMinigame onClose={() => setShowFishing(false)} postac={state.postac} />
-            </Suspense>
-          )}
-          {showTalents && (
-            <Suspense fallback={null}>
-              <TalentTree onClose={() => setShowTalents(false)} postac={state.postac} />
-            </Suspense>
-          )}
-          {showDungeon && (
-            <Suspense fallback={null}>
-              <DungeonFinder onClose={() => setShowDungeon(false)} addToast={addToast} postac={state.postac} onTeleport={() => { setShowDungeon(false); loadState(); }} />
-            </Suspense>
-          )}
-          {worldBoss && (
-            <WorldBossUI boss={worldBoss} postac={state.postac} socket={socket} addToast={addToast}
-              onBossUpdate={() => api.worldboss.active().then(b => setWorldBoss(b || null)).catch(() => {})}
-              onBossDied={() => setWorldBoss(null)}
-            />
-          )}
-          {offlineDone && (
-            <OfflineRewardModal
-              session={offlineDone}
-              onCollect={(res) => {
-                setOfflineDone(null);
-                addToast(`Odebrano: +${res.exp} EXP, +${res.gold}g, ${res.kills} zabójstw`, 'success');
-                loadState();
-              }}
-            />
-          )}
-          <Toast toasts={toasts} />
-          <AdminAnnounce socket={socket} />
-          <style>{globalCSS}</style>
-        </>
-      );
-
-      return (
-        <div style={{ position:'relative', width:'100vw', height:'100vh', overflow:'hidden', background:'#2A1A08' }}>
-          {/* Full-screen map */}
-          <MapRenderer iso={!!state.mapa?.iso} tiles={tiles}
-            state={stateForMap} direction={direction} animStep={animStep}
-            chatBubbles={chatBubbles}
-            onMobClick={handleMobClick} onPlayerClick={handlePlayerClick}
-            onNpcClick={handleNpcClick} onMapClick={handleMapClick}
-            isMobile worldState={worldState}
-          />
-          {/* Floating landscape HUD */}
-          <LandscapeHUD
-            postac={state.postac} mapa={state.mapa}
-            worldState={worldState} pillTxt={pillTxt} activeEvent={activeEvent}
-            onMove={dir=>{ stopWalking(); setWalkTarget(null); move(dir).then(ok=>{if(ok)triggerIdle();}); }}
-            onLogout={onLogout} onDisconnect={onDisconnect}
-            socket={socket} isAdmin={isAdmin}
-            onInventory={()=>setShowInv(true)}
-            onPvpToggle={()=>api.character.pvpToggle().then(loadState)}
-            onAdmin={()=>setShowAdmin(true)}
-            onQuests={()=>setShowQuests(v=>!v)}
-            onSocial={()=>setShowSocial(v=>!v)}
-            onGuild={()=>setShowGuild(v=>!v)}
-            onAuction={()=>setShowAuction(v=>!v)}
-            onCraft={()=>setShowCraft(v=>!v)}
-            onFishing={()=>setShowFishing(v=>!v)}
-            onTalents={()=>setShowTalents(v=>!v)}
-            onDungeon={()=>setShowDungeon(v=>!v)}
-            onOutfit={()=>setShowOutfit(v=>!v)}
-            onChatMessage={handleChatMessage}
-            lsChatOpen={lsChatOpen} setLsChatOpen={setLsChatOpen}
-            lsMessages={lsMessages} lsChatInput={lsChatInput}
-            setLsChatInput={setLsChatInput} lsSendChat={lsSendChat}
-            lsBottomRef={lsBottomRef}
-          />
-          {/* Other overlays */}
-          {target && (
-            <TargetFrame mob={target} liveMob={liveMob}
-              onAttack={()=>{ const pos=posRef.current; const cur=stateRef.current; if(!cur)return; if(Math.abs(target.x-pos.x)<=1&&Math.abs(target.y-pos.y)<=1)openBattle(target); else walkAdjacentTo(target.x,target.y,cur,()=>openBattle(target)); }}
-              onClose={()=>setTarget(null)}
-            />
-          )}
-          {combatLog.length > 0 && <CombatLog entries={combatLog} />}
-          <Minimap state={state} />
-          <DungeonHUD addToast={addToast} onLeave={() => { loadState(); }} />
-          {modals}
-        </div>
-      );
-    }
 
     // ── PORTRAIT LAYOUT — full-screen map, floating HUD ──────────────────────
     return (
@@ -973,6 +792,7 @@ export default function Game({ onLogout, onDisconnect }) {
           || showCraft || showFishing || showTalents || showDungeon || viewProfile || showTrade || showInv) && (
           <>
             <MobileHud
+              landscape={isLandscape}
               state={state} potions={potions} unread={unread} pillTxt={pillTxt}
               autoHunt={autoHunt} chatOpen={mChat}
               onMove={dir=>{ stopWalking(); setWalkTarget(null); move(dir).then(triggerIdle); }}
@@ -1017,6 +837,7 @@ export default function Game({ onLogout, onDisconnect }) {
         {npcDialog && <NpcDialog npc={npcDialog} postac={state.postac} onClose={()=>setNpcDialog(null)} onBought={loadState} onQuestReward={msg=>{ addToast(msg,'info'); loadState(); }} />}
         {showQuests && <QuestPanel onClose={()=>setShowQuests(false)} onReward={msg=>{ addToast(msg,'info'); loadState(); setShowQuests(false); }} />}
         {showAdmin && <AdminPanel postac={state.postac} onClose={()=>setShowAdmin(false)} onLogout={()=>(onDisconnect || onLogout)()} />}
+        {showOutfit && <OutfitSelector postac={state.postac} onClose={()=>setShowOutfit(false)} onChanged={()=>{ loadState(); setShowOutfit(false); }} />}
         {battle    && (
           <BattleModal mob={battle.mob} postac={battle.postac} mapa={state.mapa}
             onClose={() => { setBattle(null); setTarget(null); loadState(); }}

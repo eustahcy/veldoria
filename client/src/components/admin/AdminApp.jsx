@@ -204,23 +204,23 @@ export default function AdminApp({ tabs, me, onClose, onLogout, headerExtra, ini
           display: 'flex', alignItems: 'center', gap: narrow ? 10 : 22, padding: narrow ? '9px 12px' : '14px 22px', flexShrink: 0,
           borderBottom: `1px solid ${A.bronze}`, background: 'linear-gradient(180deg,#1f1a13,#110e0a)',
         }}>
-          {logo}
+          {!narrow && logo}
           {!narrow && <span style={{ width: 1, alignSelf: 'stretch', background: `linear-gradient(180deg,transparent,${A.bronze},transparent)` }} />}
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0, flex: 1 }}>
             {!narrow && <span style={{ fontSize: 30, filter: 'drop-shadow(0 0 8px rgba(231,193,88,0.35))' }}>🛡️</span>}
             <div style={{ minWidth: 0 }}>
-              <div style={{ fontFamily: A.serif, fontSize: narrow ? 12.5 : 18, color: A.goldHi, letterSpacing: narrow ? 1 : 2, whiteSpace: 'nowrap' }}>PANEL ADMINISTRATORA</div>
+              <div style={{ fontFamily: A.serif, fontSize: narrow ? 14 : 18, color: A.goldHi, letterSpacing: narrow ? 1 : 2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{narrow ? 'PANEL ADMINA' : 'PANEL ADMINISTRATORA'}</div>
               <div style={{ fontSize: narrow ? 11 : 13, color: A.muted, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{me?.nazwa || '—'} - {me?.ranga || 'GameAdmin'}</div>
             </div>
           </div>
           {headerExtra}
           <span style={{
-            display: 'inline-flex', alignItems: 'center', gap: 7, padding: narrow ? '4px 9px' : '6px 14px', borderRadius: 999,
+            display: 'inline-flex', alignItems: 'center', gap: 7, padding: narrow ? '6px' : '6px 14px', borderRadius: 999, flexShrink: 0,
             border: `1px solid ${maint ? '#a8281c' : '#2f6b3a'}`, background: maint ? 'rgba(168,40,28,0.15)' : 'rgba(95,208,122,0.08)',
             color: maint ? A.red : A.green, fontSize: 13,
           }}>
             <span style={{ width: 9, height: 9, borderRadius: '50%', background: maint ? A.red : A.green, boxShadow: `0 0 8px ${maint ? A.red : A.green}` }} />
-            {maint ? 'Konserwacja' : 'Live'}
+            {!narrow && (maint ? 'Konserwacja' : 'Live')}
           </span>
           {!narrow && <Clock withDate />}
           {!narrow && !standalone && <HeadBtn title={max ? 'Pomniejsz' : 'Pełny ekran'} onClick={() => setMax(m => !m)}>{max ? '⤡' : '⤢'}</HeadBtn>}

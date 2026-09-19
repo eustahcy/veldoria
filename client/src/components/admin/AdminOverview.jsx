@@ -172,7 +172,7 @@ export default function AdminOverview({ ctx }) {
       )}
 
       {/* Liczniki */}
-      <div style={grid(narrow ? 140 : 150)}>
+      <div style={grid(narrow ? 140 : 128)}>
         <StatCard active icon="👥" color={A.green} value={status?.online ?? stats?.online} label="Gracze online" sub={`/ ${maxPlayers}`} bar={((status?.online || 0) / maxPlayers) * 100} />
         <StatCard icon="👤" color={A.blue} value={stats?.accounts} label="Konta" sub="Wszystkich" />
         <StatCard icon="🧙" color={A.amber} value={stats?.total} label="Postacie" sub={`Online: ${online.length}`} />

@@ -11,7 +11,7 @@ function SectionHeader({ icon, label, count, open, onToggle, badge }) {
       width:'100%', display:'flex', alignItems:'center', gap:8,
       padding:'9px 12px',
       background: open
-        ? 'linear-gradient(90deg,rgba(74,122,42,0.18),rgba(74,122,42,0.06))'
+        ? 'linear-gradient(90deg,rgba(231,193,88,0.18),rgba(231,193,88,0.06))'
         : 'transparent',
       border:'none',
       borderBottom:`1px solid rgba(200,150,32,${open?'0.2':'0.08'})`,
@@ -19,15 +19,15 @@ function SectionHeader({ icon, label, count, open, onToggle, badge }) {
       cursor:'pointer', textAlign:'left',
       transition:'all 0.15s',
     }}>
-      <span style={{ fontSize:13, color: open ? '#C8922A' : '#5A6840', display:'flex', alignItems:'center', transition:'color 0.15s' }}>{icon}</span>
-      <span style={{ flex:1, fontSize:11, fontWeight:'bold', color: open ? '#E8D070' : '#8A9A6A', letterSpacing:'0.5px', fontFamily: SERIF }}>{label}</span>
+      <span style={{ fontSize:13, color: open ? '#C8922A' : '#9a9182', display:'flex', alignItems:'center', transition:'color 0.15s' }}>{icon}</span>
+      <span style={{ flex:1, fontSize:11, fontWeight:'bold', color: open ? '#f7e3a4' : '#8A9A6A', letterSpacing:'0.5px', fontFamily: SERIF }}>{label}</span>
       {count !== undefined && count > 0 && (
         <span style={{ fontSize:8, color:'#fff', background:'rgba(200,150,32,0.7)', borderRadius:10, padding:'1px 6px', fontWeight:'bold' }}>{count}</span>
       )}
       {badge > 0 && (
         <span style={{ fontSize:8, color:'#fff', background:'#C0392B', borderRadius:'50%', width:16, height:16, display:'flex', alignItems:'center', justifyContent:'center', fontWeight:'bold', flexShrink:0 }}>{badge}</span>
       )}
-      <span style={{ color: open ? '#C8922A' : '#3A4828', fontSize:9, transition:'transform 0.2s', display:'inline-block', transform: open ? 'rotate(0)' : 'rotate(-90deg)' }}>▼</span>
+      <span style={{ color: open ? '#C8922A' : '#6b6456', fontSize:9, transition:'transform 0.2s', display:'inline-block', transform: open ? 'rotate(0)' : 'rotate(-90deg)' }}>▼</span>
     </button>
   );
 }
@@ -55,19 +55,19 @@ function QuestsSection({ onTurnIn }) {
         return (
           <div key={q.id} style={{
             margin:'0 8px 5px', padding:'7px 8px',
-            background:'rgba(6,10,4,0.5)',
-            border:`1px solid ${done?'rgba(200,150,32,0.3)':'rgba(74,122,42,0.15)'}`,
+            background:'rgba(14,12,9,0.5)',
+            border:`1px solid ${done?'rgba(200,150,32,0.3)':'rgba(231,193,88,0.15)'}`,
             borderRadius:5,
           }}>
             <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:3 }}>
-              <span style={{ color: done?'#E8D070':'#A09070', fontSize:10, fontWeight:'bold', flex:1, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{q.nazwa}</span>
-              <span style={{ color:'#5A6840', fontSize:8, flexShrink:0, marginLeft:4 }}>{q.postep}/{q.cel_ilosc}</span>
+              <span style={{ color: done?'#f7e3a4':'#A09070', fontSize:10, fontWeight:'bold', flex:1, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{q.nazwa}</span>
+              <span style={{ color:'#9a9182', fontSize:8, flexShrink:0, marginLeft:4 }}>{q.postep}/{q.cel_ilosc}</span>
             </div>
             <div style={{ height:4, background:'rgba(0,0,0,0.5)', borderRadius:2, overflow:'hidden' }}>
               <div style={{ width:`${pct*100}%`, height:'100%', background: done?'#E8C030':'#4A7A2A', borderRadius:2, transition:'width 0.3s' }} />
             </div>
             {done && (
-              <button onClick={()=>turnIn(q)} style={{ marginTop:5, width:'100%', padding:'3px 0', background:'rgba(74,122,42,0.25)', color:'#6CB83A', border:'1px solid rgba(74,122,42,0.4)', borderRadius:3, cursor:'pointer', fontSize:9, fontWeight:'bold' }}>
+              <button onClick={()=>turnIn(q)} style={{ marginTop:5, width:'100%', padding:'3px 0', background:'rgba(231,193,88,0.25)', color:'#e7c158', border:'1px solid rgba(231,193,88,0.4)', borderRadius:3, cursor:'pointer', fontSize:9, fontWeight:'bold' }}>
                 ★ Odbierz nagrody
               </button>
             )}
@@ -75,8 +75,8 @@ function QuestsSection({ onTurnIn }) {
         );
       })}
       {completed.length > 0 && (
-        <div style={{ margin:'5px 8px 0', padding:'4px 8px', background:'rgba(6,10,4,0.3)', borderRadius:4 }}>
-          <div style={{ fontSize:8, color:'#3A4828', letterSpacing:'1.5px', textTransform:'uppercase', marginBottom:3 }}>Ukończone</div>
+        <div style={{ margin:'5px 8px 0', padding:'4px 8px', background:'rgba(14,12,9,0.3)', borderRadius:4 }}>
+          <div style={{ fontSize:8, color:'#6b6456', letterSpacing:'1.5px', textTransform:'uppercase', marginBottom:3 }}>Ukończone</div>
           {completed.map(q => (
             <div key={q.id} style={{ fontSize:9, color:'#4A7A2A', display:'flex', alignItems:'center', gap:4, paddingBottom:2 }}>
               <span>✓</span><span style={{ overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{q.nazwa}</span>
@@ -100,14 +100,14 @@ function FriendsSection({ onViewProfile }) {
         <div key={f.id}
           onClick={() => onViewProfile?.(f.id)}
           style={{ display:'flex', alignItems:'center', gap:6, padding:'5px 10px', cursor:'pointer', borderBottom:'1px solid rgba(200,150,32,0.04)', transition:'background 0.1s' }}
-          onMouseEnter={e=>e.currentTarget.style.background='rgba(74,122,42,0.08)'}
+          onMouseEnter={e=>e.currentTarget.style.background='rgba(231,193,88,0.08)'}
           onMouseLeave={e=>e.currentTarget.style.background='transparent'}
         >
           <div style={{ width:3, height:3, borderRadius:'50%', background: f.zalogowany?'#27AE60':'#374151', flexShrink:0 }} />
           <div style={{ width:22, height:30, backgroundImage:`url(/assets/${f.obrazek})`, backgroundRepeat:'no-repeat', imageRendering:'pixelated', flexShrink:0 }} />
           <div style={{ flex:1, minWidth:0 }}>
             <div style={{ color:'#A09070', fontSize:10, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{f.nazwa}</div>
-            <div style={{ color: f.zalogowany?'#27AE60':'#3A4828', fontSize:8 }}>{f.zalogowany?'Online':'Offline'} · poz.{f.poziom}</div>
+            <div style={{ color: f.zalogowany?'#27AE60':'#6b6456', fontSize:8 }}>{f.zalogowany?'Online':'Offline'} · poz.{f.poziom}</div>
           </div>
         </div>
       ))}
@@ -131,7 +131,7 @@ function GuildSection({ socket, postacId, onOpenGuild }) {
   if (guild === false) return (
     <div style={{ padding:'12px 10px', textAlign:'center' }}>
       <div style={emptyTxt}>Nie należysz do gildii</div>
-      <button onClick={onOpenGuild} style={{ marginTop:6, padding:'4px 14px', background:'rgba(74,122,42,0.2)', color:'#6CB83A', border:'1px solid rgba(74,122,42,0.3)', borderRadius:4, cursor:'pointer', fontSize:9 }}>
+      <button onClick={onOpenGuild} style={{ marginTop:6, padding:'4px 14px', background:'rgba(231,193,88,0.2)', color:'#e7c158', border:'1px solid rgba(231,193,88,0.3)', borderRadius:4, cursor:'pointer', fontSize:9 }}>
         Przeglądaj gildie [G]
       </button>
     </div>
@@ -152,28 +152,28 @@ function GuildSection({ socket, postacId, onOpenGuild }) {
           <span style={{ background:'rgba(160,200,255,0.12)', border:'1px solid rgba(160,200,255,0.3)', borderRadius:3, padding:'1px 5px', color:'#A0C8FF', fontSize:8, fontWeight:'bold', flexShrink:0 }}>
             {guild.tag}
           </span>
-          <span style={{ color:'#E8D070', fontWeight:'bold', fontSize:11 }}>{guild.nazwa}</span>
+          <span style={{ color:'#f7e3a4', fontWeight:'bold', fontSize:11 }}>{guild.nazwa}</span>
         </div>
-        <div style={{ color:'#5A6840', fontSize:9 }}>{guild.members?.length||0} członków · {guild.myRanga}</div>
+        <div style={{ color:'#9a9182', fontSize:9 }}>{guild.members?.length||0} członków · {guild.myRanga}</div>
       </div>
       {/* Members online */}
       <div style={{ padding:'4px 10px', borderBottom:'1px solid rgba(200,150,32,0.06)' }}>
-        <div style={{ fontSize:7, color:'#3A4828', letterSpacing:'1.5px', textTransform:'uppercase', marginBottom:3 }}>Członkowie online</div>
+        <div style={{ fontSize:7, color:'#6b6456', letterSpacing:'1.5px', textTransform:'uppercase', marginBottom:3 }}>Członkowie online</div>
         {guild.members?.filter(m=>m.zalogowany).slice(0,5).map(m=>(
-          <div key={m.id} style={{ display:'flex', alignItems:'center', gap:5, padding:'2px 0', fontSize:9, color:'#5A6840' }}>
+          <div key={m.id} style={{ display:'flex', alignItems:'center', gap:5, padding:'2px 0', fontSize:9, color:'#9a9182' }}>
             <span style={{ width:4, height:4, borderRadius:'50%', background:'#27AE60', display:'inline-block' }} />
-            {m.nazwa} <span style={{ color:'#3A4828' }}>poz.{m.poziom}</span>
+            {m.nazwa} <span style={{ color:'#6b6456' }}>poz.{m.poziom}</span>
           </div>
         ))}
-        {!guild.members?.some(m=>m.zalogowany) && <div style={{ fontSize:9, color:'#3A4828', fontStyle:'italic' }}>Brak online</div>}
+        {!guild.members?.some(m=>m.zalogowany) && <div style={{ fontSize:9, color:'#6b6456', fontStyle:'italic' }}>Brak online</div>}
       </div>
       {/* Guild chat */}
       <div style={{ maxHeight:90, overflowY:'auto', padding:'4px 10px' }}>
-        {msgs.length===0 && <div style={{ fontSize:8, color:'#2A3820', textAlign:'center', paddingTop:6, fontStyle:'italic' }}>Cisza w gildii...</div>}
+        {msgs.length===0 && <div style={{ fontSize:8, color:'#5e584c', textAlign:'center', paddingTop:6, fontStyle:'italic' }}>Cisza w gildii...</div>}
         {msgs.map((m,i)=>(
           <div key={i} style={{ fontSize:9, lineHeight:1.4 }}>
-            <span style={{ color:'#C8940A', fontWeight:'bold' }}>[{m.kto}]</span>{' '}
-            <span style={{ color:'#7A8A5A' }}>{m.tresc}</span>
+            <span style={{ color:'#e7c158', fontWeight:'bold' }}>[{m.kto}]</span>{' '}
+            <span style={{ color:'#9a9182' }}>{m.tresc}</span>
           </div>
         ))}
       </div>
@@ -181,7 +181,7 @@ function GuildSection({ socket, postacId, onOpenGuild }) {
         <input value={input} onChange={e=>setInput(e.target.value)} placeholder="Wiadomość do gildii..." maxLength={200}
           style={{ flex:1, background:'transparent', color:'#C8B890', border:'none', padding:'5px 8px', fontSize:9, outline:'none' }}
         />
-        <button type="submit" style={{ padding:'5px 10px', background:'rgba(200,150,32,0.15)', color:'#C8940A', border:'none', borderLeft:'1px solid rgba(200,150,32,0.15)', cursor:'pointer', fontSize:11 }}>✦</button>
+        <button type="submit" style={{ padding:'5px 10px', background:'rgba(200,150,32,0.15)', color:'#e7c158', border:'none', borderLeft:'1px solid rgba(200,150,32,0.15)', cursor:'pointer', fontSize:11 }}>✦</button>
       </form>
     </div>
   );
@@ -207,7 +207,7 @@ function MessagesSection({ onViewProfile }) {
     <div>
       {unread > 0 && (
         <div style={{ display:'flex', justifyContent:'flex-end', padding:'3px 8px' }}>
-          <button onClick={async()=>{ await api.social.readAll(); load(); }} style={{ fontSize:8, color:'#5A6840', background:'none', border:'none', cursor:'pointer', textDecoration:'underline' }}>
+          <button onClick={async()=>{ await api.social.readAll(); load(); }} style={{ fontSize:8, color:'#9a9182', background:'none', border:'none', cursor:'pointer', textDecoration:'underline' }}>
             Odczytaj wszystkie
           </button>
         </div>
@@ -218,17 +218,17 @@ function MessagesSection({ onViewProfile }) {
           onClick={()=>{ if(!m.przeczytana) markRead(m.id); onViewProfile?.(m.od_id); }}
           style={{
             padding:'6px 10px', cursor:'pointer', borderBottom:'1px solid rgba(200,150,32,0.04)',
-            background: m.przeczytana ? 'transparent' : 'rgba(74,122,42,0.07)',
+            background: m.przeczytana ? 'transparent' : 'rgba(231,193,88,0.07)',
           }}
         >
           <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:1 }}>
-            <span style={{ color: m.przeczytana?'#5A6840':'#A09070', fontWeight: m.przeczytana?'normal':'bold', fontSize:10 }}>
+            <span style={{ color: m.przeczytana?'#9a9182':'#A09070', fontWeight: m.przeczytana?'normal':'bold', fontSize:10 }}>
               {!m.przeczytana && <span style={{ color:'#C0392B', marginRight:4 }}>●</span>}
               {m.od_nazwa}
             </span>
-            <span style={{ color:'#2A3820', fontSize:7 }}>{new Date(m.data).toLocaleTimeString('pl-PL',{hour:'2-digit',minute:'2-digit'})}</span>
+            <span style={{ color:'#5e584c', fontSize:7 }}>{new Date(m.data).toLocaleTimeString('pl-PL',{hour:'2-digit',minute:'2-digit'})}</span>
           </div>
-          <div style={{ color:'#3A4828', fontSize:9, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{m.tresc}</div>
+          <div style={{ color:'#6b6456', fontSize:9, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{m.tresc}</div>
         </div>
       ))}
     </div>
@@ -270,7 +270,7 @@ export default function RightPanel({ socket, postacId, onViewProfile, onTurnInRe
       width: open ? 240 : 36,
       overflow:'hidden',
       borderLeft:'1px solid rgba(200,150,32,0.2)',
-      background:'linear-gradient(180deg,rgba(14,22,10,0.99),rgba(6,10,4,0.99))',
+      background:'linear-gradient(180deg,rgba(14,22,10,0.99),rgba(14,12,9,0.99))',
       boxShadow: open ? 'inset 2px 0 12px rgba(0,0,0,0.5)' : 'none',
     }}>
 
@@ -284,7 +284,7 @@ export default function RightPanel({ socket, postacId, onViewProfile, onTurnInRe
             width:28, height:28, borderRadius:5,
             background: open ? 'rgba(200,150,32,0.2)' : 'rgba(20,32,14,0.8)',
             border:`1px solid ${open ? 'rgba(200,150,32,0.5)' : 'rgba(200,150,32,0.2)'}`,
-            color: open ? '#E8D070' : '#6A7A5A',
+            color: open ? '#f7e3a4' : '#6A7A5A',
             cursor:'pointer', fontSize:12,
             display:'flex', alignItems:'center', justifyContent:'center',
             transition:'all 0.15s',
@@ -325,7 +325,7 @@ export default function RightPanel({ socket, postacId, onViewProfile, onTurnInRe
           {/* Header */}
           <div style={{
             padding:'10px 12px 8px',
-            background:'linear-gradient(180deg,rgba(20,30,14,0.95),rgba(10,16,7,0.9))',
+            background:'linear-gradient(180deg,rgba(20,30,14,0.95),rgba(22,18,13,0.9))',
             borderBottom:'1px solid rgba(200,150,32,0.2)',
             flexShrink:0, position:'relative',
           }}>
@@ -355,4 +355,4 @@ export default function RightPanel({ socket, postacId, onViewProfile, onTurnInRe
   );
 }
 
-const emptyTxt = { padding:'10px 10px', color:'#2A3820', fontSize:10, textAlign:'center', fontStyle:'italic' };
+const emptyTxt = { padding:'10px 10px', color:'#5e584c', fontSize:10, textAlign:'center', fontStyle:'italic' };

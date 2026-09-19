@@ -8,7 +8,7 @@ import {
 // ── Constants ─────────────────────────────────────────────────────────────────
 const TYPE_META = {
   kill:     { icon: '⚔', color: '#F87171', label: 'Zabij' },
-  location: { icon: '🗺', color: '#C8940A', label: 'Odwiedź' },
+  location: { icon: '🗺', color: '#e7c158', label: 'Odwiedź' },
   item:     { icon: '🎒', color: '#FCD34D', label: 'Zbierz' },
   level:    { icon: '⭐', color: '#A5B4FC', label: 'Poziom' },
   chain:    { icon: '🔗', color: '#4ADE80', label: 'Łańcuch' },
@@ -20,7 +20,7 @@ const REP_COLORS = {
 };
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
-function Bar({ pct, color = '#6CB83A', h = 6 }) {
+function Bar({ pct, color = '#e7c158', h = 6 }) {
   return (
     <div style={{ height: h, background: 'rgba(0,0,0,0.5)', borderRadius: h, overflow: 'hidden' }}>
       <div style={{ width: `${Math.min(100, pct * 100)}%`, height: '100%', background: pct >= 1 ? '#4ADE80' : color, borderRadius: h, transition: 'width 0.3s', boxShadow: pct >= 1 ? '0 0 6px rgba(74,222,128,0.5)' : 'none' }} />
@@ -50,7 +50,7 @@ function QuestCard({ q, onTurnIn }) {
       padding: '10px 12px',
       background: done
         ? 'linear-gradient(135deg,rgba(6,40,20,0.5),rgba(4,24,12,0.4))'
-        : 'linear-gradient(135deg,rgba(4,10,22,0.6),rgba(2,6,14,0.5))',
+        : 'linear-gradient(135deg,rgba(16,13,10,0.6),rgba(2,6,14,0.5))',
       border: `1px solid ${done ? 'rgba(34,197,94,0.28)' : 'rgba(200,150,32,0.14)'}`,
       borderRadius: 9, marginBottom: 7,
       borderLeft: `3px solid ${done ? '#22C55E' : meta.color}`,
@@ -60,11 +60,11 @@ function QuestCard({ q, onTurnIn }) {
         <div style={{ flex: 1, minWidth: 0 }}>
           {/* Title row */}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 6, marginBottom: 3 }}>
-            <span style={{ color: done ? '#4ADE80' : '#CDD4AA', fontWeight: 'bold', fontSize: 11, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{q.nazwa}</span>
-            <span style={{ color: done ? '#4ADE80' : '#7A8A5A', fontSize: 9, flexShrink: 0, fontWeight: 'bold' }}>{q.postep}/{q.cel_ilosc}</span>
+            <span style={{ color: done ? '#4ADE80' : '#e8e2d4', fontWeight: 'bold', fontSize: 11, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{q.nazwa}</span>
+            <span style={{ color: done ? '#4ADE80' : '#9a9182', fontSize: 9, flexShrink: 0, fontWeight: 'bold' }}>{q.postep}/{q.cel_ilosc}</span>
           </div>
           {/* Description */}
-          <div style={{ color: '#7A8A5A', fontSize: 9, lineHeight: 1.45, marginBottom: 6 }}>{q.opis}</div>
+          <div style={{ color: '#9a9182', fontSize: 9, lineHeight: 1.45, marginBottom: 6 }}>{q.opis}</div>
           {/* Progress bar */}
           <Bar pct={pct} color={meta.color} />
           {/* Meta tags */}
@@ -101,7 +101,7 @@ function AchCard({ a }) {
   return (
     <div style={{
       display: 'flex', gap: 10, padding: '8px 10px',
-      background: a.unlocked ? 'rgba(6,40,20,0.35)' : 'rgba(4,8,2,0.4)',
+      background: a.unlocked ? 'rgba(6,40,20,0.35)' : 'rgba(12,10,8,0.4)',
       border: `1px solid ${a.unlocked ? 'rgba(34,197,94,0.2)' : 'rgba(60,60,60,0.25)'}`,
       borderRadius: 7, marginBottom: 5,
       opacity: a.unlocked ? 1 : 0.55,
@@ -109,12 +109,12 @@ function AchCard({ a }) {
       <span style={{ fontSize: 20, flexShrink: 0, filter: a.unlocked ? 'none' : 'grayscale(1) brightness(0.4)', lineHeight: 1, marginTop: 1 }}>{a.ikona}</span>
       <div style={{ flex: 1 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 2 }}>
-          <span style={{ color: a.unlocked ? '#4ADE80' : '#5A6840', fontWeight: 'bold', fontSize: 10 }}>{a.nazwa}</span>
+          <span style={{ color: a.unlocked ? '#4ADE80' : '#9a9182', fontWeight: 'bold', fontSize: 10 }}>{a.nazwa}</span>
           {a.unlocked && <span style={{ color: '#4ADE80', fontSize: 7 }}>✓ Odblokowane</span>}
         </div>
-        <div style={{ color: '#7A8A5A', fontSize: 9 }}>{a.opis}</div>
+        <div style={{ color: '#9a9182', fontSize: 9 }}>{a.opis}</div>
         {!a.unlocked && (
-          <div style={{ marginTop: 3, color: '#3A4828', fontSize: 8 }}>
+          <div style={{ marginTop: 3, color: '#6b6456', fontSize: 8 }}>
             Nagroda:{a.nagroda_exp > 0 ? ` +${a.nagroda_exp} EXP` : ''}{a.nagroda_gold > 0 ? ` +${a.nagroda_gold}g` : ''}{a.nagroda_bonus_exp_pct > 0 ? ` +${a.nagroda_bonus_exp_pct}% EXP` : ''}
           </div>
         )}
@@ -127,14 +127,14 @@ function AchCard({ a }) {
 function RewardChoice({ choices, questId, onChoose, onClose }) {
   return (
     <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.88)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10, borderRadius: 12 }}>
-      <div style={{ background: 'rgba(8,14,5,0.99)', border: '1px solid rgba(200,150,32,0.4)', borderRadius: 10, padding: '20px 24px', minWidth: 280, maxWidth: 360 }}>
-        <div style={{ color: '#E8D070', fontWeight: 'bold', fontSize: 14, marginBottom: 5 }}>🎁 Wybierz nagrodę</div>
-        <div style={{ color: '#5A6840', fontSize: 9, marginBottom: 14 }}>Wybierz jedną nagrodę za ukończenie questa:</div>
+      <div style={{ background: 'rgba(20,16,12,0.99)', border: '1px solid rgba(200,150,32,0.4)', borderRadius: 10, padding: '20px 24px', minWidth: 280, maxWidth: 360 }}>
+        <div style={{ color: '#f7e3a4', fontWeight: 'bold', fontSize: 14, marginBottom: 5 }}>🎁 Wybierz nagrodę</div>
+        <div style={{ color: '#9a9182', fontSize: 9, marginBottom: 14 }}>Wybierz jedną nagrodę za ukończenie questa:</div>
         {choices.map((c, i) => (
           <button key={i} onClick={() => onChoose(questId, i)} style={{
             display: 'flex', gap: 10, alignItems: 'center', width: '100%',
             padding: '9px 12px', marginBottom: 6,
-            background: 'rgba(4,10,22,0.8)', border: '1px solid rgba(200,150,32,0.2)',
+            background: 'rgba(16,13,10,0.8)', border: '1px solid rgba(200,150,32,0.2)',
             borderRadius: 6, cursor: 'pointer', textAlign: 'left',
           }}>
             <span style={{ color: '#FCD34D', fontSize: 14, fontWeight: 'bold', flexShrink: 0 }}>{i + 1}</span>
@@ -143,7 +143,7 @@ function RewardChoice({ choices, questId, onChoose, onClose }) {
             </div>
           </button>
         ))}
-        <button onClick={onClose} style={{ marginTop: 4, padding: '4px 10px', background: 'none', border: '1px solid rgba(200,150,32,0.2)', borderRadius: 4, color: '#5A6840', cursor: 'pointer', fontSize: 9, fontFamily: 'Verdana,sans-serif' }}>Anuluj</button>
+        <button onClick={onClose} style={{ marginTop: 4, padding: '4px 10px', background: 'none', border: '1px solid rgba(200,150,32,0.2)', borderRadius: 4, color: '#9a9182', cursor: 'pointer', fontSize: 9, fontFamily: 'Verdana,sans-serif' }}>Anuluj</button>
       </div>
     </div>
   );
@@ -229,7 +229,7 @@ export default function QuestPanel({ onClose, onReward }) {
 
       <div style={{
         width: 680, maxWidth: '99vw', height: '88vh', maxHeight: 740,
-        background: 'linear-gradient(160deg,rgba(8,14,5,0.99),rgba(4,8,2,0.99))',
+        background: 'linear-gradient(160deg,rgba(20,16,12,0.99),rgba(12,10,8,0.99))',
         border: '1px solid rgba(200,150,32,0.2)', borderRadius: 12,
         display: 'flex', flexDirection: 'column', overflow: 'hidden',
         boxShadow: '0 20px 80px rgba(0,0,0,0.9)',
@@ -237,11 +237,11 @@ export default function QuestPanel({ onClose, onReward }) {
       }}>
 
         {/* Header */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '9px 16px', background: 'rgba(4,8,2,0.6)', borderBottom: '1px solid rgba(200,150,32,0.12)', flexShrink: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '9px 16px', background: 'rgba(12,10,8,0.6)', borderBottom: '1px solid rgba(200,150,32,0.12)', flexShrink: 0 }}>
           <span style={{ fontSize: 16 }}>📜</span>
-          <span style={{ color: '#E8D070', fontWeight: 'bold', fontSize: 13 }}>Dziennik Questów</span>
-          <span style={{ color: '#5A6840', fontSize: 9 }}>— {active.length} aktywnych</span>
-          <button onClick={onClose} style={{ marginLeft: 'auto', background: 'none', border: 'none', color: '#5A6840', cursor: 'pointer', display: 'flex' }}>
+          <span style={{ color: '#f7e3a4', fontWeight: 'bold', fontSize: 13 }}>Dziennik Questów</span>
+          <span style={{ color: '#9a9182', fontSize: 9 }}>— {active.length} aktywnych</span>
+          <button onClick={onClose} style={{ marginLeft: 'auto', background: 'none', border: 'none', color: '#9a9182', cursor: 'pointer', display: 'flex' }}>
             <IconX size={17} />
           </button>
         </div>
@@ -250,7 +250,7 @@ export default function QuestPanel({ onClose, onReward }) {
         <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
 
           {/* SIDEBAR */}
-          <div style={{ width: 152, flexShrink: 0, borderRight: '1px solid rgba(200,150,32,0.1)', background: 'rgba(4,8,2,0.5)', display: 'flex', flexDirection: 'column', padding: '6px 0', overflowY: 'auto' }}>
+          <div style={{ width: 152, flexShrink: 0, borderRight: '1px solid rgba(200,150,32,0.1)', background: 'rgba(12,10,8,0.5)', display: 'flex', flexDirection: 'column', padding: '6px 0', overflowY: 'auto' }}>
             {TABS.map(({ id, Icon, label }) => {
               const active = tab === id;
               const badge  = BADGE[id];
@@ -259,18 +259,18 @@ export default function QuestPanel({ onClose, onReward }) {
                   width: '100%', display: 'flex', alignItems: 'center', gap: 8,
                   padding: '8px 12px',
                   background: active ? 'rgba(200,150,32,0.1)' : 'none',
-                  border: 'none', borderLeft: active ? '3px solid #C8940A' : '3px solid transparent',
-                  cursor: 'pointer', color: active ? '#E8D070' : '#5A6840',
+                  border: 'none', borderLeft: active ? '3px solid #e7c158' : '3px solid transparent',
+                  cursor: 'pointer', color: active ? '#f7e3a4' : '#9a9182',
                   fontSize: 9, fontWeight: active ? 'bold' : 'normal',
                   fontFamily: 'Verdana,sans-serif', textAlign: 'left',
                   position: 'relative',
                 }}>
-                  <span style={{ color: active ? '#C8940A' : '#3A4828', flexShrink: 0 }}><Icon size={12} /></span>
+                  <span style={{ color: active ? '#e7c158' : '#6b6456', flexShrink: 0 }}><Icon size={12} /></span>
                   <span style={{ flex: 1 }}>{label}</span>
                   {badge && (
                     <span style={{ background: '#EF4444', color: '#fff', fontSize: 7, fontWeight: 'bold', borderRadius: 9999, padding: '1px 5px', minWidth: 16, textAlign: 'center' }}>{badge}</span>
                   )}
-                  {active && <IconChevronRight size={10} style={{ color: '#C8940A', flexShrink: 0 }} />}
+                  {active && <IconChevronRight size={10} style={{ color: '#e7c158', flexShrink: 0 }} />}
                 </button>
               );
             })}
@@ -279,8 +279,8 @@ export default function QuestPanel({ onClose, onReward }) {
           {/* CONTENT */}
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
             {/* Tab header */}
-            <div style={{ padding: '8px 16px', borderBottom: '1px solid rgba(200,150,32,0.08)', flexShrink: 0, display: 'flex', alignItems: 'center', gap: 8, background: 'rgba(4,8,2,0.3)' }}>
-              {(() => { const t = TABS.find(t => t.id === tab); return t ? <><t.Icon size={13} style={{ color: '#C8940A' }} /><span style={{ color: '#C8940A', fontWeight: 'bold', fontSize: 10 }}>{t.label}</span></> : null; })()}
+            <div style={{ padding: '8px 16px', borderBottom: '1px solid rgba(200,150,32,0.08)', flexShrink: 0, display: 'flex', alignItems: 'center', gap: 8, background: 'rgba(12,10,8,0.3)' }}>
+              {(() => { const t = TABS.find(t => t.id === tab); return t ? <><t.Icon size={13} style={{ color: '#e7c158' }} /><span style={{ color: '#e7c158', fontWeight: 'bold', fontSize: 10 }}>{t.label}</span></> : null; })()}
             </div>
 
             <div style={{ flex: 1, overflowY: 'auto', padding: '12px 14px' }}>
@@ -301,7 +301,7 @@ export default function QuestPanel({ onClose, onReward }) {
                       <span style={{ color: '#22C55E', fontSize: 16 }}>✓</span>
                       <div style={{ flex: 1 }}>
                         <div style={{ color: '#4ADE80', fontWeight: 'bold', fontSize: 10 }}>{q.nazwa}</div>
-                        <div style={{ color: '#5A6840', fontSize: 8 }}>{q.data_ukon ? fmtDate(q.data_ukon) : 'Ukończono'}</div>
+                        <div style={{ color: '#9a9182', fontSize: 8 }}>{q.data_ukon ? fmtDate(q.data_ukon) : 'Ukończono'}</div>
                       </div>
                     </div>
                   ))
@@ -312,12 +312,12 @@ export default function QuestPanel({ onClose, onReward }) {
                 daily.length === 0
                   ? <Empty icon="🔄" text="Brak dziennych questów" />
                   : daily.map(q => (
-                    <div key={q.id} style={{ padding: '10px 12px', background: 'rgba(4,10,22,0.6)', border: '1px solid rgba(167,139,250,0.18)', borderRadius: 8, marginBottom: 6, borderLeft: '3px solid #A78BFA' }}>
+                    <div key={q.id} style={{ padding: '10px 12px', background: 'rgba(16,13,10,0.6)', border: '1px solid rgba(167,139,250,0.18)', borderRadius: 8, marginBottom: 6, borderLeft: '3px solid #A78BFA' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 3 }}>
-                        <span style={{ color: '#CDD4AA', fontWeight: 'bold', fontSize: 11 }}>🔄 {q.nazwa}</span>
+                        <span style={{ color: '#e8e2d4', fontWeight: 'bold', fontSize: 11 }}>🔄 {q.nazwa}</span>
                         {q.doneToday && pill('#4ADE80', '✓ Dziś ukończony')}
                       </div>
-                      <div style={{ color: '#7A8A5A', fontSize: 9, marginBottom: 6 }}>{q.opis}</div>
+                      <div style={{ color: '#9a9182', fontSize: 9, marginBottom: 6 }}>{q.opis}</div>
                       <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
                         {q.nagroda_exp > 0  && pill('#06B6D4', `+${q.nagroda_exp} EXP`)}
                         {q.nagroda_zloto > 0 && pill('#FCD34D', `+${q.nagroda_zloto}g`)}
@@ -325,7 +325,7 @@ export default function QuestPanel({ onClose, onReward }) {
                       {q.myStatus === 'aktywny' && (
                         <div style={{ marginTop: 7 }}>
                           <Bar pct={(q.myPostep || 0) / q.cel_ilosc} color='#A78BFA' />
-                          <div style={{ color: '#5A6840', fontSize: 8, marginTop: 2 }}>{q.myPostep || 0}/{q.cel_ilosc}</div>
+                          <div style={{ color: '#9a9182', fontSize: 8, marginTop: 2 }}>{q.myPostep || 0}/{q.cel_ilosc}</div>
                         </div>
                       )}
                     </div>
@@ -337,12 +337,12 @@ export default function QuestPanel({ onClose, onReward }) {
                 weekly.length === 0
                   ? <Empty icon="📅" text="Brak tygodniowych questów" />
                   : weekly.map(q => (
-                    <div key={q.id} style={{ padding: '10px 12px', background: 'rgba(4,10,22,0.6)', border: '1px solid rgba(96,165,250,0.18)', borderRadius: 8, marginBottom: 6, borderLeft: '3px solid #60A5FA' }}>
+                    <div key={q.id} style={{ padding: '10px 12px', background: 'rgba(16,13,10,0.6)', border: '1px solid rgba(96,165,250,0.18)', borderRadius: 8, marginBottom: 6, borderLeft: '3px solid #60A5FA' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 3 }}>
-                        <span style={{ color: '#CDD4AA', fontWeight: 'bold', fontSize: 11 }}>📅 {q.nazwa}</span>
+                        <span style={{ color: '#e8e2d4', fontWeight: 'bold', fontSize: 11 }}>📅 {q.nazwa}</span>
                         {q.doneThisWeek && pill('#4ADE80', '✓ Ten tydzień')}
                       </div>
-                      <div style={{ color: '#7A8A5A', fontSize: 9, marginBottom: 6 }}>{q.opis}</div>
+                      <div style={{ color: '#9a9182', fontSize: 9, marginBottom: 6 }}>{q.opis}</div>
                       <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
                         {q.nagroda_exp > 0  && pill('#06B6D4', `+${q.nagroda_exp} EXP`)}
                         {q.nagroda_zloto > 0 && pill('#FCD34D', `+${q.nagroda_zloto}g`)}
@@ -350,7 +350,7 @@ export default function QuestPanel({ onClose, onReward }) {
                       {q.myStatus === 'aktywny' && (
                         <div style={{ marginTop: 7 }}>
                           <Bar pct={(q.myPostep || 0) / q.cel_ilosc} color='#60A5FA' />
-                          <div style={{ color: '#5A6840', fontSize: 8, marginTop: 2 }}>{q.myPostep || 0}/{q.cel_ilosc}</div>
+                          <div style={{ color: '#9a9182', fontSize: 8, marginTop: 2 }}>{q.myPostep || 0}/{q.cel_ilosc}</div>
                         </div>
                       )}
                     </div>
@@ -362,11 +362,11 @@ export default function QuestPanel({ onClose, onReward }) {
                 chains.length === 0
                   ? <Empty icon="🔗" text="Brak łańcuchów questów" />
                   : chains.map(c => (
-                    <div key={c.id} style={{ padding: '10px 12px', background: 'rgba(4,10,22,0.6)', border: '1px solid rgba(200,150,32,0.15)', borderRadius: 8, marginBottom: 6 }}>
-                      <div style={{ color: '#E8D070', fontWeight: 'bold', fontSize: 11, marginBottom: 3 }}>🔗 {c.nazwa}</div>
-                      {c.opis && <div style={{ color: '#7A8A5A', fontSize: 9, marginBottom: 6 }}>{c.opis}</div>}
-                      <Bar pct={c.done / c.total} color='#C8940A' />
-                      <div style={{ color: '#5A6840', fontSize: 8, marginTop: 3 }}>{c.done}/{c.total} questów ukończonych</div>
+                    <div key={c.id} style={{ padding: '10px 12px', background: 'rgba(16,13,10,0.6)', border: '1px solid rgba(200,150,32,0.15)', borderRadius: 8, marginBottom: 6 }}>
+                      <div style={{ color: '#f7e3a4', fontWeight: 'bold', fontSize: 11, marginBottom: 3 }}>🔗 {c.nazwa}</div>
+                      {c.opis && <div style={{ color: '#9a9182', fontSize: 9, marginBottom: 6 }}>{c.opis}</div>}
+                      <Bar pct={c.done / c.total} color='#e7c158' />
+                      <div style={{ color: '#9a9182', fontSize: 8, marginTop: 3 }}>{c.done}/{c.total} questów ukończonych</div>
                       {c.nagroda_tytul && <div style={{ color: '#FCD34D', fontSize: 9, marginTop: 5 }}>Nagroda: 🏅 {c.nagroda_tytul}</div>}
                     </div>
                   ))
@@ -377,13 +377,13 @@ export default function QuestPanel({ onClose, onReward }) {
                 history.length === 0
                   ? <Empty icon="📖" text="Brak historii questów" />
                   : history.map(h => (
-                    <div key={h.id} style={{ display: 'flex', gap: 10, alignItems: 'center', padding: '7px 10px', background: 'rgba(8,13,5,0.4)', border: '1px solid rgba(34,197,94,0.08)', borderRadius: 6, marginBottom: 4 }}>
+                    <div key={h.id} style={{ display: 'flex', gap: 10, alignItems: 'center', padding: '7px 10px', background: 'rgba(20,16,12,0.4)', border: '1px solid rgba(34,197,94,0.08)', borderRadius: 6, marginBottom: 4 }}>
                       <span style={{ fontSize: 16, flexShrink: 0 }}>
                         {h.zakonczenie === 'dobre' ? '😊' : h.zakonczenie === 'zle' ? '💀' : '✓'}
                       </span>
                       <div style={{ flex: 1 }}>
-                        <div style={{ color: '#CDD4AA', fontSize: 10, fontWeight: 'bold' }}>{h.quest_nazwa}</div>
-                        <div style={{ color: '#5A6840', fontSize: 8 }}>
+                        <div style={{ color: '#e8e2d4', fontSize: 10, fontWeight: 'bold' }}>{h.quest_nazwa}</div>
+                        <div style={{ color: '#9a9182', fontSize: 8 }}>
                           {h.data_ukonczenia ? new Date(h.data_ukonczenia).toLocaleString('pl-PL', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : ''}
                         </div>
                       </div>
@@ -397,7 +397,7 @@ export default function QuestPanel({ onClose, onReward }) {
                   ? <Empty icon="🏆" text="Ładowanie osiągnięć..." />
                   : <>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
-                      <span style={{ color: '#5A6840', fontSize: 9 }}>{achievements.filter(a => a.unlocked).length}/{achievements.length} odblokowanych</span>
+                      <span style={{ color: '#9a9182', fontSize: 9 }}>{achievements.filter(a => a.unlocked).length}/{achievements.length} odblokowanych</span>
                       <div style={{ flex: 1, maxWidth: 200, marginLeft: 12 }}>
                         <Bar pct={achievements.filter(a => a.unlocked).length / achievements.length} color='#FCD34D' h={4} />
                       </div>
@@ -414,16 +414,16 @@ export default function QuestPanel({ onClose, onReward }) {
                     const color = REP_COLORS[f.poziom] || '#9CA3AF';
                     const pct   = Math.min(1, f.punkty / 1000);
                     return (
-                      <div key={f.id} style={{ padding: '10px 12px', background: 'rgba(4,10,22,0.5)', border: '1px solid rgba(200,150,32,0.12)', borderRadius: 8, marginBottom: 6 }}>
+                      <div key={f.id} style={{ padding: '10px 12px', background: 'rgba(16,13,10,0.5)', border: '1px solid rgba(200,150,32,0.12)', borderRadius: 8, marginBottom: 6 }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
                           <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
                             <div style={{ width: 10, height: 10, borderRadius: '50%', background: f.kolor, boxShadow: `0 0 5px ${f.kolor}` }} />
-                            <span style={{ color: '#CDD4AA', fontWeight: 'bold', fontSize: 11 }}>{f.nazwa}</span>
+                            <span style={{ color: '#e8e2d4', fontWeight: 'bold', fontSize: 11 }}>{f.nazwa}</span>
                           </div>
                           <span style={{ color, fontSize: 9, fontWeight: 'bold', padding: '2px 8px', background: `${color}18`, border: `1px solid ${color}44`, borderRadius: 9999 }}>{f.poziom}</span>
                         </div>
                         <Bar pct={pct} color={color} h={5} />
-                        <div style={{ color: '#5A6840', fontSize: 8, marginTop: 3 }}>{f.punkty} / 1000 punktów</div>
+                        <div style={{ color: '#9a9182', fontSize: 8, marginTop: 3 }}>{f.punkty} / 1000 punktów</div>
                       </div>
                     );
                   })
@@ -444,7 +444,7 @@ export default function QuestPanel({ onClose, onReward }) {
 
 function Empty({ icon, text }) {
   return (
-    <div style={{ textAlign: 'center', paddingTop: 48, color: '#2A3820' }}>
+    <div style={{ textAlign: 'center', paddingTop: 48, color: '#5e584c' }}>
       <div style={{ fontSize: 36, marginBottom: 10, opacity: 0.3 }}>{icon}</div>
       <div style={{ fontSize: 10 }}>{text}</div>
     </div>

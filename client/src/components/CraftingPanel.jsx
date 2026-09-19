@@ -3,7 +3,7 @@ import { api } from '../api';
 
 const RARITY_COLORS = {
   pospolity: '#6B7280',
-  rzadki:    '#C8940A',
+  rzadki:    '#e7c158',
   epicki:    '#8B5CF6',
 };
 const RARITY_LABELS = {
@@ -73,7 +73,7 @@ export default function CraftingPanel({ onClose, postac }) {
   };
   const panel = {
     width: 520, maxHeight: '80vh', display: 'flex', flexDirection: 'column',
-    background: 'linear-gradient(160deg,rgba(8,14,5,0.99),rgba(5,9,3,0.99))',
+    background: 'linear-gradient(160deg,rgba(20,16,12,0.99),rgba(12,10,8,0.99))',
     border: '1px solid rgba(200,146,42,0.35)', borderRadius: 6,
     boxShadow: '0 8px 40px rgba(0,0,0,0.85)',
   };
@@ -104,7 +104,7 @@ export default function CraftingPanel({ onClose, postac }) {
               ...TAB_STYLE_BASE,
               background: tab === t ? 'rgba(200,146,42,0.15)' : 'transparent',
               color: tab === t ? '#E8B84B' : '#6B5530',
-              borderBottom: tab === t ? '2px solid #C8940A' : '2px solid transparent',
+              borderBottom: tab === t ? '2px solid #e7c158' : '2px solid transparent',
             }}>{label}</button>
           ))}
         </div>
@@ -135,11 +135,11 @@ export default function CraftingPanel({ onClose, postac }) {
                     borderRadius: 4, padding: '8px 6px', textAlign: 'center', position: 'relative',
                   }}>
                     <div style={{ fontSize: 24, marginBottom: 4 }}>🪨</div>
-                    <div style={{ fontSize: 9, color: '#CDD4AA', lineHeight: 1.3 }}>{m.nazwa}</div>
+                    <div style={{ fontSize: 9, color: '#e8e2d4', lineHeight: 1.3 }}>{m.nazwa}</div>
                     <div style={{ fontSize: 8, color: RARITY_COLORS[m.rzadkosc], marginTop: 2 }}>{RARITY_LABELS[m.rzadkosc]}</div>
                     <div style={{
                       position: 'absolute', top: 3, right: 5,
-                      background: '#C8940A', color: '#0A0600', fontSize: 8, fontWeight: 'bold',
+                      background: '#e7c158', color: '#0A0600', fontSize: 8, fontWeight: 'bold',
                       borderRadius: 8, padding: '1px 5px',
                     }}>{m.ilosc}</div>
                   </div>
@@ -222,7 +222,7 @@ export default function CraftingPanel({ onClose, postac }) {
                           border: `1px solid ${isSelected ? 'rgba(200,146,42,0.6)' : 'rgba(200,146,42,0.15)'}`,
                         }}
                       >
-                        <div style={{ color: '#CDD4AA', fontSize: 9 }}>{item.nazwa}</div>
+                        <div style={{ color: '#e8e2d4', fontSize: 9 }}>{item.nazwa}</div>
                         <div style={{ color: '#6B5530', fontSize: 8, marginTop: 2 }}>{item.typ} — {lvl < 5 ? `+${lvl}` : 'MAX'}</div>
                       </div>
                     );
@@ -235,9 +235,9 @@ export default function CraftingPanel({ onClose, postac }) {
                   <div style={{ color: '#E8B84B', fontSize: 11, marginBottom: 6 }}>{selectedItem.nazwa}</div>
                   {selLevel < 5 ? (
                     <>
-                      <div style={{ color: '#CDD4AA', fontSize: 9, marginBottom: 4 }}>
+                      <div style={{ color: '#e8e2d4', fontSize: 9, marginBottom: 4 }}>
                         Ulepsz do: <span style={{ color: '#E8B84B' }}>+{selLevel + 1}</span> &nbsp;|&nbsp;
-                        Szansa: <span style={{ color: nextChance >= 60 ? '#4ADE80' : nextChance >= 40 ? '#C8940A' : '#F87171' }}>{nextChance}%</span>
+                        Szansa: <span style={{ color: nextChance >= 60 ? '#4ADE80' : nextChance >= 40 ? '#e7c158' : '#F87171' }}>{nextChance}%</span>
                       </div>
                       <div style={{ color: '#8A7050', fontSize: 8, marginBottom: 8 }}>
                         Koszt: {Math.max(1, Math.floor((selectedItem.wartosc_sprzedazy || 50) / 25))}x Kryształ Magii
@@ -254,7 +254,7 @@ export default function CraftingPanel({ onClose, postac }) {
                       </button>
                     </>
                   ) : (
-                    <div style={{ color: '#C8940A', fontSize: 10 }}>Ten przedmiot jest na maksymalnym poziomie ulepszenia (+5).</div>
+                    <div style={{ color: '#e7c158', fontSize: 10 }}>Ten przedmiot jest na maksymalnym poziomie ulepszenia (+5).</div>
                   )}
                 </div>
               )}

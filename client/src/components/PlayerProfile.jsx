@@ -20,9 +20,9 @@ function fmtNum(n) {
 
 function StatCard({ label, value, color }) {
   return (
-    <div style={{ padding:'8px 10px', background:'rgba(8,13,5,0.5)', borderRadius:5, border:'1px solid rgba(200,150,32,0.12)', textAlign:'center' }}>
+    <div style={{ padding:'8px 10px', background:'rgba(20,16,12,0.5)', borderRadius:5, border:'1px solid rgba(200,150,32,0.12)', textAlign:'center' }}>
       <div style={{ color: color || '#8A7050', fontSize:9, marginBottom:3 }}>{label}</div>
-      <div style={{ color:'#E8D070', fontWeight:'bold', fontSize:13 }}>{value}</div>
+      <div style={{ color:'#f7e3a4', fontWeight:'bold', fontSize:13 }}>{value}</div>
     </div>
   );
 }
@@ -74,7 +74,7 @@ export default function PlayerProfile({ postacId, myId, onClose, onSendMessage, 
   if (loading) return (
     <div style={overlay}>
       <div style={card}>
-        <div style={{ display:'flex', alignItems:'center', justifyContent:'center', height:200, color:'#5A6840', fontSize:11 }}>Ładowanie profilu...</div>
+        <div style={{ display:'flex', alignItems:'center', justifyContent:'center', height:200, color:'#9a9182', fontSize:11 }}>Ładowanie profilu...</div>
       </div>
     </div>
   );
@@ -104,14 +104,14 @@ export default function PlayerProfile({ postacId, myId, onClose, onSendMessage, 
     <div style={overlay} onClick={e => e.target === e.currentTarget && onClose()}>
       <div style={card}>
         {/* Header */}
-        <div style={{ display:'flex', alignItems:'center', gap:8, padding:'8px 14px', background:'rgba(8,13,5,0.5)', borderBottom:'1px solid rgba(200,150,32,0.15)', flexShrink:0 }}>
-          <span style={{ color:'#C8940A', display:'flex' }}><IconUsers size={14}/></span>
-          <span style={{ color:'#E8D070', fontWeight:'bold', fontSize:12 }}>Profil gracza</span>
+        <div style={{ display:'flex', alignItems:'center', gap:8, padding:'8px 14px', background:'rgba(20,16,12,0.5)', borderBottom:'1px solid rgba(200,150,32,0.15)', flexShrink:0 }}>
+          <span style={{ color:'#e7c158', display:'flex' }}><IconUsers size={14}/></span>
+          <span style={{ color:'#f7e3a4', fontWeight:'bold', fontSize:12 }}>Profil gracza</span>
           {profile.zalogowany
             ? <span style={{ fontSize:9, color:'#22C55E' }}>● Online</span>
             : <span style={{ fontSize:9, color:'#374151' }}>● Offline</span>
           }
-          <button onClick={onClose} style={{ marginLeft:'auto', background:'none', border:'none', color:'#5A6840', cursor:'pointer' }}>
+          <button onClick={onClose} style={{ marginLeft:'auto', background:'none', border:'none', color:'#9a9182', cursor:'pointer' }}>
             <IconX size={16}/>
           </button>
         </div>
@@ -128,7 +128,7 @@ export default function PlayerProfile({ postacId, myId, onClose, onSendMessage, 
             background:`rgba(4,8,16,0.8) url(/assets/${profile.obrazek}) 0 0 no-repeat`,
           }} />
           <div style={{ flex:1 }}>
-            <div style={{ color:'#E8D070', fontWeight:'bold', fontSize:14 }}>
+            <div style={{ color:'#f7e3a4', fontWeight:'bold', fontSize:14 }}>
               {profile.nazwa}
               {profile.prestige > 0 && (
                 <span style={{ color:'#E8B84B', fontSize:10, marginLeft:6 }}>⁽{profile.prestige}⁾</span>
@@ -142,21 +142,21 @@ export default function PlayerProfile({ postacId, myId, onClose, onSendMessage, 
             {profile.gildia_nazwa && (
               <div style={{ color:'#FCD34D', fontSize:10 }}>[{profile.gildia_tag}] {profile.gildia_nazwa}</div>
             )}
-            <div style={{ color:'#7A8A5A', fontSize:10 }}>{profile.profesja}</div>
-            <div style={{ display:'inline-flex', alignItems:'center', gap:4, marginTop:4, background:'rgba(74,122,42,0.15)', border:'1px solid rgba(200,150,32,0.3)', borderRadius:10, padding:'1px 10px', fontSize:10, color:'#C8940A', fontWeight:'bold' }}>
+            <div style={{ color:'#9a9182', fontSize:10 }}>{profile.profesja}</div>
+            <div style={{ display:'inline-flex', alignItems:'center', gap:4, marginTop:4, background:'rgba(231,193,88,0.15)', border:'1px solid rgba(200,150,32,0.3)', borderRadius:10, padding:'1px 10px', fontSize:10, color:'#e7c158', fontWeight:'bold' }}>
               Poziom {profile.poziom}
             </div>
           </div>
           {/* HP bar */}
           <div style={{ minWidth:90 }}>
-            <div style={{ display:'flex', justifyContent:'space-between', fontSize:8, color:'#5A6840', marginBottom:2 }}>
+            <div style={{ display:'flex', justifyContent:'space-between', fontSize:8, color:'#9a9182', marginBottom:2 }}>
               <span>HP</span>
               <span style={{ color:hpClr }}>{profile.zycie}/{profile.zycie_max}</span>
             </div>
             <div style={{ height:6, background:'rgba(0,0,0,0.5)', borderRadius:3, overflow:'hidden', marginBottom:4 }}>
               <div style={{ width:`${hpPct*100}%`, height:'100%', background:hpClr, borderRadius:3 }} />
             </div>
-            <div style={{ display:'flex', justifyContent:'space-between', fontSize:7, color:'#3A4828', marginBottom:2 }}>
+            <div style={{ display:'flex', justifyContent:'space-between', fontSize:7, color:'#6b6456', marginBottom:2 }}>
               <span>EXP</span><span>{Math.round(expPct*100)}%</span>
             </div>
             <div style={{ height:3, background:'rgba(0,0,0,0.5)', borderRadius:2, overflow:'hidden' }}>
@@ -166,12 +166,12 @@ export default function PlayerProfile({ postacId, myId, onClose, onSendMessage, 
         </div>
 
         {/* Tabs */}
-        <div style={{ display:'flex', borderBottom:'1px solid rgba(200,150,32,0.15)', background:'rgba(4,6,3,0.3)' }}>
+        <div style={{ display:'flex', borderBottom:'1px solid rgba(200,150,32,0.15)', background:'rgba(10,8,6,0.3)' }}>
           {TABS.map(t => (
             <button key={t} onClick={() => setTab(t)} style={{
               flex:1, padding:'6px 4px', background:'none',
-              border:'none', borderBottom: tab === t ? '2px solid #C8940A' : '2px solid transparent',
-              color: tab === t ? '#E8B84B' : '#3A4828',
+              border:'none', borderBottom: tab === t ? '2px solid #e7c158' : '2px solid transparent',
+              color: tab === t ? '#E8B84B' : '#6b6456',
               cursor:'pointer', fontSize:9, fontWeight: tab === t ? 'bold' : 'normal',
               transition:'color 0.15s',
             }}>{TAB_LABEL[t]}</button>
@@ -183,7 +183,7 @@ export default function PlayerProfile({ postacId, myId, onClose, onSendMessage, 
           {tab === 'stats' && (
             <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:6 }}>
               <StatCard label="Zabicia"       value={fmtNum(profile.kills)}           color='#F87171' />
-              <StatCard label="Śmierci"       value={fmtNum(profile.deaths)}          color='#7A8A5A' />
+              <StatCard label="Śmierci"       value={fmtNum(profile.deaths)}          color='#9a9182' />
               <StatCard label="K/D"           value={kd}                              color='#FCD34D' />
               <StatCard label="Czas gry"      value={fmtTime(profile.czas_gry)}       color='#60A5FA' />
               <StatCard label="Questy"        value={fmtNum(profile.questy_count)}    color='#4ADE80' />
@@ -195,9 +195,9 @@ export default function PlayerProfile({ postacId, myId, onClose, onSendMessage, 
           )}
 
           {tab === 'osiagniecia' && (
-            <div style={{ color:'#5A6840', fontSize:10, textAlign:'center', paddingTop:20 }}>
+            <div style={{ color:'#9a9182', fontSize:10, textAlign:'center', paddingTop:20 }}>
               Osiągnięcia odblokowane: {profile.osiagniecia_count || 0}<br/>
-              <span style={{ fontSize:9, color:'#3A4828' }}>Szczegółowa lista dostępna w dzienniku questów</span>
+              <span style={{ fontSize:9, color:'#6b6456' }}>Szczegółowa lista dostępna w dzienniku questów</span>
             </div>
           )}
 
@@ -208,7 +208,7 @@ export default function PlayerProfile({ postacId, myId, onClose, onSendMessage, 
                   Aktywny: {profile.tytul_ikona} {profile.tytul_nazwa}
                 </div>
               )}
-              <div style={{ color:'#5A6840', fontSize:10 }}>
+              <div style={{ color:'#9a9182', fontSize:10 }}>
                 Tytuły odblokowane: {profile.tytuly_count || 0}
               </div>
             </div>
@@ -231,13 +231,13 @@ export default function PlayerProfile({ postacId, myId, onClose, onSendMessage, 
                 </div>
               )}
               {(profile.komentarze || []).length === 0 && (
-                <div style={{ color:'#3A4828', fontSize:10, textAlign:'center', paddingTop:10 }}>Brak komentarzy</div>
+                <div style={{ color:'#6b6456', fontSize:10, textAlign:'center', paddingTop:10 }}>Brak komentarzy</div>
               )}
               {(profile.komentarze || []).map(c => (
-                <div key={c.id} style={{ padding:'5px 8px', background:'rgba(8,13,5,0.4)', borderRadius:4, border:'1px solid rgba(200,150,32,0.08)', marginBottom:4 }}>
+                <div key={c.id} style={{ padding:'5px 8px', background:'rgba(20,16,12,0.4)', borderRadius:4, border:'1px solid rgba(200,150,32,0.08)', marginBottom:4 }}>
                   <div style={{ display:'flex', alignItems:'center', gap:5 }}>
-                    <span style={{ color:'#C8940A', fontSize:9, fontWeight:'bold' }}>{c.autor_nazwa}</span>
-                    <span style={{ color:'#3A4828', fontSize:8, marginLeft:'auto' }}>{new Date(c.data).toLocaleDateString('pl-PL')}</span>
+                    <span style={{ color:'#e7c158', fontSize:9, fontWeight:'bold' }}>{c.autor_nazwa}</span>
+                    <span style={{ color:'#6b6456', fontSize:8, marginLeft:'auto' }}>{new Date(c.data).toLocaleDateString('pl-PL')}</span>
                     {(c.autor_postac_id === myId || isSelf) && (
                       <button onClick={() => deleteComment(c.id)} style={{ background:'none', border:'none', color:'#5A3030', cursor:'pointer', fontSize:9, padding:'0 2px' }}>✕</button>
                     )}
@@ -258,12 +258,12 @@ export default function PlayerProfile({ postacId, myId, onClose, onSendMessage, 
               <button onClick={() => { onChallengePvp?.(postacId); onClose(); }} style={actionBtn('#F87171')}>⚔ Wyzwij PvP</button>
             )}
             {profile.zalogowany && (
-              <button onClick={() => { onTradeRequest?.(postacId); onClose(); }} style={actionBtn('#C8940A')}>🤝 Handluj</button>
+              <button onClick={() => { onTradeRequest?.(postacId); onClose(); }} style={actionBtn('#e7c158')}>🤝 Handluj</button>
             )}
           </div>
         )}
         {isSelf && (
-          <div style={{ padding:'8px 16px', borderTop:'1px solid rgba(59,130,246,0.1)', fontSize:9, color:'#3A4828', textAlign:'center' }}>To Twój profil</div>
+          <div style={{ padding:'8px 16px', borderTop:'1px solid rgba(59,130,246,0.1)', fontSize:9, color:'#6b6456', textAlign:'center' }}>To Twój profil</div>
         )}
       </div>
     </div>
@@ -271,8 +271,8 @@ export default function PlayerProfile({ postacId, myId, onClose, onSendMessage, 
 }
 
 const overlay = { position:'fixed', inset:0, background:'rgba(0,0,0,0.72)', backdropFilter:'blur(4px)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:250 };
-const card    = { width:380, maxWidth:'96vw', maxHeight:'90vh', background:'linear-gradient(160deg, rgba(10,16,7,0.99), rgba(6,10,4,0.99))', border:'1px solid rgba(59,130,246,0.28)', borderRadius:10, overflow:'hidden', display:'flex', flexDirection:'column', boxShadow:'0 12px 50px rgba(0,0,0,0.85)', fontFamily:'Verdana,sans-serif' };
-const closeBtn = { padding:'5px 14px', background:'rgba(15,32,64,0.5)', color:'#7A8A5A', border:'1px solid rgba(59,130,246,0.2)', borderRadius:4, cursor:'pointer', fontSize:10 };
+const card    = { width:380, maxWidth:'96vw', maxHeight:'90vh', background:'linear-gradient(160deg, rgba(22,18,13,0.99), rgba(14,12,9,0.99))', border:'1px solid rgba(59,130,246,0.28)', borderRadius:10, overflow:'hidden', display:'flex', flexDirection:'column', boxShadow:'0 12px 50px rgba(0,0,0,0.85)', fontFamily:'Verdana,sans-serif' };
+const closeBtn = { padding:'5px 14px', background:'rgba(15,32,64,0.5)', color:'#9a9182', border:'1px solid rgba(59,130,246,0.2)', borderRadius:4, cursor:'pointer', fontSize:10 };
 function actionBtn(color) {
   return { flex:1, padding:'7px 8px', background:`${color}18`, color, border:`1px solid ${color}44`, borderRadius:4, cursor:'pointer', fontSize:10, fontWeight:'bold', minWidth:80 };
 }

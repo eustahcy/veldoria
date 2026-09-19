@@ -4,7 +4,7 @@ import { api } from '../api';
 const SERIF = '"Palatino Linotype",Palatino,serif';
 
 const TYP_ICON = { loch:'🏰', ruiny:'🔮', wulkan:'🌋', mrozny:'❄', podziemia:'⚙' };
-const TYP_CLR  = { loch:'#C8940A', ruiny:'#A78BFA', wulkan:'#F97316', mrozny:'#60A5FA', podziemia:'#34D399' };
+const TYP_CLR  = { loch:'#e7c158', ruiny:'#A78BFA', wulkan:'#F97316', mrozny:'#60A5FA', podziemia:'#34D399' };
 const DIFF_CLR = { normalny:'#4ADE80', heroiczny:'#F59E0B', legendarny:'#EF4444' };
 const DIFF_ICN = { normalny:'★', heroiczny:'★★', legendarny:'★★★' };
 const MOD_ICN  = { dark_curse:'🌑', blessed:'✨', mutated:'👾', no_potions:'🚫', horde:'💀', golden:'💰' };
@@ -23,7 +23,7 @@ function fmtCd(wygasa) {
 function DungeonCard({ dung, onEnter, postacPoziom }) {
   const [diff, setDiff] = useState('normalny');
   const icon  = TYP_ICON[dung.typ]  || '⚔';
-  const color = TYP_CLR[dung.typ]   || '#C8940A';
+  const color = TYP_CLR[dung.typ]   || '#e7c158';
   const cd    = dung.cooldowns?.[diff];
   const canEnter = !cd && postacPoziom >= dung.min_poziom;
 
@@ -41,13 +41,13 @@ function DungeonCard({ dung, onEnter, postacPoziom }) {
       }}>
         <span style={{ fontSize:18 }}>{icon}</span>
         <div style={{ flex:1 }}>
-          <div style={{ color:'#E8D070', fontWeight:'bold', fontSize:12 }}>{dung.nazwa}</div>
+          <div style={{ color:'#f7e3a4', fontWeight:'bold', fontSize:12 }}>{dung.nazwa}</div>
           <div style={{ color:'rgba(200,150,32,0.45)', fontSize:8 }}>{dung.opis}</div>
         </div>
         <div style={{ textAlign:'right', fontSize:8, color:'rgba(200,150,32,0.5)' }}>
-          <div>Poz. min: <span style={{ color:'#CDD4AA' }}>{dung.min_poziom}</span></div>
-          <div>Piętra: <span style={{ color:'#CDD4AA' }}>{dung.pietra}</span></div>
-          <div>Max: <span style={{ color:'#CDD4AA' }}>{dung.max_graczy}★</span></div>
+          <div>Poz. min: <span style={{ color:'#e8e2d4' }}>{dung.min_poziom}</span></div>
+          <div>Piętra: <span style={{ color:'#e8e2d4' }}>{dung.pietra}</span></div>
+          <div>Max: <span style={{ color:'#e8e2d4' }}>{dung.max_graczy}★</span></div>
         </div>
       </div>
 
@@ -169,7 +169,7 @@ export default function DungeonFinder2({ onClose, addToast, onTeleport, postac }
             <button key={key} onClick={() => setTab(key)} style={{
               flex:1, padding:'7px', fontSize:10, fontFamily:SERIF,
               background: tab===key ? 'rgba(200,146,42,0.08)' : 'transparent',
-              border:'none', borderBottom: tab===key ? '2px solid #C8940A' : '2px solid transparent',
+              border:'none', borderBottom: tab===key ? '2px solid #e7c158' : '2px solid transparent',
               color: tab===key ? '#E8B84B' : 'rgba(200,146,42,0.45)',
               cursor:'pointer',
             }}>{label}</button>
@@ -205,11 +205,11 @@ export default function DungeonFinder2({ onClose, addToast, onTeleport, postac }
                     background:'rgba(14,10,3,0.6)', border:'1px solid rgba(200,146,42,0.1)',
                     borderRadius:7, alignItems:'center',
                   }}>
-                    <span style={{ fontSize:20, color:RATING_CLR[h.wynik]||'#CDD4AA', fontWeight:'bold', minWidth:28, textAlign:'center' }}>
+                    <span style={{ fontSize:20, color:RATING_CLR[h.wynik]||'#e8e2d4', fontWeight:'bold', minWidth:28, textAlign:'center' }}>
                       {h.wynik}
                     </span>
                     <div style={{ flex:1 }}>
-                      <div style={{ color:'#E8D070', fontSize:11, fontWeight:'bold' }}>{h.dung_nazwa}</div>
+                      <div style={{ color:'#f7e3a4', fontSize:11, fontWeight:'bold' }}>{h.dung_nazwa}</div>
                       <div style={{ color:'rgba(200,146,42,0.5)', fontSize:8 }}>
                         {h.trudnosc} · {fmt2(h.czas_s)} · {h.zgony} zgon{h.zgony===1?'':'y/ów'}
                       </div>

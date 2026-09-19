@@ -39,24 +39,24 @@ export default function OutfitSelector({ postac, onClose, onChanged }) {
     }}>
       <div style={{
         width:480, maxWidth:'95vw',
-        background:'linear-gradient(160deg, rgba(13,21,10,0.99), rgba(6,10,4,0.99))',
+        background:'linear-gradient(160deg, rgba(26,21,16,0.99), rgba(14,12,9,0.99))',
         border:'1px solid rgba(200,150,32,0.3)', borderRadius:10,
         overflow:'hidden',
         boxShadow:'0 12px 60px rgba(0,0,0,0.9), inset 0 1px 0 rgba(200,150,32,0.06)',
         fontFamily:'"Palatino Linotype",Palatino,serif',
       }}>
         {/* Header */}
-        <div style={{ display:'flex', alignItems:'center', gap:10, padding:'10px 16px', background:'rgba(6,10,4,0.6)', borderBottom:'1px solid rgba(200,150,32,0.15)' }}>
+        <div style={{ display:'flex', alignItems:'center', gap:10, padding:'10px 16px', background:'rgba(14,12,9,0.6)', borderBottom:'1px solid rgba(200,150,32,0.15)' }}>
           <span style={{ fontSize:16 }}>👘</span>
-          <span style={{ color:'#E8D070', fontWeight:'bold', fontSize:13 }}>Wybór Wyglądu Postaci</span>
-          <span style={{ color:'#3A4828', fontSize:10, marginLeft:4 }}>poz. {postac.poziom} · {postac.profesja}</span>
-          <button onClick={onClose} style={{ marginLeft:'auto', background:'none', border:'none', color:'#3A4828', cursor:'pointer' }}>
+          <span style={{ color:'#f7e3a4', fontWeight:'bold', fontSize:13 }}>Wybór Wyglądu Postaci</span>
+          <span style={{ color:'#6b6456', fontSize:10, marginLeft:4 }}>poz. {postac.poziom} · {postac.profesja}</span>
+          <button onClick={onClose} style={{ marginLeft:'auto', background:'none', border:'none', color:'#6b6456', cursor:'pointer' }}>
             <IconX size={16}/>
           </button>
         </div>
 
         {flash && (
-          <div style={{ padding:'6px 16px', fontSize:10, color:'#6CB83A', background:'rgba(13,40,8,0.6)', borderBottom:'1px solid rgba(74,122,42,0.2)' }}>
+          <div style={{ padding:'6px 16px', fontSize:10, color:'#e7c158', background:'rgba(58,45,20,0.6)', borderBottom:'1px solid rgba(231,193,88,0.2)' }}>
             ✦ {flash}
           </div>
         )}
@@ -64,7 +64,7 @@ export default function OutfitSelector({ postac, onClose, onChanged }) {
         <div style={{ padding:'16px' }}>
           {/* Available outfits */}
           <div style={{ marginBottom:12 }}>
-            <div style={{ fontSize:9, color:'#5A6840', letterSpacing:'2px', textTransform:'uppercase', marginBottom:10 }}>Dostępne wyglądy</div>
+            <div style={{ fontSize:9, color:'#9a9182', letterSpacing:'2px', textTransform:'uppercase', marginBottom:10 }}>Dostępne wyglądy</div>
             <div style={{ display:'flex', gap:10, flexWrap:'wrap' }}>
               {outfits.map(outfit => (
                 <div
@@ -73,8 +73,8 @@ export default function OutfitSelector({ postac, onClose, onChanged }) {
                   style={{
                     padding:'12px 14px', borderRadius:8, cursor: outfit.current ? 'default' : 'pointer',
                     background: outfit.current
-                      ? 'linear-gradient(160deg, rgba(74,122,42,0.2), rgba(13,40,8,0.8))'
-                      : 'rgba(13,21,10,0.7)',
+                      ? 'linear-gradient(160deg, rgba(231,193,88,0.2), rgba(58,45,20,0.8))'
+                      : 'rgba(26,21,16,0.7)',
                     border:`1px solid ${outfit.current ? 'rgba(200,150,32,0.5)' : 'rgba(200,150,32,0.15)'}`,
                     display:'flex', flexDirection:'column', alignItems:'center', gap:6,
                     minWidth:100,
@@ -95,27 +95,27 @@ export default function OutfitSelector({ postac, onClose, onChanged }) {
                       </div>
                     )}
                   </div>
-                  <div style={{ color: outfit.current ? '#E8D070' : '#7A8A5A', fontSize:10, fontWeight: outfit.current ? 'bold' : 'normal', textAlign:'center' }}>
+                  <div style={{ color: outfit.current ? '#f7e3a4' : '#9a9182', fontSize:10, fontWeight: outfit.current ? 'bold' : 'normal', textAlign:'center' }}>
                     {outfit.label}
                   </div>
                   {outfit.current && (
-                    <div style={{ fontSize:8, color:'#6CB83A', letterSpacing:'0.5px' }}>Aktywny</div>
+                    <div style={{ fontSize:8, color:'#e7c158', letterSpacing:'0.5px' }}>Aktywny</div>
                   )}
                 </div>
               ))}
-              {outfits.length === 0 && <div style={{ color:'#3A4828', fontSize:11, fontStyle:'italic' }}>Ładowanie...</div>}
+              {outfits.length === 0 && <div style={{ color:'#6b6456', fontSize:11, fontStyle:'italic' }}>Ładowanie...</div>}
             </div>
           </div>
 
           {/* Locked outfits */}
           {locked.length > 0 && (
             <div>
-              <div style={{ fontSize:9, color:'#3A4828', letterSpacing:'2px', textTransform:'uppercase', marginBottom:10 }}>Zablokowane wyglądy</div>
+              <div style={{ fontSize:9, color:'#6b6456', letterSpacing:'2px', textTransform:'uppercase', marginBottom:10 }}>Zablokowane wyglądy</div>
               <div style={{ display:'flex', gap:10, flexWrap:'wrap' }}>
                 {locked.map(outfit => (
                   <div key={outfit.id} style={{
                     padding:'12px 14px', borderRadius:8,
-                    background:'rgba(6,10,4,0.5)',
+                    background:'rgba(14,12,9,0.5)',
                     border:'1px solid rgba(200,150,32,0.06)',
                     display:'flex', flexDirection:'column', alignItems:'center', gap:6,
                     minWidth:100, opacity:0.5,
@@ -126,8 +126,8 @@ export default function OutfitSelector({ postac, onClose, onChanged }) {
                       backgroundPosition:'0 0', backgroundRepeat:'no-repeat', imageRendering:'pixelated',
                       filter:'grayscale(1) brightness(0.4)',
                     }} />
-                    <div style={{ color:'#3A4828', fontSize:10, textAlign:'center' }}>{outfit.label}</div>
-                    <div style={{ fontSize:8, color:'#2A3820' }}>🔒 poz. {outfit.minLevel}</div>
+                    <div style={{ color:'#6b6456', fontSize:10, textAlign:'center' }}>{outfit.label}</div>
+                    <div style={{ fontSize:8, color:'#5e584c' }}>🔒 poz. {outfit.minLevel}</div>
                   </div>
                 ))}
               </div>

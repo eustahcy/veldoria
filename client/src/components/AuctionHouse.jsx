@@ -6,7 +6,7 @@ const KLASA_COLOR = {
   heroic:    '#2090FE',
   legendary: '#FA9A20',
   artefact:  '#f0032a',
-  normal:    '#CDD4AA',
+  normal:    '#e8e2d4',
 };
 
 function fmtTime(ts) {
@@ -32,7 +32,7 @@ function AuctionCard({ a, onBuy, canBuy }) {
     <div style={{
       display: 'flex', alignItems: 'center', gap: 8,
       padding: '6px 8px', marginBottom: 4,
-      background: 'rgba(4,8,4,0.6)',
+      background: 'rgba(12,10,8,0.6)',
       border: `1px solid ${color}22`,
       borderRadius: 5,
     }}>
@@ -56,21 +56,21 @@ function AuctionCard({ a, onBuy, canBuy }) {
         <div style={{ color, fontSize: 10, fontWeight: 'bold', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
           {item.nazwa || 'Nieznany'}
         </div>
-        <div style={{ color: '#5A6840', fontSize: 8 }}>
+        <div style={{ color: '#9a9182', fontSize: 8 }}>
           {a.sprzedawca_nazwa} · wygasa: {fmtTime(a.data_wygasniecia)}
           {item.wym_poziom > 0 && ` · Poz.${item.wym_poziom}+`}
         </div>
       </div>
 
       <div style={{ textAlign: 'right', flexShrink: 0 }}>
-        <div style={{ color: '#E8D070', fontWeight: 'bold', fontSize: 11 }}>
+        <div style={{ color: '#f7e3a4', fontWeight: 'bold', fontSize: 11 }}>
           {fmtGold(a.cena)} 💰
         </div>
         {canBuy && (
           <button onClick={() => onBuy(a.id)} style={{
             marginTop: 2, padding: '2px 8px',
-            background: 'rgba(74,122,42,0.25)', color: '#4ADE80',
-            border: '1px solid rgba(74,122,42,0.4)', borderRadius: 3,
+            background: 'rgba(231,193,88,0.25)', color: '#4ADE80',
+            border: '1px solid rgba(231,193,88,0.4)', borderRadius: 3,
             cursor: 'pointer', fontSize: 9, fontWeight: 'bold',
           }}>Kup</button>
         )}
@@ -182,7 +182,7 @@ export default function AuctionHouse({ onClose, postac, socket }) {
   };
   const box = {
     width: 580, maxWidth: '98vw', height: '82vh', maxHeight: 680,
-    background: 'linear-gradient(160deg,rgba(10,16,7,0.99),rgba(6,10,4,0.99))',
+    background: 'linear-gradient(160deg,rgba(22,18,13,0.99),rgba(14,12,9,0.99))',
     border: '1px solid rgba(200,150,32,0.25)', borderRadius: 10,
     display: 'flex', flexDirection: 'column', overflow: 'hidden',
     boxShadow: '0 12px 60px rgba(0,0,0,0.9)',
@@ -190,7 +190,7 @@ export default function AuctionHouse({ onClose, postac, socket }) {
   const inputSt = {
     padding: '4px 8px', background: 'rgba(0,0,0,0.4)',
     border: '1px solid rgba(200,150,32,0.25)', borderRadius: 4,
-    color: '#CDD4AA', fontSize: 10, outline: 'none',
+    color: '#e8e2d4', fontSize: 10, outline: 'none',
   };
   const selectSt = { ...inputSt, cursor: 'pointer' };
 
@@ -205,13 +205,13 @@ export default function AuctionHouse({ onClose, postac, socket }) {
       <div style={box}>
         {/* Header */}
         <div style={{
-          padding: '8px 14px', background: 'rgba(8,13,5,0.8)',
+          padding: '8px 14px', background: 'rgba(20,16,12,0.8)',
           borderBottom: '1px solid rgba(200,150,32,0.2)',
           display: 'flex', alignItems: 'center', gap: 8,
         }}>
           <span style={{ fontSize: 16 }}>🏪</span>
           <span style={{ color: '#E8B84B', fontWeight: 'bold', fontSize: 13 }}>Dom Aukcyjny</span>
-          <button onClick={onClose} style={{ marginLeft: 'auto', background: 'none', border: 'none', color: '#5A6840', cursor: 'pointer', fontSize: 18 }}>✕</button>
+          <button onClick={onClose} style={{ marginLeft: 'auto', background: 'none', border: 'none', color: '#9a9182', cursor: 'pointer', fontSize: 18 }}>✕</button>
         </div>
 
         {/* Flash message */}
@@ -224,12 +224,12 @@ export default function AuctionHouse({ onClose, postac, socket }) {
         )}
 
         {/* Tabs */}
-        <div style={{ display: 'flex', borderBottom: '1px solid rgba(200,150,32,0.15)', background: 'rgba(4,6,3,0.3)' }}>
+        <div style={{ display: 'flex', borderBottom: '1px solid rgba(200,150,32,0.15)', background: 'rgba(10,8,6,0.3)' }}>
           {TABS.map(t => (
             <button key={t.key} onClick={() => setTab(t.key)} style={{
               flex: 1, padding: '7px 4px', background: 'none',
-              border: 'none', borderBottom: tab === t.key ? '2px solid #C8940A' : '2px solid transparent',
-              color: tab === t.key ? '#E8B84B' : '#3A4828',
+              border: 'none', borderBottom: tab === t.key ? '2px solid #e7c158' : '2px solid transparent',
+              color: tab === t.key ? '#E8B84B' : '#6b6456',
               cursor: 'pointer', fontSize: 10, fontWeight: tab === t.key ? 'bold' : 'normal',
             }}>{t.label}</button>
           ))}
@@ -264,14 +264,14 @@ export default function AuctionHouse({ onClose, postac, socket }) {
                   <option value="cena_desc">Cena ↓</option>
                 </select>
                 <button onClick={handleFilterSearch} style={{
-                  padding: '4px 12px', background: 'rgba(200,150,32,0.2)', color: '#C8940A',
+                  padding: '4px 12px', background: 'rgba(200,150,32,0.2)', color: '#e7c158',
                   border: '1px solid rgba(200,150,32,0.4)', borderRadius: 4, cursor: 'pointer', fontSize: 9,
                 }}>Szukaj</button>
               </div>
 
-              {loading && <div style={{ textAlign: 'center', color: '#5A6840', fontSize: 11, padding: 20 }}>Ładowanie...</div>}
+              {loading && <div style={{ textAlign: 'center', color: '#9a9182', fontSize: 11, padding: 20 }}>Ładowanie...</div>}
               {!loading && aukcje.length === 0 && (
-                <div style={{ textAlign: 'center', color: '#3A4828', fontSize: 10, padding: 30 }}>Brak aktywnych aukcji</div>
+                <div style={{ textAlign: 'center', color: '#6b6456', fontSize: 10, padding: 30 }}>Brak aktywnych aukcji</div>
               )}
               {aukcje.map(a => (
                 <AuctionCard
@@ -287,7 +287,7 @@ export default function AuctionHouse({ onClose, postac, socket }) {
           {tab === 'my' && (
             <>
               {myAukcje.length === 0 && (
-                <div style={{ textAlign: 'center', color: '#3A4828', fontSize: 10, padding: 30 }}>
+                <div style={{ textAlign: 'center', color: '#6b6456', fontSize: 10, padding: 30 }}>
                   Nie masz aktywnych aukcji
                 </div>
               )}
@@ -298,11 +298,11 @@ export default function AuctionHouse({ onClose, postac, socket }) {
                   <div key={a.id} style={{
                     display: 'flex', alignItems: 'center', gap: 8,
                     padding: '6px 8px', marginBottom: 4,
-                    background: 'rgba(4,8,4,0.6)', border: `1px solid ${color}22`, borderRadius: 5,
+                    background: 'rgba(12,10,8,0.6)', border: `1px solid ${color}22`, borderRadius: 5,
                   }}>
                     <div style={{ flex: 1 }}>
                       <div style={{ color, fontSize: 10, fontWeight: 'bold' }}>{item.nazwa}</div>
-                      <div style={{ fontSize: 8, color: '#5A6840' }}>
+                      <div style={{ fontSize: 8, color: '#9a9182' }}>
                         {fmtGold(a.cena)} 💰 · wygasa: {fmtTime(a.data_wygasniecia)}
                         {' · '}<span style={{ color: a.status === 'aktywna' ? '#4ADE80' : '#F87171' }}>{a.status}</span>
                       </div>
@@ -323,12 +323,12 @@ export default function AuctionHouse({ onClose, postac, socket }) {
           {/* LIST TAB */}
           {tab === 'list' && (
             <div>
-              <div style={{ fontSize: 9, color: '#5A6840', marginBottom: 8 }}>Wybierz przedmiot z plecaka:</div>
+              <div style={{ fontSize: 9, color: '#9a9182', marginBottom: 8 }}>Wybierz przedmiot z plecaka:</div>
 
               {/* Inventory grid */}
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginBottom: 10 }}>
                 {inventory.length === 0 && (
-                  <div style={{ color: '#3A4828', fontSize: 10 }}>Plecak pusty</div>
+                  <div style={{ color: '#6b6456', fontSize: 10 }}>Plecak pusty</div>
                 )}
                 {inventory.map(item => {
                   const color   = KLASA_COLOR[item.klasa] || KLASA_COLOR.normal;
@@ -363,7 +363,7 @@ export default function AuctionHouse({ onClose, postac, socket }) {
                   padding: '5px 8px', marginBottom: 8, borderRadius: 4,
                   background: 'rgba(200,150,32,0.08)',
                   border: '1px solid rgba(200,150,32,0.2)',
-                  color: KLASA_COLOR[listItem.klasa] || '#CDD4AA', fontSize: 10,
+                  color: KLASA_COLOR[listItem.klasa] || '#e8e2d4', fontSize: 10,
                 }}>
                   Wybrany: {listItem.nazwa} ({listItem.klasa})
                 </div>
@@ -372,7 +372,7 @@ export default function AuctionHouse({ onClose, postac, socket }) {
               {/* Price + hours */}
               <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap', marginBottom: 10 }}>
                 <div>
-                  <div style={{ fontSize: 8, color: '#5A6840', marginBottom: 2 }}>Cena (złoto):</div>
+                  <div style={{ fontSize: 8, color: '#9a9182', marginBottom: 2 }}>Cena (złoto):</div>
                   <input
                     type="number" min="1"
                     value={listCena}
@@ -382,7 +382,7 @@ export default function AuctionHouse({ onClose, postac, socket }) {
                   />
                 </div>
                 <div>
-                  <div style={{ fontSize: 8, color: '#5A6840', marginBottom: 2 }}>Czas (godziny):</div>
+                  <div style={{ fontSize: 8, color: '#9a9182', marginBottom: 2 }}>Czas (godziny):</div>
                   <select value={listHours} onChange={e => setListHours(Number(e.target.value))} style={selectSt}>
                     {[1, 2, 4, 8, 12, 24, 48].map(h => (
                       <option key={h} value={h}>{h}h</option>
@@ -391,15 +391,15 @@ export default function AuctionHouse({ onClose, postac, socket }) {
                 </div>
                 <button onClick={handleList} style={{
                   padding: '6px 16px', marginTop: 14,
-                  background: 'rgba(74,122,42,0.25)', color: '#4ADE80',
-                  border: '1px solid rgba(74,122,42,0.4)', borderRadius: 4,
+                  background: 'rgba(231,193,88,0.25)', color: '#4ADE80',
+                  border: '1px solid rgba(231,193,88,0.4)', borderRadius: 4,
                   cursor: 'pointer', fontSize: 10, fontWeight: 'bold',
                 }}>
                   Wystaw na aukcji
                 </button>
               </div>
 
-              <div style={{ fontSize: 8, color: '#3A4828', fontStyle: 'italic' }}>
+              <div style={{ fontSize: 8, color: '#6b6456', fontStyle: 'italic' }}>
                 Przedmiot zostanie usunięty z plecaka do momentu sprzedaży lub anulowania.
               </div>
             </div>

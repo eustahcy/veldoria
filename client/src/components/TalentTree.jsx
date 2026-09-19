@@ -10,7 +10,7 @@ function TalentCard({ talent, onInvest, canSpend }) {
   let bgColor     = 'rgba(20,16,10,0.8)';
   let opacity     = 1;
 
-  if (isMaxed)    { borderColor = '#C8940A'; bgColor = 'rgba(200,146,42,0.15)'; }
+  if (isMaxed)    { borderColor = '#e7c158'; bgColor = 'rgba(200,146,42,0.15)'; }
   else if (isAvail) { borderColor = 'rgba(200,146,42,0.7)'; bgColor = 'rgba(200,146,42,0.06)'; }
   else if (isLocked) { opacity = 0.4; }
 
@@ -30,14 +30,14 @@ function TalentCard({ talent, onInvest, canSpend }) {
       }}
     >
       <div style={{ fontSize: 18, lineHeight: 1, marginBottom: 3 }}>{talent.ikona || '⭐'}</div>
-      <div style={{ fontSize: 7, color: '#CDD4AA', lineHeight: 1.3, marginBottom: 2 }}>{talent.nazwa}</div>
-      <div style={{ fontSize: 7, color: isMaxed ? '#C8940A' : '#6B5530' }}>
+      <div style={{ fontSize: 7, color: '#e8e2d4', lineHeight: 1.3, marginBottom: 2 }}>{talent.nazwa}</div>
+      <div style={{ fontSize: 7, color: isMaxed ? '#e7c158' : '#6B5530' }}>
         {talent.myLevel}/{talent.max_poziom}
       </div>
       {isAvail && canSpend && (
         <div style={{
           position: 'absolute', bottom: -1, left: '50%', transform: 'translateX(-50%)',
-          background: '#C8940A', color: '#000', fontSize: 8, fontWeight: 'bold',
+          background: '#e7c158', color: '#000', fontSize: 8, fontWeight: 'bold',
           borderRadius: 3, padding: '1px 5px',
         }}>+</div>
       )}
@@ -86,7 +86,7 @@ export default function TalentTree({ postac, onClose }) {
   };
   const panel = {
     maxWidth: 600, width: '96vw', maxHeight: '85vh',
-    background: 'linear-gradient(160deg,rgba(8,14,5,0.99),rgba(5,9,3,0.99))',
+    background: 'linear-gradient(160deg,rgba(20,16,12,0.99),rgba(12,10,8,0.99))',
     border: '1px solid rgba(200,146,42,0.35)', borderRadius: 6,
     boxShadow: '0 8px 50px rgba(0,0,0,0.9)', display: 'flex', flexDirection: 'column',
   };
@@ -137,7 +137,7 @@ export default function TalentTree({ postac, onClose }) {
                 <div key={path.name} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
                   {/* Path header */}
                   <div style={{
-                    color: '#C8940A', fontSize: 8, fontWeight: 'bold', letterSpacing: '1.5px',
+                    color: '#e7c158', fontSize: 8, fontWeight: 'bold', letterSpacing: '1.5px',
                     textTransform: 'uppercase', marginBottom: 6, textAlign: 'center',
                   }}>{path.name}</div>
 

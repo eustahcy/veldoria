@@ -61,10 +61,10 @@ function ShopCard({ item, selected, canAfford, onClick }) {
       display: 'flex', flexDirection: 'column', alignItems: 'center',
       padding: '8px 5px', borderRadius: 8, cursor: 'pointer',
       background: selected
-        ? `linear-gradient(145deg,rgba(12,28,8,0.95),rgba(8,18,4,0.95))`
-        : 'rgba(8,13,5,0.55)',
-      border: `1px solid ${selected ? '#6CB83A' : color + '40'}`,
-      boxShadow: selected ? `0 0 12px rgba(200,150,32,0.3), 0 0 0 1px #C8940A` : 'none',
+        ? `linear-gradient(145deg,rgba(32,26,16,0.95),rgba(22,18,12,0.95))`
+        : 'rgba(20,16,12,0.55)',
+      border: `1px solid ${selected ? '#e7c158' : color + '40'}`,
+      boxShadow: selected ? `0 0 12px rgba(200,150,32,0.3), 0 0 0 1px #e7c158` : 'none',
       transition: 'all 0.12s', position: 'relative', minWidth: 0,
     }}>
       {/* Rarity top accent */}
@@ -89,13 +89,13 @@ function ShopCard({ item, selected, canAfford, onClick }) {
 // ── Item detail sidebar ────────────────────────────────────────────────────────
 function ShopDetail({ item, equippedItem, gold, onBuy, buying, msgType, msg }) {
   if (!item) return (
-    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 12, color: '#2A3820' }}>
+    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 12, color: '#5e584c' }}>
       <div style={{ fontSize: 36, opacity: 0.3 }}>🛒</div>
-      <div style={{ fontSize: 10, color: '#3A4828' }}>Wybierz przedmiot ze sklepu</div>
+      <div style={{ fontSize: 10, color: '#6b6456' }}>Wybierz przedmiot ze sklepu</div>
     </div>
   );
 
-  const color    = RC[item.klasa] || '#CDD4AA';
+  const color    = RC[item.klasa] || '#e8e2d4';
   const price    = item.wartosc_kupna || 0;
   const canAfford = gold >= price;
   const stats    = getStats(item);
@@ -104,11 +104,11 @@ function ShopDetail({ item, equippedItem, gold, onBuy, buying, msgType, msg }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
       {/* Item header */}
-      <div style={{ padding: '12px 14px', flexShrink: 0, background: `linear-gradient(135deg,${color}0A,rgba(8,13,5,0.6))`, borderBottom: `1px solid ${color}22` }}>
+      <div style={{ padding: '12px 14px', flexShrink: 0, background: `linear-gradient(135deg,${color}0A,rgba(20,16,12,0.6))`, borderBottom: `1px solid ${color}22` }}>
         <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
           <div style={{
             width: 60, height: 60, flexShrink: 0, borderRadius: 9,
-            background: 'linear-gradient(145deg,rgba(12,20,8,0.95),rgba(6,12,4,0.95))',
+            background: 'linear-gradient(145deg,rgba(24,20,15,0.95),rgba(16,13,10,0.95))',
             border: `2px solid ${color}55`,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             boxShadow: `0 0 16px ${color}22`,
@@ -122,7 +122,7 @@ function ShopDetail({ item, equippedItem, gold, onBuy, buying, msgType, msg }) {
                 <span style={{ color, fontSize: 8, fontWeight: 'bold' }}>★ {RL[item.klasa]}</span>
               </div>
             )}
-            <div style={{ color: '#5A6840', fontSize: 9 }}>{item.typ}</div>
+            <div style={{ color: '#9a9182', fontSize: 9 }}>{item.typ}</div>
             {item.wym_poziom > 0 && <div style={{ color: '#F59E0B', fontSize: 9, marginTop: 2 }}>Min. poziom {item.wym_poziom}</div>}
           </div>
         </div>
@@ -130,8 +130,8 @@ function ShopDetail({ item, equippedItem, gold, onBuy, buying, msgType, msg }) {
 
       {/* Compare hint */}
       {equippedItem && (
-        <div style={{ padding: '4px 14px', background: 'rgba(200,150,32,0.06)', borderBottom: '1px solid rgba(200,150,32,0.08)', fontSize: 8, color: '#7A8A5A' }}>
-          Porównanie z założonym: <span style={{ color: '#C8940A', fontWeight: 'bold' }}>{equippedItem.nazwa}</span>
+        <div style={{ padding: '4px 14px', background: 'rgba(200,150,32,0.06)', borderBottom: '1px solid rgba(200,150,32,0.08)', fontSize: 8, color: '#9a9182' }}>
+          Porównanie z założonym: <span style={{ color: '#e7c158', fontWeight: 'bold' }}>{equippedItem.nazwa}</span>
         </div>
       )}
 
@@ -145,9 +145,9 @@ function ShopDetail({ item, equippedItem, gold, onBuy, buying, msgType, msg }) {
               const numCmp = cmp ? parseFloat(cmp.val.replace(/[^0-9.-]/g, '')) : null;
               const diff   = numCmp !== null && !isNaN(numVal) && !isNaN(numCmp) ? numVal - numCmp : null;
               return (
-                <div key={label} style={{ display: 'flex', justifyContent: 'space-between', padding: '2px 6px', borderRadius: 3, background: 'rgba(8,13,5,0.4)' }}>
+                <div key={label} style={{ display: 'flex', justifyContent: 'space-between', padding: '2px 6px', borderRadius: 3, background: 'rgba(20,16,12,0.4)' }}>
                   <span style={{ color: '#4A5A30', fontSize: 8 }}>{label}</span>
-                  <span style={{ color: diff > 0 ? '#4ADE80' : diff < 0 ? '#F87171' : '#CDD4AA', fontWeight: 'bold', fontSize: 9 }}>
+                  <span style={{ color: diff > 0 ? '#4ADE80' : diff < 0 ? '#F87171' : '#e8e2d4', fontWeight: 'bold', fontSize: 9 }}>
                     {val}{diff !== null && diff !== 0 && <span style={{ fontSize: 7 }}>{diff > 0 ? ' ▲' : ' ▼'}</span>}
                   </span>
                 </div>
@@ -155,10 +155,10 @@ function ShopDetail({ item, equippedItem, gold, onBuy, buying, msgType, msg }) {
             })}
           </div>
         ) : (
-          <div style={{ color: '#2A3820', fontSize: 9, textAlign: 'center', paddingTop: 12 }}>Brak statystyk</div>
+          <div style={{ color: '#5e584c', fontSize: 9, textAlign: 'center', paddingTop: 12 }}>Brak statystyk</div>
         )}
         {item.opis && (
-          <div style={{ marginTop: 10, color: '#7A8A5A', fontSize: 9, fontStyle: 'italic', padding: '6px 8px', background: 'rgba(8,13,5,0.5)', borderRadius: 5, lineHeight: 1.5, borderLeft: '2px solid rgba(200,150,32,0.2)' }}>
+          <div style={{ marginTop: 10, color: '#9a9182', fontSize: 9, fontStyle: 'italic', padding: '6px 8px', background: 'rgba(20,16,12,0.5)', borderRadius: 5, lineHeight: 1.5, borderLeft: '2px solid rgba(200,150,32,0.2)' }}>
             {item.opis}
           </div>
         )}
@@ -176,10 +176,10 @@ function ShopDetail({ item, equippedItem, gold, onBuy, buying, msgType, msg }) {
         <button onClick={onBuy} disabled={!canAfford || buying} style={{
           width: '100%', padding: '11px',
           display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-          background: canAfford && !buying ? 'linear-gradient(135deg,rgba(74,122,42,0.35),rgba(14,28,10,0.4))' : 'rgba(8,13,5,0.4)',
+          background: canAfford && !buying ? 'linear-gradient(135deg,rgba(231,193,88,0.35),rgba(34,28,18,0.4))' : 'rgba(20,16,12,0.4)',
           border: `1px solid ${canAfford ? 'rgba(200,150,32,0.45)' : 'rgba(200,150,32,0.1)'}`,
           borderRadius: 7, cursor: canAfford && !buying ? 'pointer' : 'not-allowed',
-          color: canAfford ? '#E8D070' : '#3A4828',
+          color: canAfford ? '#f7e3a4' : '#6b6456',
           fontSize: 12, fontWeight: 'bold',
           boxShadow: canAfford ? '0 0 14px rgba(200,150,32,0.12)' : 'none',
           fontFamily: 'Verdana,sans-serif',
@@ -290,7 +290,7 @@ export default function NpcDialog({ npc, postac, onClose, onBought, onQuestRewar
 
       <div style={{
         width: 720, maxWidth: '99vw', height: '85vh', maxHeight: 620,
-        background: 'linear-gradient(160deg,rgba(8,14,5,0.99),rgba(4,8,2,0.99))',
+        background: 'linear-gradient(160deg,rgba(20,16,12,0.99),rgba(12,10,8,0.99))',
         border: '1px solid rgba(200,150,32,0.22)', borderRadius: 12,
         display: 'flex', flexDirection: 'column', overflow: 'hidden',
         boxShadow: '0 20px 80px rgba(0,0,0,0.9)',
@@ -298,18 +298,18 @@ export default function NpcDialog({ npc, postac, onClose, onBought, onQuestRewar
       }}>
 
         {/* ── HEADER ── */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 16px', background: 'rgba(4,8,2,0.6)', borderBottom: '1px solid rgba(200,150,32,0.12)', flexShrink: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 16px', background: 'rgba(12,10,8,0.6)', borderBottom: '1px solid rgba(200,150,32,0.12)', flexShrink: 0 }}>
           {/* NPC portrait */}
           <div style={{
             width: 40, height: 52, flexShrink: 0,
             backgroundImage: `url(/assets/${npc.obrazek})`,
             backgroundPosition: '0 0', backgroundRepeat: 'no-repeat', imageRendering: 'pixelated',
             border: '1px solid rgba(200,150,32,0.3)', borderRadius: 4,
-            background: `rgba(8,13,5,0.8) url(/assets/${npc.obrazek}) 0 0 no-repeat`,
+            background: `rgba(20,16,12,0.8) url(/assets/${npc.obrazek}) 0 0 no-repeat`,
           }} />
           <div style={{ flex: 1 }}>
-            <div style={{ color: '#E8D070', fontWeight: 'bold', fontSize: 13 }}>{npc.nazwa}</div>
-            <div style={{ color: '#5A6840', fontSize: 9 }}>{npc.shop > 0 ? `Kupiec · Sklep #${npc.shop}` : 'NPC'}</div>
+            <div style={{ color: '#f7e3a4', fontWeight: 'bold', fontSize: 13 }}>{npc.nazwa}</div>
+            <div style={{ color: '#9a9182', fontSize: 9 }}>{npc.shop > 0 ? `Kupiec · Sklep #${npc.shop}` : 'NPC'}</div>
           </div>
           {/* Nav buttons */}
           <div style={{ display: 'flex', gap: 3 }}>
@@ -322,16 +322,16 @@ export default function NpcDialog({ npc, postac, onClose, onBought, onQuestRewar
               ['talk', '💬 Rozmowa'],
             ].filter(Boolean).map(([v, l]) => (
               <button key={v} onClick={() => { setView(v); setSelItem(null); }} style={{
-                padding: '4px 10px', background: view === v ? 'rgba(200,150,32,0.15)' : 'rgba(8,13,5,0.6)',
+                padding: '4px 10px', background: view === v ? 'rgba(200,150,32,0.15)' : 'rgba(20,16,12,0.6)',
                 border: `1px solid ${view === v ? 'rgba(200,150,32,0.5)' : 'rgba(200,150,32,0.15)'}`,
-                borderRadius: 5, cursor: 'pointer', color: view === v ? '#E8D070' : '#5A6840',
+                borderRadius: 5, cursor: 'pointer', color: view === v ? '#f7e3a4' : '#9a9182',
                 fontSize: 9, fontWeight: view === v ? 'bold' : 'normal',
                 fontFamily: 'Verdana,sans-serif',
               }}>{l}</button>
             ))}
           </div>
           {view !== 'menu' && (
-            <button onClick={() => setView('menu')} style={{ padding: '4px 8px', background: 'none', border: 'none', cursor: 'pointer', color: '#5A6840', display: 'flex', alignItems: 'center', gap: 3, fontSize: 9, fontFamily: 'Verdana,sans-serif' }}>
+            <button onClick={() => setView('menu')} style={{ padding: '4px 8px', background: 'none', border: 'none', cursor: 'pointer', color: '#9a9182', display: 'flex', alignItems: 'center', gap: 3, fontSize: 9, fontFamily: 'Verdana,sans-serif' }}>
               <IconArrowLeft size={10} /> Wróć
             </button>
           )}
@@ -341,7 +341,7 @@ export default function NpcDialog({ npc, postac, onClose, onBought, onQuestRewar
               <span style={{ color: '#FCD34D', fontWeight: 'bold', fontSize: 11 }}>{fmtNum(gold)}g</span>
             </div>
           )}
-          <button onClick={onClose} style={{ background: 'none', border: 'none', color: '#5A6840', cursor: 'pointer', display: 'flex' }}>
+          <button onClick={onClose} style={{ background: 'none', border: 'none', color: '#9a9182', cursor: 'pointer', display: 'flex' }}>
             <IconX size={17} />
           </button>
         </div>
@@ -349,7 +349,7 @@ export default function NpcDialog({ npc, postac, onClose, onBought, onQuestRewar
         {/* ── MENU ── */}
         {view === 'menu' && (
           <div style={{ padding: '24px 20px', display: 'flex', flexDirection: 'column', gap: 12 }}>
-            <div style={{ color: '#CDD4AA', fontSize: 11, lineHeight: 1.65, padding: '10px 14px', background: 'rgba(8,13,5,0.5)', borderRadius: 8, borderLeft: '3px solid rgba(200,150,32,0.3)' }}>
+            <div style={{ color: '#e8e2d4', fontSize: 11, lineHeight: 1.65, padding: '10px 14px', background: 'rgba(20,16,12,0.5)', borderRadius: 8, borderLeft: '3px solid rgba(200,150,32,0.3)' }}>
               Witaj, podróżniku! Czym mogę Ci służyć?
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(160px,1fr))', gap: 8, marginTop: 4 }}>
@@ -359,18 +359,18 @@ export default function NpcDialog({ npc, postac, onClose, onBought, onQuestRewar
                 isTemple && { icon: '✦', label: 'Uzdrowienie', sub: templeData?.canHeal ? 'Darmowe leczenie dostępne!' : `Dostępne za ${templeData?.cooldownMins || '?'} min`, color: '#34D399', fn: () => setView('temple') },
                 isGuildBoard && { icon: '⚜', label: 'Tablica Gildii', sub: 'Rankingi i informacje', color: '#F59E0B', fn: () => setView('guild') },
                 { icon: '💬', label: 'Rozmowa', sub: 'Pogadaj z NPC', color: '#818CF8', fn: () => setView('talk') },
-                { icon: '👋', label: 'Do widzenia', sub: 'Zamknij dialog', color: '#5A6840', fn: onClose },
+                { icon: '👋', label: 'Do widzenia', sub: 'Zamknij dialog', color: '#9a9182', fn: onClose },
               ].filter(Boolean).map(({ icon, label, sub, color, fn }) => (
                 <button key={label} onClick={fn} style={{
                   display: 'flex', alignItems: 'center', gap: 10, padding: '12px 14px',
-                  background: 'rgba(8,13,5,0.55)', border: `1px solid ${color}28`,
+                  background: 'rgba(20,16,12,0.55)', border: `1px solid ${color}28`,
                   borderRadius: 9, cursor: 'pointer', textAlign: 'left',
                   transition: 'all 0.12s',
                 }}>
                   <span style={{ fontSize: 22, lineHeight: 1 }}>{icon}</span>
                   <div>
-                    <div style={{ color: '#CDD4AA', fontWeight: 'bold', fontSize: 11 }}>{label}</div>
-                    <div style={{ color: '#5A6840', fontSize: 8, marginTop: 1 }}>{sub}</div>
+                    <div style={{ color: '#e8e2d4', fontWeight: 'bold', fontSize: 11 }}>{label}</div>
+                    <div style={{ color: '#9a9182', fontSize: 8, marginTop: 1 }}>{sub}</div>
                   </div>
                 </button>
               ))}
@@ -388,7 +388,7 @@ export default function NpcDialog({ npc, postac, onClose, onBought, onQuestRewar
                 {npcQuests.turnin.map(q => (
                   <div key={q.id} style={{ padding: '10px 12px', background: 'rgba(6,40,20,0.4)', border: '1px solid rgba(34,197,94,0.28)', borderRadius: 8, marginBottom: 6, borderLeft: '3px solid #22C55E' }}>
                     <div style={{ color: '#4ADE80', fontWeight: 'bold', fontSize: 11, marginBottom: 3 }}>{q.nazwa}</div>
-                    <div style={{ color: '#7A8A5A', fontSize: 9, lineHeight: 1.4, marginBottom: 7 }}>{q.tekst_koniec || q.opis}</div>
+                    <div style={{ color: '#9a9182', fontSize: 9, lineHeight: 1.4, marginBottom: 7 }}>{q.tekst_koniec || q.opis}</div>
                     <div style={{ display: 'flex', gap: 8, fontSize: 9, marginBottom: 8 }}>
                       {q.nagroda_exp > 0  && <span style={{ color: '#06B6D4' }}>+{q.nagroda_exp} EXP</span>}
                       {q.nagroda_zloto > 0 && <span style={{ color: '#FCD34D' }}>+{q.nagroda_zloto}g</span>}
@@ -407,13 +407,13 @@ export default function NpcDialog({ npc, postac, onClose, onBought, onQuestRewar
                 {npcQuests.give.map(q => (
                   <div key={q.id} style={{ padding: '10px 12px', background: 'rgba(10,22,40,0.6)', border: '1px solid rgba(250,200,80,0.2)', borderRadius: 8, marginBottom: 6, borderLeft: '3px solid #FCD34D' }}>
                     <div style={{ color: '#FCD34D', fontWeight: 'bold', fontSize: 11, marginBottom: 3 }}>{q.nazwa}</div>
-                    <div style={{ color: '#CDD4AA', fontSize: 9, lineHeight: 1.5, marginBottom: 7 }}>{q.tekst_start || q.opis}</div>
+                    <div style={{ color: '#e8e2d4', fontSize: 9, lineHeight: 1.5, marginBottom: 7 }}>{q.tekst_start || q.opis}</div>
                     <div style={{ display: 'flex', gap: 8, fontSize: 9, marginBottom: 8 }}>
                       {q.nagroda_exp > 0  && <span style={{ color: '#06B6D4' }}>+{q.nagroda_exp} EXP</span>}
                       {q.nagroda_zloto > 0 && <span style={{ color: '#FCD34D' }}>+{q.nagroda_zloto}g</span>}
-                      <span style={{ color: '#5A6840' }}>Cel: {q.cel_ilosc}×</span>
+                      <span style={{ color: '#9a9182' }}>Cel: {q.cel_ilosc}×</span>
                     </div>
-                    <button onClick={() => acceptQuest(q)} style={{ padding: '6px 14px', background: 'rgba(74,122,42,0.3)', color: '#E8D070', border: '1px solid rgba(200,150,32,0.4)', borderRadius: 5, cursor: 'pointer', fontSize: 9, fontWeight: 'bold', fontFamily: 'Verdana,sans-serif' }}>
+                    <button onClick={() => acceptQuest(q)} style={{ padding: '6px 14px', background: 'rgba(231,193,88,0.3)', color: '#f7e3a4', border: '1px solid rgba(200,150,32,0.4)', borderRadius: 5, cursor: 'pointer', fontSize: 9, fontWeight: 'bold', fontFamily: 'Verdana,sans-serif' }}>
                       Przyjmij quest
                     </button>
                   </div>
@@ -423,20 +423,20 @@ export default function NpcDialog({ npc, postac, onClose, onBought, onQuestRewar
             {/* Active (info) */}
             {npcQuests.active.length > 0 && (
               <div>
-                <div style={{ color: '#C8940A', fontSize: 8, fontWeight: 'bold', letterSpacing: '1.5px', textTransform: 'uppercase', marginBottom: 6 }}>⋯ W trakcie</div>
+                <div style={{ color: '#e7c158', fontSize: 8, fontWeight: 'bold', letterSpacing: '1.5px', textTransform: 'uppercase', marginBottom: 6 }}>⋯ W trakcie</div>
                 {npcQuests.active.map(q => (
-                  <div key={q.id} style={{ padding: '8px 12px', background: 'rgba(8,13,5,0.5)', border: '1px solid rgba(200,150,32,0.1)', borderRadius: 7, marginBottom: 5 }}>
-                    <div style={{ color: '#CDD4AA', fontSize: 10, fontWeight: 'bold', marginBottom: 4 }}>{q.nazwa}</div>
+                  <div key={q.id} style={{ padding: '8px 12px', background: 'rgba(20,16,12,0.5)', border: '1px solid rgba(200,150,32,0.1)', borderRadius: 7, marginBottom: 5 }}>
+                    <div style={{ color: '#e8e2d4', fontSize: 10, fontWeight: 'bold', marginBottom: 4 }}>{q.nazwa}</div>
                     <div style={{ height: 5, background: 'rgba(0,0,0,0.4)', borderRadius: 3, overflow: 'hidden' }}>
-                      <div style={{ width: `${Math.min(100, (q.postep / q.cel_ilosc) * 100)}%`, height: '100%', background: '#6CB83A', borderRadius: 3 }} />
+                      <div style={{ width: `${Math.min(100, (q.postep / q.cel_ilosc) * 100)}%`, height: '100%', background: '#e7c158', borderRadius: 3 }} />
                     </div>
-                    <div style={{ color: '#5A6840', fontSize: 8, marginTop: 3 }}>{q.postep}/{q.cel_ilosc}</div>
+                    <div style={{ color: '#9a9182', fontSize: 8, marginTop: 3 }}>{q.postep}/{q.cel_ilosc}</div>
                   </div>
                 ))}
               </div>
             )}
             {npcQuests.give.length === 0 && npcQuests.turnin.length === 0 && npcQuests.active.length === 0 && (
-              <div style={{ color: '#2A3820', textAlign: 'center', paddingTop: 30, fontSize: 10 }}>Ten NPC nie ma dla ciebie questów</div>
+              <div style={{ color: '#5e584c', textAlign: 'center', paddingTop: 30, fontSize: 10 }}>Ten NPC nie ma dla ciebie questów</div>
             )}
           </div>
         )}
@@ -444,12 +444,12 @@ export default function NpcDialog({ npc, postac, onClose, onBought, onQuestRewar
         {/* ── TALK ── */}
         {view === 'talk' && (
           <div style={{ padding: '20px' }}>
-            <div style={{ color: '#CDD4AA', fontSize: 11, lineHeight: 1.75, padding: '14px 16px', background: 'rgba(8,13,5,0.5)', borderRadius: 8, borderLeft: '3px solid rgba(200,150,32,0.3)', marginBottom: 12 }}>
+            <div style={{ color: '#e8e2d4', fontSize: 11, lineHeight: 1.75, padding: '14px 16px', background: 'rgba(20,16,12,0.5)', borderRadius: 8, borderLeft: '3px solid rgba(200,150,32,0.3)', marginBottom: 12 }}>
               Jestem {npc.nazwa}. Strzegę tego miejsca i pomagam podróżnikom.<br />
               Świat Veldorii jest niebezpieczny, ale dla dzielnych — pełen skarbów!
             </div>
             {npc.shop > 0 && (
-              <button onClick={() => setView('shop')} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 16px', background: 'rgba(74,122,42,0.15)', border: '1px solid rgba(200,150,32,0.3)', borderRadius: 6, cursor: 'pointer', color: '#C8940A', fontSize: 10, fontFamily: 'Verdana,sans-serif' }}>
+              <button onClick={() => setView('shop')} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 16px', background: 'rgba(231,193,88,0.15)', border: '1px solid rgba(200,150,32,0.3)', borderRadius: 6, cursor: 'pointer', color: '#e7c158', fontSize: 10, fontFamily: 'Verdana,sans-serif' }}>
                 <IconCart size={12} /> Przejdź do sklepu
               </button>
             )}
@@ -460,7 +460,7 @@ export default function NpcDialog({ npc, postac, onClose, onBought, onQuestRewar
         {view === 'temple' && (
           <div style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 14, alignItems: 'center' }}>
             <div style={{ fontSize: 40 }}>✦</div>
-            <div style={{ color: '#CDD4AA', fontSize: 11, textAlign: 'center', lineHeight: 1.7, padding: '12px 16px', background: 'rgba(8,13,5,0.5)', borderRadius: 8, borderLeft: '3px solid rgba(52,211,153,0.4)' }}>
+            <div style={{ color: '#e8e2d4', fontSize: 11, textAlign: 'center', lineHeight: 1.7, padding: '12px 16px', background: 'rgba(20,16,12,0.5)', borderRadius: 8, borderLeft: '3px solid rgba(52,211,153,0.4)' }}>
               Niech Światło Świątyni oczyści twoje rany.<br />
               Kapłanka Elara jest gotowa, by cię uleczyć.
             </div>
@@ -469,7 +469,7 @@ export default function NpcDialog({ npc, postac, onClose, onBought, onQuestRewar
               ? <button onClick={templeHeal} style={{ padding: '10px 32px', background: 'rgba(6,50,30,0.6)', color: '#34D399', border: '1px solid rgba(52,211,153,0.4)', borderRadius: 7, cursor: 'pointer', fontSize: 11, fontWeight: 'bold', fontFamily: 'Verdana,sans-serif' }}>
                   ✦ Ulecz mnie (bezpłatnie)
                 </button>
-              : <div style={{ color: '#5A6840', fontSize: 10, textAlign: 'center' }}>
+              : <div style={{ color: '#9a9182', fontSize: 10, textAlign: 'center' }}>
                   Możesz skorzystać z uzdrowienia za <b style={{ color: '#FCD34D' }}>{templeData?.cooldownMins || '?'} min</b>.
                 </div>
             }
@@ -481,14 +481,14 @@ export default function NpcDialog({ npc, postac, onClose, onBought, onQuestRewar
         {view === 'guild' && (
           <div style={{ flex: 1, overflowY: 'auto', padding: '14px 16px' }}>
             <div style={{ color: '#F59E0B', fontSize: 9, fontWeight: 'bold', letterSpacing: '1.5px', textTransform: 'uppercase', marginBottom: 10 }}>⚜ Ranking Gildii</div>
-            {!guildData && <div style={{ color: '#2A3820', fontSize: 10, textAlign: 'center', padding: 20 }}>Ładowanie...</div>}
-            {guildData?.topGuilds?.length === 0 && <div style={{ color: '#2A3820', fontSize: 10, textAlign: 'center', padding: 20 }}>Brak gildii w świecie Veldorii.</div>}
+            {!guildData && <div style={{ color: '#5e584c', fontSize: 10, textAlign: 'center', padding: 20 }}>Ładowanie...</div>}
+            {guildData?.topGuilds?.length === 0 && <div style={{ color: '#5e584c', fontSize: 10, textAlign: 'center', padding: 20 }}>Brak gildii w świecie Veldorii.</div>}
             {(guildData?.topGuilds || []).map((g, i) => (
-              <div key={g.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 12px', background: 'rgba(8,13,5,0.5)', border: '1px solid rgba(245,158,11,0.12)', borderRadius: 7, marginBottom: 6 }}>
-                <span style={{ color: i < 3 ? '#F59E0B' : '#5A6840', fontSize: 13, fontWeight: 'bold', minWidth: 22 }}>{i+1}.</span>
+              <div key={g.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 12px', background: 'rgba(20,16,12,0.5)', border: '1px solid rgba(245,158,11,0.12)', borderRadius: 7, marginBottom: 6 }}>
+                <span style={{ color: i < 3 ? '#F59E0B' : '#9a9182', fontSize: 13, fontWeight: 'bold', minWidth: 22 }}>{i+1}.</span>
                 <div style={{ flex: 1 }}>
-                  <div style={{ color: '#E8D070', fontSize: 10, fontWeight: 'bold' }}>{g.nazwa}</div>
-                  <div style={{ color: '#5A6840', fontSize: 8 }}>Poz. {g.poziom} · {g.czlonkowie} członków</div>
+                  <div style={{ color: '#f7e3a4', fontSize: 10, fontWeight: 'bold' }}>{g.nazwa}</div>
+                  <div style={{ color: '#9a9182', fontSize: 8 }}>Poz. {g.poziom} · {g.czlonkowie} członków</div>
                 </div>
                 <div style={{ color: '#06B6D4', fontSize: 9 }}>{g.laczne_kille || 0} kill</div>
               </div>
@@ -497,7 +497,7 @@ export default function NpcDialog({ npc, postac, onClose, onBought, onQuestRewar
               <>
                 <div style={{ color: '#F87171', fontSize: 9, fontWeight: 'bold', letterSpacing: '1.5px', textTransform: 'uppercase', margin: '14px 0 8px' }}>⚔ Trwające Wojny</div>
                 {guildData.recentWars.map((w, i) => (
-                  <div key={i} style={{ padding: '7px 12px', background: 'rgba(30,5,5,0.5)', border: '1px solid rgba(248,113,113,0.15)', borderRadius: 6, marginBottom: 5, fontSize: 9, color: '#CDD4AA' }}>
+                  <div key={i} style={{ padding: '7px 12px', background: 'rgba(30,5,5,0.5)', border: '1px solid rgba(248,113,113,0.15)', borderRadius: 6, marginBottom: 5, fontSize: 9, color: '#e8e2d4' }}>
                     <b style={{ color: '#F87171' }}>{w.atakujacy_nazwa}</b> vs <b style={{ color: '#60A5FA' }}>{w.bronicy_nazwa}</b>
                   </div>
                 ))}
@@ -515,7 +515,7 @@ export default function NpcDialog({ npc, postac, onClose, onBought, onQuestRewar
               <div style={{ padding: '7px 10px', borderBottom: '1px solid rgba(200,150,32,0.08)', flexShrink: 0 }}>
                 <input value={filter} onChange={e => setFilter(e.target.value)}
                   placeholder="🔍 Szukaj…"
-                  style={{ width: '100%', padding: '5px 9px', background: 'rgba(8,13,5,0.7)', color: '#CDD4AA', border: '1px solid rgba(200,150,32,0.2)', borderRadius: 5, fontSize: 9, outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box' }}
+                  style={{ width: '100%', padding: '5px 9px', background: 'rgba(20,16,12,0.7)', color: '#e8e2d4', border: '1px solid rgba(200,150,32,0.2)', borderRadius: 5, fontSize: 9, outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box' }}
                 />
               </div>
               {/* Categories */}
@@ -524,8 +524,8 @@ export default function NpcDialog({ npc, postac, onClose, onBought, onQuestRewar
                   {[['all', `Wszystko (${shopItems?.length || 0})`], ...allCats.map(c => [c, `${c} (${shopItems?.filter(i => i.typ === c).length || 0})`])].map(([k, l]) => (
                     <button key={k} onClick={() => { setCatFilter(k); setSelItem(null); }} style={{
                       padding: '3px 9px', background: 'none', border: 'none', cursor: 'pointer', fontSize: 8, whiteSpace: 'nowrap',
-                      color: catFilter === k ? '#E8D070' : '#5A6840',
-                      borderBottom: catFilter === k ? '2px solid #C8940A' : '2px solid transparent',
+                      color: catFilter === k ? '#f7e3a4' : '#9a9182',
+                      borderBottom: catFilter === k ? '2px solid #e7c158' : '2px solid transparent',
                       fontWeight: catFilter === k ? 'bold' : 'normal', fontFamily: 'inherit',
                     }}>{l}</button>
                   ))}
@@ -533,9 +533,9 @@ export default function NpcDialog({ npc, postac, onClose, onBought, onQuestRewar
               )}
               {/* Items grid */}
               <div style={{ flex: 1, overflowY: 'auto', padding: 8 }}>
-                {shopItems === null && <div style={{ color: '#2A3820', textAlign: 'center', paddingTop: 24, fontSize: 10 }}>Ładowanie sklepu…</div>}
-                {shopItems?.length === 0 && <div style={{ color: '#2A3820', textAlign: 'center', paddingTop: 24, fontSize: 10 }}>Sklep jest pusty</div>}
-                {filtered.length === 0 && shopItems?.length > 0 && <div style={{ color: '#2A3820', textAlign: 'center', paddingTop: 24, fontSize: 10 }}>Brak wyników</div>}
+                {shopItems === null && <div style={{ color: '#5e584c', textAlign: 'center', paddingTop: 24, fontSize: 10 }}>Ładowanie sklepu…</div>}
+                {shopItems?.length === 0 && <div style={{ color: '#5e584c', textAlign: 'center', paddingTop: 24, fontSize: 10 }}>Sklep jest pusty</div>}
+                {filtered.length === 0 && shopItems?.length > 0 && <div style={{ color: '#5e584c', textAlign: 'center', paddingTop: 24, fontSize: 10 }}>Brak wyników</div>}
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(80px,1fr))', gap: 5 }}>
                   {filtered.map(item => (
                     <ShopCard

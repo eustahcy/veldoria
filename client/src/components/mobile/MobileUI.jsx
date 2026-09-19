@@ -321,7 +321,7 @@ function BottomSlot({ children, label, onClick, active, count, disabled }) {
 }
 
 export function MobileHud({
-  state, potions = [], unread = 0, pillTxt, autoHunt, chatOpen,
+  landscape, state, potions = [], unread = 0, pillTxt, autoHunt, chatOpen,
   onMove, onScreen, onChat, onAttack, onTalk, onPotion, onAuto,
 }) {
   const p = state.postac;
@@ -331,6 +331,8 @@ export function MobileHud({
   const potion = potions[0];
   const potionCount = potions.reduce((n, x) => n + (x.ilosc || 1), 0);
   const low = hpPct < 30;
+  // Poziomo: joystick i przyciski schodzą na dół po bokach, pasek akcji jest węższy i wyśrodkowany
+  const SAFE_L = 'env(safe-area-inset-left, 0px)', SAFE_R = 'env(safe-area-inset-right, 0px)';
 
   return (
     <>
@@ -349,7 +351,7 @@ export function MobileHud({
 
       {/* Karta bohatera */}
       <div style={{
-        position: 'fixed', top: `calc(${SAFE_T} + 54px)`, left: 8, zIndex: 480, width: 'min(58vw, 230px)',
+        position: 'fixed', top: `calc(${SAFE_T} + 54px)`, left: `calc(${SAFE_L} + 8px)`, zIndex: 480, width: 'min(58vw, 230px)',
         display: 'flex', gap: 7, padding: 6, borderRadius: 4,
         background: 'linear-gradient(180deg,rgba(26,21,15,0.88),rgba(10,8,6,0.88))', border: `1px solid ${G.bronze}`,
         boxShadow: '0 6px 16px rgba(0,0,0,0.6)',
@@ -374,8 +376,8 @@ export function MobileHud({
       </div>
 
       {/* Minimapa + położenie */}
-      <div style={{ position: 'fixed', top: `calc(${SAFE_T} + 54px)`, right: 8, zIndex: 480, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
-        <RoundMinimap state={state} size={96} onClick={() => onScreen('mapa')} />
+      <div style={{ position: 'fixed', top: `calc(${SAFE_T} + 54px)`, right: `calc(${SAFE_R} + 8px)`, zIndex: 480, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+        <RoundMinimap state={state} size={landscape ? 78 : 96} onClick={() => onScreen('mapa')} />
         <div style={{
           padding: '3px 8px', borderRadius: 3, textAlign: 'center', maxWidth: 120,
           background: 'rgba(10,8,6,0.82)', border: `1px solid ${G.bronze}99`,
@@ -389,23 +391,25 @@ export function MobileHud({
       </div>
 
       {/* Szybkie przyciski po prawej */}
-      <div style={{ position: 'fixed', right: 10, bottom: `calc(${SAFE_B} + 150px)`, zIndex: 480, display: 'flex', flexDirection: 'column', gap: 10 }}>
+      <div style={{ position: 'fixed', right: `calc(${SAFE_R} + 10px)`, bottom: landscape ? `calc(${SAFE_B} + 10px)` : `calc(${SAFE_B} + 150px)`, zIndex: 480, display: 'flex', flexDirection: 'column', gap: landscape ? 8 : 10 }}>
         <RoundBtn icon="🎒" label="Ekwipunek" onClick={() => onScreen('ekwipunek')} />
         <RoundBtn icon="⭐" label="Umiejętności" onClick={() => onScreen('umiejetnosci')} badge={p.punkty_talentow > 0 ? p.punkty_talentow : null} />
         <RoundBtn icon="🗺" label="Mapa" onClick={() => onScreen('mapa')} />
       </div>
 
       {/* Joystick */}
-      <div style={{ position: 'fixed', left: 16, bottom: `calc(${SAFE_B} + 84px)`, zIndex: 480 }}>
+      <div style={{ position: 'fixed', left: `calc(${SAFE_L} + 16px)`, bottom: landscape ? `calc(${SAFE_B} + 10px)` : `calc(${SAFE_B} + 84px)`, zIndex: 480 }}>
         <Joystick onMove={onMove} />
       </div>
 
       {/* Dolny pasek akcji */}
       <div style={{
-        position: 'fixed', left: 0, right: 0, bottom: 0, zIndex: 490, paddingBottom: `calc(${SAFE_B} + 6px)`,
-        background: 'linear-gradient(180deg,rgba(18,14,10,0.0),rgba(10,8,6,0.92) 30%)',
+        position: 'fixed', left: landscape ? '50%' : 0, right: landscape ? 'auto' : 0, bottom: 0, zIndex: 490,
+        width: landscape ? 'min(460px, calc(100vw - 320px))' : undefined, transform: landscape ? 'translateX(-50%)' : undefined,
+        paddingBottom: `calc(${SAFE_B} + 6px)`,
+        background: landscape ? 'none' : 'linear-gradient(180deg,rgba(18,14,10,0.0),rgba(10,8,6,0.92) 30%)',
       }}>
-        <div style={{ display: 'flex', gap: 6, padding: '10px 8px 0' }}>
+        <div style={{ display: 'flex', gap: 6, padding: landscape ? '0' : '10px 8px 0' }}>
           <BottomSlot label="Czat" onClick={onChat} active={chatOpen} count={unread > 0 && !chatOpen ? unread : null}>💬</BottomSlot>
           <BottomSlot label="Atak" onClick={onAttack}>⚔️</BottomSlot>
           <BottomSlot label="Rozmowa" onClick={onTalk}>🗨️</BottomSlot>
