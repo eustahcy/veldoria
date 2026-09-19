@@ -181,11 +181,7 @@ export function TopBar({ postac, mapa, worldState, tokens, onAuction, onRanking,
           {worldState?.pora === 'noc' ? '🌙' : worldState?.pora === 'swit' ? '🌅' : worldState?.pora === 'zmierzch' ? '🌇' : '☀'}{' '}
           {zegar.toLocaleTimeString('pl-PL', { hour: '2-digit', minute: '2-digit' })}
         </span>
-        <span style={{
-          marginLeft: 6, padding: '4px 11px', borderRadius: 4, fontSize: 11, whiteSpace: 'nowrap',
-          border: `1px solid ${G.bronze}`, color: G.gold, background: 'linear-gradient(180deg,#191510,#0d0b08)',
-          fontFamily: G.serif, letterSpacing: 1,
-        }}>{mapa?.nazwa || 'Veldoria'}</span>
+
       </div>
     </header>
   );
@@ -207,17 +203,17 @@ export function HeroPanel({ postac, actions }) {
 
   return (
     <aside style={{
-      width: 244, flexShrink: 0, display: 'flex', flexDirection: 'column', gap: 12,
-      padding: 12, overflowY: 'auto',
+      width: 238, flexShrink: 0, display: 'flex', flexDirection: 'column', gap: 9,
+      padding: '10px 10px 14px', overflowY: 'auto',
       background: 'linear-gradient(180deg,#171309 0%,#0f0c08 55%,#080706 100%)',
       borderRight: `2px solid ${G.bronze}`,
       boxShadow: 'inset -10px 0 24px rgba(0,0,0,0.55)',
       fontFamily: C.font,
     }}>
       {/* Portret */}
-      <Ornate pad={14} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 7 }}>
+      <Ornate pad={11} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
         <div style={{
-          position: 'relative', width: 96, height: 106, display: 'grid', placeItems: 'center',
+          position: 'relative', width: 84, height: 94, display: 'grid', placeItems: 'center',
           background: 'radial-gradient(ellipse at 50% 88%, rgba(231,193,88,0.22), rgba(6,5,4,0.95) 68%)',
           border: `1px solid ${G.goldDim}`, borderRadius: 3,
           boxShadow: `inset 0 0 22px rgba(0,0,0,0.9), 0 0 16px rgba(231,193,88,0.12)`,
@@ -278,7 +274,7 @@ export function HeroPanel({ postac, actions }) {
             onMouseEnter={() => setHov(a.label)} onMouseLeave={() => setHov(null)}
             title={a.skrot ? `${a.label} (${a.skrot})` : a.label}
             style={{
-              position: 'relative', padding: '11px 4px', cursor: 'pointer', borderRadius: 4,
+              position: 'relative', padding: '9px 4px', cursor: 'pointer', borderRadius: 4,
               display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5,
               background: hov === a.label ? 'linear-gradient(180deg,#2c2418,#171208)' : G.stone,
               border: `1px solid ${hov === a.label ? G.gold : G.bronze}`,
@@ -289,7 +285,7 @@ export function HeroPanel({ postac, actions }) {
               fontSize: 11, fontFamily: G.serif, letterSpacing: 0.3,
               transition: 'all .12s',
             }}>
-            <span style={{ fontSize: 18, filter: 'drop-shadow(0 2px 3px rgba(0,0,0,0.7))' }}>{a.icon}</span>
+            <span style={{ fontSize: 17, filter: 'drop-shadow(0 2px 3px rgba(0,0,0,0.7))' }}>{a.icon}</span>
             {a.label}
             {a.skrot && (
               <span style={{ position: 'absolute', top: 3, right: 5, fontSize: 8, color: G.dim }}>{a.skrot}</span>
@@ -391,8 +387,8 @@ function Orb({ value, max, from, to, label, size = 84 }) {
     }}>
       <div style={{
         position: 'absolute', left: 0, right: 0, bottom: 0, height: `${pct * 100}%`,
-        background: `linear-gradient(180deg, ${to}, ${from} 75%, #000 160%)`,
-        boxShadow: `0 0 26px ${to}99`, transition: 'height .35s',
+        background: `linear-gradient(180deg, ${to} 0%, ${to} 35%, ${from} 100%)`,
+        boxShadow: `0 0 30px ${to}, inset 0 0 18px rgba(255,255,255,0.18)`, transition: 'height .35s',
       }} />
       {/* połysk szkła */}
       <span style={{
