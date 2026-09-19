@@ -4,6 +4,9 @@ WORKDIR /app/client
 COPY client/package.json ./
 RUN npm install --no-audit --no-fund
 COPY client/ ./
+# Pusty VITE_API_URL = klient pyta ten sam serwer, z którego się załadował.
+# (client/.env.production trzyma adres dla aplikacji Capacitor i nadpisałby to w buildzie web.)
+ENV VITE_API_URL=
 RUN npm run build
 
 # ── Serwer gry ───────────────────────────────────────────────────────────────

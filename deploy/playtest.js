@@ -70,8 +70,22 @@ async function walk(path) {
   return true;
 }
 
+// Zbudowany klient musi pytać ten sam serwer — inaczej przeglądarka wisi na "Łączenie z serwerem..."
+async function checkClientBundle() {
+  const origin = BASE.replace(/\/api$/, '');
+  const html = await (await fetch(origin + '/')).text();
+  const js = html.match(/\/assets\/index-[^"]+\.js/)?.[0];
+  if (!js) { fails.push('klient: brak bundla w index.html'); return; }
+  const code = await (await fetch(origin + js)).text();
+  const foreign = [...new Set(code.match(/https?:\/\/\d+\.\d+\.\d+\.\d+(:\d+)?/g) || [])];
+  console.log(`  klient ${js}: ${foreign.length ? 'adresy w kodzie: ' + foreign.join(', ') : 'API na tym samym serwerze'}`);
+  if (foreign.length) fails.push(`klient: bundle celuje w ${foreign.join(', ')}`);
+}
+
 async function main() {
   const login = 'bot_' + Math.random().toString(36).slice(2, 8);
+  console.log('\n=== Klient');
+  await checkClientBundle();
   console.log(`\n=== Konto ${login}`);
   await call('GET', '/auth/stats');
   await call('GET', '/auth/classes');

@@ -5,9 +5,9 @@ const config: CapacitorConfig = {
   appName: 'Margo',
   webDir: 'dist',
   server: {
-    url: 'http://145.239.89.133:3002',
+    url: 'http://148.113.237.210:3002',
     cleartext: true,
-    allowNavigation: ['145.239.89.133'],
+    allowNavigation: ['148.113.237.210'],
   },
   android: {
     allowMixedContent: true,
