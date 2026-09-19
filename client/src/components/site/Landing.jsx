@@ -2,11 +2,16 @@
 import { useEffect, useState } from 'react';
 import { S, pageBg, vignette, goldBtn, ghostBtn, Diamond, Ornament, Logo, OnlineBadge } from './siteStyle';
 
+// Tylko pozycje, które naprawdę gdzieś prowadzą
 const NAV = [
-  { id: 'swiat',   label: 'Świat' },
-  { id: 'klasy',   label: 'Klasy' },
-  { id: 'ranking', label: 'Ranking' },
+  { id: 'klasy', label: 'Klasy' },
+  { id: 'swiat', label: 'Świat' },
 ];
+
+const CLASS_ICON = {
+  Wojownik: '⚔', Paladyn: '🛡', 'Tancerz Ostrzy': '🗡',
+  Lowca: '🏹', Tropiciel: '🧭', Mag: '🔮',
+};
 
 const PILLS = [
   { icon: '⚔', label: 'Walka',       color: '#e5624c' },
@@ -60,7 +65,7 @@ export default function Landing({ stats, classes = [], onPlay, onLogin, onSectio
         {!narrow && (
           <nav style={{ display: 'flex', gap: 26, marginLeft: 30 }}>
             {NAV.map(n => (
-              <button key={n.id} onClick={() => onSection?.(n.id)} style={{
+              <button key={n.id} onClick={() => document.getElementById(n.id)?.scrollIntoView({ behavior: 'smooth' })} style={{
                 background: 'none', border: 'none', cursor: 'pointer', padding: 0,
                 fontFamily: S.serif, fontSize: 14, color: S.muted, letterSpacing: 0.5,
               }}>{n.label}</button>
@@ -122,7 +127,7 @@ export default function Landing({ stats, classes = [], onPlay, onLogin, onSectio
         </div>
 
         {/* Pasek statystyk */}
-        <div style={{
+        <div id="swiat" style={{
           marginTop: narrow ? 30 : 56, alignSelf: 'center',
           display: 'flex', flexWrap: 'wrap', justifyContent: 'center',
           padding: '16px 10px', borderRadius: 14,
@@ -138,6 +143,46 @@ export default function Landing({ stats, classes = [], onPlay, onLogin, onSectio
           <Stat icon="⚔" value={stats?.total ?? 0} label="Założonych kont" />
         </div>
       </main>
+
+      {/* Klasy */}
+      {classes.length > 0 && (
+        <section id="klasy" style={{
+          position: 'relative', zIndex: 2, padding: narrow ? '36px 14px' : '56px 28px',
+          background: 'linear-gradient(180deg, rgba(4,7,14,0.6), rgba(4,7,14,0.92))',
+        }}>
+          <div style={{ textAlign: 'center', marginBottom: 10 }}><Ornament>Wybierz swoją drogę</Ornament></div>
+          <h2 style={{
+            textAlign: 'center', margin: '12px 0 26px', fontFamily: S.serif, fontWeight: 700,
+            fontSize: narrow ? 26 : 36, letterSpacing: 4, color: S.gold,
+          }}>KLASY POSTACI</h2>
+          <div style={{
+            display: 'grid', gap: 14, maxWidth: 1100, margin: '0 auto',
+            gridTemplateColumns: `repeat(auto-fit, minmax(${narrow ? 240 : 320}px, 1fr))`,
+          }}>
+            {classes.map(c => (
+              <div key={c.name} style={{
+                display: 'flex', gap: 14, alignItems: 'flex-start', padding: 16,
+                background: 'rgba(8,12,22,0.8)', border: `1px solid ${S.lineSoft}`, borderRadius: 12,
+              }}>
+                <div style={{
+                  width: 52, height: 52, flexShrink: 0, display: 'grid', placeItems: 'center',
+                  borderRadius: 10, border: `1px solid ${S.line}`, background: 'rgba(4,7,14,0.7)', fontSize: 22,
+                }}>{CLASS_ICON[c.name] || '✦'}</div>
+                <div>
+                  <div style={{ fontFamily: S.serif, fontSize: 18, color: S.gold }}>{c.name}</div>
+                  <div style={{ color: S.muted, fontSize: 12.5, margin: '3px 0 8px' }}>{c.opis}</div>
+                  <div style={{ display: 'flex', gap: 10, fontSize: 11, color: S.dim }}>
+                    <span>💪 siła {c.sila}</span><span>🏹 zręczność {c.zrecznosc}</span><span>🧠 intelekt {c.intelekt}</span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'center', marginTop: 26 }}>
+            <button onClick={onPlay} style={goldBtn(true)}>⚔ Rozpocznij przygodę →</button>
+          </div>
+        </section>
+      )}
 
       {/* Stopka */}
       <footer style={{
