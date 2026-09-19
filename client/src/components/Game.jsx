@@ -378,6 +378,19 @@ export default function Game({ onLogout, onDisconnect }) {
 
   const socket = useSocket(state?.mapa?.id);
 
+  // Przejście z paska zakładek ekwipunku do innych okien
+  const openPanel = useCallback((id) => {
+    setShowInv(false);
+    const open = {
+      postac:  () => setShowOutfit(true),
+      talenty: () => setShowTalents(true),
+      zadania: () => setShowQuests(true),
+      gildia:  () => setShowGuild(true),
+      aukcja:  () => setShowAuction(true),
+    }[id];
+    open?.();
+  }, []);
+
   // ── Mikstury na pasek + licznik poczty ────────────────────────────────────
   const loadPotions = useCallback(async () => {
     try {
@@ -675,7 +688,7 @@ export default function Game({ onLogout, onDisconnect }) {
     if (isLandscape) {
       const modals = (
         <>
-          {showInv    && <Inventory onClose={()=>setShowInv(false)} onRefresh={loadState} postac={state.postac} />}
+          {showInv    && <Inventory onClose={()=>setShowInv(false)} onRefresh={()=>{ loadState(); loadPotions(); }} postac={state.postac} onNavigate={openPanel} />}
           {npcDialog  && <NpcDialog npc={npcDialog} postac={state.postac} onClose={()=>setNpcDialog(null)} onBought={loadState} onQuestReward={msg=>{ addToast(msg,'info'); loadState(); }} />}
           {showQuests && <QuestPanel onClose={()=>setShowQuests(false)} onReward={msg=>{ addToast(msg,'info'); loadState(); setShowQuests(false); }} />}
           {showSocial && <SocialPanel onClose={()=>setShowSocial(false)} onViewProfile={id=>{ setViewProfile(id); setShowSocial(false); }} />}
@@ -863,7 +876,7 @@ export default function Game({ onLogout, onDisconnect }) {
           onHeal={()=>api.character.heal().then(loadState)}
         />
 
-        {showInv   && <Inventory onClose={()=>setShowInv(false)} onRefresh={loadState} postac={state.postac} />}
+        {showInv   && <Inventory onClose={()=>setShowInv(false)} onRefresh={()=>{ loadState(); loadPotions(); }} postac={state.postac} onNavigate={openPanel} />}
         {npcDialog && <NpcDialog npc={npcDialog} postac={state.postac} onClose={()=>setNpcDialog(null)} onBought={loadState} onQuestReward={msg=>{ addToast(msg,'info'); loadState(); }} />}
         {showQuests && <QuestPanel onClose={()=>setShowQuests(false)} onReward={msg=>{ addToast(msg,'info'); loadState(); setShowQuests(false); }} />}
         {showAdmin && <AdminPanel postac={state.postac} onClose={()=>setShowAdmin(false)} />}
@@ -1111,7 +1124,7 @@ export default function Game({ onLogout, onDisconnect }) {
     </div>{/* end scaled layout */}
 
       {/* Modals — poza skalowanym kontenerem, zawsze pełny viewport */}
-      {showInv    && <Inventory onClose={()=>setShowInv(false)} onRefresh={loadState} postac={state.postac} />}
+      {showInv    && <Inventory onClose={()=>setShowInv(false)} onRefresh={()=>{ loadState(); loadPotions(); }} postac={state.postac} onNavigate={openPanel} />}
       {npcDialog  && <NpcDialog npc={npcDialog} postac={state.postac} onClose={()=>setNpcDialog(null)} onBought={loadState} />}
       {showAdmin  && <AdminPanel postac={state.postac} onClose={()=>setShowAdmin(false)} />}
       {battle     && (

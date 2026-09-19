@@ -128,6 +128,7 @@ export const api = {
     equip:          (itemId,action) => req('POST', '/items/equip', { itemId, action }),
     sell:           (itemId)        => req('POST', '/items/sell', { itemId }),
     use:            (itemId)        => req('POST', '/items/use', { itemId }),
+    drop:           (itemId)        => req('POST', '/items/drop', { itemId }),
     shop:           (shopId)        => req('GET',  `/items/shop/${shopId}`),
     buy:            (itemId,shopId) => req('POST', '/items/buy', { itemId, shopId }),
     templeHeal:     ()              => req('POST', '/items/temple-heal'),

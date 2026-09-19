@@ -81,6 +81,18 @@ router.post('/sell', requireSession, async (req, res, next) => {
   } catch (e) { next(e); }
 });
 
+// POST /api/items/drop — wyrzuć (zniszcz) przedmiot z plecaka
+router.post('/drop', requireSession, async (req, res, next) => {
+  try {
+    const [del] = await db.query(
+      'DELETE FROM przedmiot_postac WHERE id=? AND postac=? AND zalozony=0',
+      [req.body.itemId, req.session.postacId]
+    );
+    if (del.affectedRows !== 1) return res.json({ ok: false, error: 'Nie można wyrzucić tego przedmiotu' });
+    res.json({ ok: true });
+  } catch (e) { next(e); }
+});
+
 // POST /api/items/use — wypij miksturę poza walką
 router.post('/use', requireSession, async (req, res, next) => {
   try {
