@@ -1,7 +1,9 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { lazy, Suspense } from 'react';
 import Landing from './site/Landing';
 import AuthScreen from './site/AuthScreen';
 import CharacterSelect from './site/CharacterSelect';
+const AdminDashboard = lazy(() => import('./AdminDashboard'));
 
 // ── API helper ────────────────────────────────────────────────────────────────
 async function apiFetch(method, path, body) {
@@ -363,6 +365,18 @@ export default function Login({ onLogin }) {
     />
   );
 
+  if (screen === 'admin') return (
+    <Suspense fallback={<div style={{ padding: 30, color: '#e7c158', fontFamily: 'serif' }}>Wczytywanie panelu…</div>}>
+      <AdminDashboard
+        onEnterGame={() => setScreen('charselect')}
+        onLogout={async () => {
+          await apiFetch('POST', '/auth/logout');
+          setChars([]); setMe(null); setScreen('landing');
+        }}
+      />
+    </Suspense>
+  );
+
   if (screen === 'charselect') return (
     <CharacterSelect
       chars={chars} me={me} stats={stats} mapNames={mapNames}
@@ -370,6 +384,7 @@ export default function Login({ onLogin }) {
       onCreate={() => setScreen('create')}
       onDelete={deleteChar}
       onHome={() => setScreen('landing')}
+      onAdmin={() => setScreen('admin')}
       onLogout={async () => {
         await apiFetch('POST', '/auth/logout');
         setChars([]); setMe(null); setScreen('landing');

@@ -73,10 +73,14 @@ export default function Landing({ stats, classes = [], onPlay, onLogin, onSectio
           </nav>
         )}
 
-        <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: narrow ? 10 : 16 }}>
+        <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: narrow ? 8 : 16 }}>
           {!narrow && <OnlineBadge online={stats?.online} />}
-          <button onClick={onLogin} style={ghostBtn()}>Zaloguj się</button>
-          <button onClick={onPlay} style={goldBtn()}>⚔ Graj teraz</button>
+          <button onClick={onLogin} style={{ ...ghostBtn(), whiteSpace: 'nowrap', padding: narrow ? '9px 12px' : undefined }}>
+            Zaloguj się
+          </button>
+          <button onClick={onPlay} style={{ ...goldBtn(), whiteSpace: 'nowrap', padding: narrow ? '9px 14px' : undefined }}>
+            ⚔ {narrow ? 'Graj' : 'Graj teraz'}
+          </button>
         </div>
       </header>
 

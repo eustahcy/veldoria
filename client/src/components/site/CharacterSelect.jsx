@@ -163,7 +163,7 @@ function EmptySlot({ onCreate }) {
 }
 
 export default function CharacterSelect({
-  chars = [], me, stats, mapNames = {}, onEnterGame, onCreate, onDelete, onLogout, onHome, loading, error,
+  chars = [], me, stats, mapNames = {}, onEnterGame, onCreate, onDelete, onLogout, onHome, onAdmin, loading, error,
 }) {
   const narrow = useNarrow();
   const slots = Math.max(MAX_SLOTS, chars.length);
@@ -182,6 +182,12 @@ export default function CharacterSelect({
         </div>
       </div>
       <div style={{ height: 1, background: S.lineSoft, margin: '4px 0 12px' }} />
+      {me?.isAdmin && (
+        <button onClick={onAdmin} style={{
+          ...ghostBtn(), width: '100%', marginBottom: 8,
+          color: '#ff8b78', borderColor: 'rgba(229,98,76,0.45)',
+        }}>★ Panel administratora</button>
+      )}
       <button onClick={onHome} style={{ ...ghostBtn(), width: '100%', marginBottom: 8 }}>← Strona główna</button>
       <button onClick={onLogout} style={{ ...ghostBtn(), width: '100%', color: '#ff8b78', borderColor: 'rgba(229,98,76,0.4)' }}>
         ⎋ Wyloguj się

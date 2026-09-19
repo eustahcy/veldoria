@@ -94,6 +94,15 @@ export default function AuthScreen({ mode = 'login', stats, onBack, onDone, apiF
 
   return (
     <div style={{ position: 'relative', minHeight: '100vh', color: S.text, fontFamily: S.sans }}>
+      {/* Autouzupełnianie przeglądarki potrafi wstawić białe tło — wymuszamy ciemne */}
+      <style>{`
+        input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:focus {
+          -webkit-box-shadow: 0 0 0 1000px #070a12 inset !important;
+          -webkit-text-fill-color: ${S.text} !important;
+          caret-color: ${S.text};
+          transition: background-color 9999s ease-out 0s;
+        }
+      `}</style>
       <div style={pageBg} />
       <div style={vignette} />
 

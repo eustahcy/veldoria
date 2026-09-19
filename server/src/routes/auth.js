@@ -3,6 +3,7 @@ const { logError } = require('../game/log');
 const router  = express.Router();
 const db      = require('../db');
 const { createLimiter } = require('../middleware/rateLimiter');
+const { computeStats } = require('../game/stats');
 
 // Ochrona przed zgadywaniem haseł / masową rejestracją — liczone po IP
 const loginLimit    = createLimiter(10, 15 * 60 * 1000, { byIp: true }); // 10 prób / 15 min
@@ -84,10 +85,18 @@ router.get('/my-characters', async (req, res, next) => {
     if (!req.session.accountId) return res.status(401).json({ error: 'Nie zalogowany' });
     const [chars] = await db.query(
       // Limit 3 dotyczy tworzenia nowych postaci; wyświetlamy wszystkie przypisane do konta
-      'SELECT id,nazwa,poziom,profesja,obrazek,ranga,zycie,zycie_max,exp,prestige,zloto,sila,zrecznosc,intelekt,mapa,zalogowany FROM postac WHERE account_id=? ORDER BY id ASC LIMIT 10',
+      'SELECT * FROM postac WHERE account_id=? ORDER BY id ASC LIMIT 10',
       [req.session.accountId]
     );
-    res.json(chars);
+    // zycie_max w tabeli to wartość bazowa — ekran wyboru pokazuje maksimum z ekwipunkiem
+    const out = [];
+    for (const c of chars) {
+      let zycieMax = c.zycie_max;
+      try { zycieMax = (await computeStats(db, c)).zycie_max; } catch (e) { logError('auth:my-characters')(e); }
+      const { haslo: _h, combat_state: _cs, ...safe } = c;
+      out.push({ ...safe, zycie_max: zycieMax, zycie: Math.min(c.zycie, zycieMax) });
+    }
+    res.json(out);
   } catch(e) { next(e); }
 });
 
