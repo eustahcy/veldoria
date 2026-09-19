@@ -78,7 +78,7 @@ export const api = {
   },
   chat: {
     get: () => req('GET', '/chat'),
-    send: (tresc) => req('POST', '/chat', { tresc }),
+    send: (tresc, kanal) => req('POST', '/chat', { tresc, kanal }),
   },
   combat: {
     mobInfo:  (mobId)                    => req('GET',  `/combat/mob-info/${mobId}`),

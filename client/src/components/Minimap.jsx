@@ -86,7 +86,7 @@ function overlay(ctx, W, H, postac, mobs, npcs, portals, blockers, pulse) {
 // ── Component ─────────────────────────────────────────────────────────────────
 const EXPANDED_MAX = 260;
 
-export default function Minimap({ state }) {
+export default function Minimap({ state, size = 72 }) {
   const canvasRef  = useRef(null);
   const wrapRef    = useRef(null);
   const dragRef    = useRef(null);
@@ -153,7 +153,7 @@ export default function Minimap({ state }) {
   const ch = Math.round(H * scale);
 
   // Compact circle canvas scale
-  const CIRCLE = 72; // diameter
+  const CIRCLE = size; // średnica (desktop podaje większą)
   const cs = Math.min(1, CIRCLE / Math.max(W, H));
   const ccw = Math.round(W * cs);
   const cch = Math.round(H * cs);
@@ -194,12 +194,20 @@ export default function Minimap({ state }) {
               style={{ display: 'block', width: CIRCLE - 4, height: CIRCLE - 4, imageRendering: 'pixelated' }}
             />
           </div>
-          {/* N compass marker */}
-          <div style={{
-            position: 'absolute', top: 3, left: '50%', transform: 'translateX(-50%)',
-            color: GOLD, fontSize: 7, fontWeight: 'bold', zIndex: 3, pointerEvents: 'none',
-            textShadow: '0 1px 3px rgba(0,0,0,0.9)',
-          }}>N</div>
+          {/* Kompas: litery na obręczy */}
+          {[
+            ['N', { top: 2, left: '50%', transform: 'translateX(-50%)' }],
+            ['S', { bottom: 2, left: '50%', transform: 'translateX(-50%)' }],
+            ['W', { left: 4, top: '50%', transform: 'translateY(-50%)' }],
+            ['E', { right: 4, top: '50%', transform: 'translateY(-50%)' }],
+          ].map(([l, p]) => (
+            <div key={l} style={{
+              position: 'absolute', ...p,
+              color: '#f7e3a4', fontSize: size > 100 ? 11 : 7, fontWeight: 'bold', zIndex: 3, pointerEvents: 'none',
+              fontFamily: "'Cinzel','Palatino Linotype',serif",
+              textShadow: '0 1px 3px #000, 0 0 6px rgba(0,0,0,0.9)',
+            }}>{l}</div>
+          ))}
           {/* Expand hint */}
           <div style={{
             position: 'absolute', bottom: 3, right: 5,

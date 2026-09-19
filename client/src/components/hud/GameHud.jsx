@@ -175,7 +175,7 @@ export function TopBar({ postac, mapa, worldState, tokens, onAuction, onRanking,
         {btn('🏪', 'Aukcja', onAuction)}
         {btn('🏆', 'Ranking', onRanking)}
         {btn('✉', 'Poczta', onMail, unread)}
-        {btn('⚙', 'System', onSettings)}
+        {btn('⚙', 'Ustawienia', onSettings)}
         <Sep />
         <span style={{ color: G.muted, fontSize: 12.5, whiteSpace: 'nowrap', fontFamily: G.serif }}>
           {worldState?.pora === 'noc' ? '🌙' : worldState?.pora === 'swit' ? '🌅' : worldState?.pora === 'zmierzch' ? '🌇' : '☀'}{' '}
@@ -468,6 +468,33 @@ export function BottomBar({ postac, potions = [], onUsePotion, shortcuts = [] })
         <Orb value={postac.energia ?? 0} max={postac.energia_max ?? 100} from={G.en} to={G.enHi} label="Energia" />
       </div>
     </div>
+  );
+}
+
+// ── Szybki dostęp (prawy dolny róg) ──────────────────────────────────────────
+export function QuickAccess({ items = [] }) {
+  const [hov, setHov] = useState(null);
+  return (
+    <Ornate pad={6} style={{ display: 'flex', flexDirection: 'column', gap: 4, width: 170 }}>
+      {items.map(it => (
+        <button key={it.label} onClick={it.onClick}
+          onMouseEnter={() => setHov(it.label)} onMouseLeave={() => setHov(null)}
+          style={{
+            display: 'flex', alignItems: 'center', gap: 9, padding: '6px 8px', cursor: 'pointer',
+            background: hov === it.label ? 'rgba(231,193,88,0.1)' : 'transparent',
+            border: `1px solid ${hov === it.label ? G.bronze : 'transparent'}`, borderRadius: 3,
+            color: hov === it.label ? G.goldHi : G.text, fontFamily: G.serif, fontSize: 12.5, textAlign: 'left',
+          }}>
+          <span style={{
+            width: 20, height: 20, display: 'grid', placeItems: 'center', flexShrink: 0,
+            border: `1px solid ${G.bronze}`, borderRadius: 3, background: '#0c0a08',
+            color: G.gold, fontSize: 10, fontWeight: 700, fontFamily: C.font,
+          }}>{it.skrot}</span>
+          <span style={{ fontSize: 15 }}>{it.icon}</span>
+          {it.label}
+        </button>
+      ))}
+    </Ornate>
   );
 }
 

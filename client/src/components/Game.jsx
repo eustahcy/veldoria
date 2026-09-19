@@ -6,7 +6,7 @@ import { usePathfinding, buildBlockSet } from '../hooks/usePathfinding';
 import GameMap              from './GameMap';
 import IsoGameMap           from './IsoGameMap';
 import { applyTilePatch }   from '../ui/iso';
-import { TopBar, HeroPanel, QuestTracker, BottomBar, LocationBox } from './hud/GameHud';
+import { TopBar, HeroPanel, QuestTracker, BottomBar, LocationBox, QuickAccess } from './hud/GameHud';
 
 // Widok świata: izometryczny dla map z iso=1, inaczej klasyczny z góry.
 // Gdy mapa ma włączoną izometrię, ale nie została jeszcze pomalowana, pokazujemy
@@ -979,7 +979,7 @@ export default function Game({ onLogout, onDisconnect }) {
           { icon:'⭐', label:'Talenty',      skrot:'T', onClick:()=>setShowTalents(v=>!v), uwaga: state.postac.punkty_talentow > 0 },
           { icon:'📜', label:'Zadania',      skrot:'Q', onClick:()=>setShowQuests(v=>!v) },
           { icon:'⚜', label:'Gildia',       skrot:'G', onClick:()=>setShowGuild(v=>!v) },
-          { icon:'👥', label:'Znajomi',      skrot:'U', onClick:()=>setShowSocial(v=>!v) },
+          { icon:'👥', label:'Przyjaciele',  skrot:'U', onClick:()=>setShowSocial(v=>!v) },
           { icon:'⚒', label:'Rzemiosło',    skrot:'C', onClick:()=>setShowCraft(v=>!v) },
           { icon:'🐟', label:'Wędka',        skrot:'F', onClick:()=>setShowFishing(v=>!v) },
           { icon:'🏰', label:'Lochy',        skrot:'D', onClick:()=>setShowDungeon(v=>!v) },
@@ -1058,13 +1058,23 @@ export default function Game({ onLogout, onDisconnect }) {
           )}
 
           {/* Minimap (bottom-right of map area) */}
-          <Minimap state={state} />
+          <Minimap state={state} size={168} />
           <DungeonHUD addToast={addToast} onLeave={() => { loadState(); }} />
 
           {/* Lokalizacja + śledzenie zadań pod minimapą */}
-          <div style={{ position:'absolute', top:158, right:10, width:268, zIndex:55, display:'flex', flexDirection:'column', gap:10 }}>
+          <div style={{ position:'absolute', top:186, right:10, width:268, zIndex:55, display:'flex', flexDirection:'column', gap:10 }}>
             <LocationBox mapa={state.mapa} postac={state.postac} />
             <QuestTracker onOpen={()=>setShowQuests(true)} />
+          </div>
+
+          {/* Szybki dostęp — prawy dolny róg */}
+          <div style={{ position:'absolute', right:10, bottom:12, zIndex:55 }}>
+            <QuickAccess items={[
+              { skrot:'B', icon:'🏪', label:'Aukcja',    onClick:()=>setShowAuction(v=>!v) },
+              { skrot:'I', icon:'🎒', label:'Ekwipunek', onClick:()=>setShowInv(v=>!v) },
+              { skrot:'T', icon:'⭐', label:'Talenty',   onClick:()=>setShowTalents(v=>!v) },
+              { skrot:'Q', icon:'📜', label:'Zadania',   onClick:()=>setShowQuests(v=>!v) },
+            ]} />
           </div>
 
           {/* Kule HP/EN + szybkie akcje */}

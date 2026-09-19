@@ -317,21 +317,31 @@ io.on('connection', (socket) => {
     } catch(e) { logError('socket:guild_message')(e); }
   });
 
+  // Kanały: lokalny (gracze na tej samej mapie), globalny i handel (wszyscy)
+  const CHAT_KANALY = ['lokalny', 'globalny', 'handel'];
+  let lastChatAt = 0;
   socket.on('chat_message', async (data) => {
     try {
       if (!data?.tresc?.trim()) return;
+      const now = Date.now();
+      if (now - lastChatAt < 800) return;   // prosty limit: ~1 wiadomość na 0,8 s
+      lastChatAt = now;
+
       const tresc = String(data.tresc).trim().slice(0, 250);
-      const [[postac]] = await db.query('SELECT nazwa, mapa FROM postac WHERE id=?', [postacId]);
+      const kanal = CHAT_KANALY.includes(data.kanal) ? data.kanal : 'lokalny';
+      const [[postac]] = await db.query('SELECT nazwa, mapa, zablokowany_chat FROM postac WHERE id=?', [postacId]);
       if (!postac) return;
+      if (postac.zablokowany_chat > Math.floor(now / 1000)) return;
 
       await db.query(
-        'INSERT INTO chat (kto,tresc,mapa_id,postac_id) VALUES (?,?,?,?)',
-        [postac.nazwa, tresc, postac.mapa, postacId]
+        'INSERT INTO chat (kto,tresc,mapa_id,postac_id,kanal) VALUES (?,?,?,?,?)',
+        [postac.nazwa, tresc, postac.mapa, postacId, kanal]
       );
 
-      // Broadcast to same map
-      io.to(`map_${postac.mapa}`).emit('chat_message', { kto: postac.nazwa, tresc });
-    } catch(e) { console.error('chat_message error:', e.message); }
+      const msg = { kto: postac.nazwa, tresc, kanal };
+      if (kanal === 'lokalny') io.to(`map_${postac.mapa}`).emit('chat_message', msg);
+      else io.emit('chat_message', msg);
+    } catch(e) { logError('socket:chat_message')(e); }
   });
 
   // ── PvP Challenge ─────────────────────────────────────────────────────────
