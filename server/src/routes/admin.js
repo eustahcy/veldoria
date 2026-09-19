@@ -359,15 +359,23 @@ router.post('/clear-chat', requireAdmin, async (req, res, next) => {
 // ── BROADCAST (server announcement) ──────────────────────────────────────────
 router.post('/broadcast', requireAdmin, async (req, res, next) => {
   try {
-    const { message } = req.body;
+    const { message, chat = true, center = false, sound = false } = req.body;
     if (!message?.trim()) return res.status(400).json({ error: 'Brak wiadomości' });
-    await serverConfig.set(db, 'announcement', message.trim(), req.adminPostac.id, req.adminPostac.nazwa);
-    // Also insert into chat as system message
-    await db.query(
-      'INSERT INTO chat (kto, tresc, mapa_id, postac_id) VALUES (?,?,?,?)',
-      ['[SYSTEM]', `📢 ${message.trim()}`, 0, req.adminPostac.id]
-    );
-    adminLog(req, 'broadcast', 'global', message.trim().slice(0, 100));
+    const text = message.trim().slice(0, 300);
+    await serverConfig.set(db, 'announcement', text, req.adminPostac.id, req.adminPostac.nazwa);
+    // Na czacie (kanał System) — zapis do historii i od razu do wszystkich zalogowanych
+    const io = req.app.locals.io;
+    if (chat) {
+      const tresc = `📢 ${text}`;
+      await db.query(
+        'INSERT INTO chat (kto, tresc, mapa_id, postac_id, kanal) VALUES (?,?,?,?,?)',
+        ['[SYSTEM]', tresc, 0, req.adminPostac.id, 'system']
+      );
+      io?.emit('chat_message', { kto: '[SYSTEM]', tresc, kanal: 'system' });
+    }
+    // Komunikat na środku ekranu (opcjonalnie z dźwiękiem) — dla wszystkich zalogowanych
+    if (center) io?.emit('admin_announce', { message: text, sound: !!sound, from: req.adminPostac.nazwa });
+    adminLog(req, 'broadcast', 'global', text.slice(0, 100));
     res.json({ ok: true });
   } catch(e) { next(e); }
 });

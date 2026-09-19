@@ -5,21 +5,24 @@
 import { useState, useEffect, useCallback } from 'react';
 import { api } from '../api';
 import AssetsTab from './AssetsTab';
+import AdminApp from './admin/AdminApp';
+import AdminOverview from './admin/AdminOverview';
 
 // ── Design tokens ─────────────────────────────────────────────────────────────
+// Ta sama paleta co reszta interfejsu: ciemny kamień, brąz, złoto
 const T = {
-  bg:      'linear-gradient(160deg,rgba(8,14,5,0.99),rgba(4,8,2,0.99))',
-  surface: 'rgba(12,20,8,0.98)',
-  card:    'rgba(10,16,6,0.95)',
-  border:  'rgba(200,150,32,0.16)',
-  borderH: 'rgba(200,150,32,0.45)',
-  gold:    '#E8D070', goldDim: '#C8940A',
-  text:    '#CDD4AA', muted: '#6A7A50', dim: '#3A4828',
-  red: '#F87171', green: '#4ADE80', blue: '#60A5FA',
-  amber: '#FBBF24', purple: '#A78BFA', cyan: '#22D3EE',
+  bg:      'linear-gradient(180deg,#15120e,#0b0907)',
+  surface: 'rgba(24,20,15,0.98)',
+  card:    'linear-gradient(180deg,#1a1611,#100d0a)',
+  border:  'rgba(122,95,42,0.6)',
+  borderH: '#e7c158',
+  gold:    '#f7e3a4', goldDim: '#e7c158',
+  text:    '#e8e2d4', muted: '#9a9182', dim: '#6b6456',
+  red: '#ff7a68', green: '#5fd07a', blue: '#6fb2ff',
+  amber: '#f0a24b', purple: '#c79bff', cyan: '#5ec8ff',
 };
-const FF = 'Verdana,sans-serif';
-const FS = '"Palatino Linotype",Palatino,serif';
+const FF = "'Trebuchet MS', Verdana, sans-serif";
+const FS = "'Cinzel','Palatino Linotype',Palatino,serif";
 
 const RCOLOR = { GameAdmin: '#EF4444', GameMaster: '#F59E0B', Moderator: '#60A5FA', Gracz: T.dim };
 
@@ -49,7 +52,7 @@ function SInput({ value, onChange, placeholder, type = 'text', style = {} }) {
 }
 
 function SBtn({ children, onClick, variant = 'default', disabled, style = {}, wide }) {
-  const v = { default: [T.goldDim, `rgba(74,122,42,0.2)`, T.borderH], danger: [T.red, 'rgba(50,4,4,0.7)', 'rgba(239,68,68,0.4)'], success: [T.green, 'rgba(6,40,20,0.7)', 'rgba(34,197,94,0.4)'], ghost: [T.muted, 'rgba(8,13,5,0.4)', T.border], blue: [T.blue, 'rgba(29,78,216,0.2)', 'rgba(59,130,246,0.4)'] }[variant] || [];
+  const v = { default: [T.gold, 'linear-gradient(180deg,#4a3818,#241a0b)', T.borderH], danger: [T.red, 'rgba(50,4,4,0.7)', 'rgba(239,68,68,0.4)'], success: [T.green, 'rgba(6,40,20,0.7)', 'rgba(34,197,94,0.4)'], ghost: [T.muted, 'rgba(8,13,5,0.4)', T.border], blue: [T.blue, 'rgba(29,78,216,0.2)', 'rgba(59,130,246,0.4)'] }[variant] || [];
   return (
     <button onClick={onClick} disabled={disabled} style={{ padding: '5px 12px', borderRadius: 5, cursor: disabled ? 'not-allowed' : 'pointer', fontSize: 10, fontWeight: 'bold', border: `1px solid ${v[2]}`, background: disabled ? 'rgba(6,10,4,0.3)' : v[1], color: disabled ? T.dim : v[0], opacity: disabled ? 0.5 : 1, display: 'inline-flex', alignItems: 'center', gap: 5, whiteSpace: 'nowrap', transition: 'all .12s', fontFamily: FF, width: wide ? '100%' : undefined, justifyContent: wide ? 'center' : undefined, ...style }}>{children}</button>
   );
@@ -777,97 +780,30 @@ function EventsBossTab() {
 }
 
 // ── MAIN ──────────────────────────────────────────────────────────────────────
-const TABS = [
-  { id: 'stats',   icon: '📊', label: 'Serwer' },
-  { id: 'players', icon: '👥', label: 'Gracze' },
-  { id: 'mobs',    icon: '👾', label: 'Moby' },
-  { id: 'maps',    icon: '🗺', label: 'Mapy' },
-  { id: 'server',  icon: '⚙',  label: 'Config' },
-  { id: 'chat',    icon: '💬', label: 'Czat' },
-  { id: 'audit',   icon: '📋', label: 'Logi' },
-  { id: 'assets',  icon: '🖼', label: 'Assety' },
-  { id: 'events',  icon: '⚡', label: 'Eventy' },
-];
+// Zakładki wspólne dla panelu w grze i na stronie (AdminDashboard dokłada własne)
+export { StatsTab, PlayersTab, MobsTab, MapsTab, ServerTab, ChatTab, AuditTab, EventsBossTab };
 
-export default function AdminPanel({ postac, onClose }) {
-  const [tab, setTab] = useState('stats');
-  const isMobile = typeof window !== 'undefined' && window.innerWidth < 600;
+export function adminTabs({ myId, currentMap }) {
+  return [
+    { id: 'overview', icon: '🏠', label: 'Serwer',  sub: 'Status i informacje',        render: (ctx) => <AdminOverview ctx={ctx} /> },
+    { id: 'players',  icon: '👥', label: 'Gracze',  sub: 'Zarządzanie graczami',       render: () => <PlayersTab myId={myId} />, fill: true, legacy: true },
+    { id: 'mobs',     icon: '👾', label: 'Moby',    sub: 'Respawn i podgląd',          render: () => <MobsTab currentMap={currentMap} />, legacy: true },
+    { id: 'maps',     icon: '🗺', label: 'Mapy',    sub: 'Zarządzanie mapami',         render: () => <MapsTab />, legacy: true },
+    { id: 'config',   icon: '⚙️', label: 'Config',  sub: 'Ustawienia serwera',         render: () => <ServerTab />, legacy: true },
+    { id: 'chat',     icon: '💬', label: 'Czat',    sub: 'Wiadomości i komunikacja',   render: () => <ChatTab />, fill: true, legacy: true },
+    { id: 'audit',    icon: '📋', label: 'Logi',    sub: 'Historia zdarzeń',           render: () => <AuditTab />, legacy: true },
+    { id: 'assets',   icon: '🗃', label: 'Assety',  sub: 'Zarządzanie plikami',        render: () => <AssetsTab />, fill: true, legacy: true },
+    { id: 'events',   icon: '⚡', label: 'Eventy',  sub: 'Eventy i bossy',             render: () => <EventsBossTab />, legacy: true },
+  ];
+}
 
-  // scroll-fix helper — every overflowY:auto flex-child needs minHeight:0 + iOS touch + Android overscroll contain
-  const scroll = { overflowY: 'auto', minHeight: 0, WebkitOverflowScrolling: 'touch', overscrollBehavior: 'contain' };
-
+export default function AdminPanel({ postac, onClose, onLogout }) {
   return (
-    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(6px)', display: 'flex', alignItems: isMobile ? 'stretch' : 'center', justifyContent: isMobile ? 'stretch' : 'center', zIndex: 500 }}>
-      <div style={{
-        background: T.bg,
-        border: isMobile ? 'none' : `1px solid rgba(200,150,32,0.3)`,
-        borderRadius: isMobile ? 0 : 14,
-        /* mobile: true fullscreen; desktop: centred modal */
-        width: isMobile ? '100%' : 820,
-        maxWidth: isMobile ? '100%' : '98vw',
-        height: isMobile ? '100%' : '91vh',
-        maxHeight: isMobile ? '100%' : 680,
-        display: 'flex', flexDirection: 'column',
-        overflow: 'hidden',
-        boxShadow: isMobile ? 'none' : '0 0 0 1px rgba(200,150,32,0.08), 0 28px 70px rgba(0,0,0,0.95)',
-        fontFamily: FF,
-        /* safe-area for notched phones */
-        paddingTop: isMobile ? 'env(safe-area-inset-top,0px)' : 0,
-        paddingBottom: isMobile ? 'env(safe-area-inset-bottom,0px)' : 0,
-      }}>
-
-        {/* ── HEADER ── */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 14px', flexShrink: 0, background: T.surface, borderBottom: `1px solid ${T.border}` }}>
-          <span style={{ color: T.red, fontSize: 15 }}>🛡</span>
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ color: T.red, fontWeight: 'bold', fontSize: isMobile ? 11 : 12, letterSpacing: '1px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>PANEL ADMINISTRATORA</div>
-            <div style={{ color: T.dim, fontSize: 8 }}>{postac.nazwa} · {postac.ranga}</div>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '3px 8px', background: 'rgba(6,10,4,0.6)', border: `1px solid ${T.border}`, borderRadius: 20, flexShrink: 0 }}>
-            <div style={{ width: 5, height: 5, borderRadius: '50%', background: T.green, boxShadow: `0 0 5px ${T.green}` }} />
-            <span style={{ color: T.goldDim, fontSize: 8 }}>Live</span>
-          </div>
-          <button onClick={onClose} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '6px 12px', background: 'rgba(6,10,4,0.5)', border: `1px solid ${T.border}`, borderRadius: 6, cursor: 'pointer', color: T.muted, fontSize: 10, fontFamily: FF, minHeight: 34, minWidth: 44, flexShrink: 0 }}>
-            ✕
-          </button>
-        </div>
-
-        {/* ── TAB BAR — icons only on mobile, icons+label on desktop ── */}
-        <div style={{ display: 'flex', flexShrink: 0, background: 'rgba(6,10,4,0.7)', borderBottom: `1px solid ${T.border}`, overflowX: 'auto', WebkitOverflowScrolling: 'touch', scrollbarWidth: 'none' }}>
-          {TABS.map(t => (
-            <button key={t.id} onClick={() => setTab(t.id)} style={{
-              display: 'flex', flexDirection: isMobile ? 'column' : 'row',
-              alignItems: 'center', gap: isMobile ? 2 : 6,
-              padding: isMobile ? '6px 10px' : '8px 14px',
-              border: 'none', flexShrink: 0, cursor: 'pointer',
-              minHeight: isMobile ? 46 : 40,
-              minWidth: isMobile ? 46 : 'auto',
-              background: tab === t.id ? 'rgba(74,122,42,0.12)' : 'transparent',
-              borderBottom: `2px solid ${tab === t.id ? T.goldDim : 'transparent'}`,
-              color: tab === t.id ? T.gold : T.muted,
-              fontWeight: tab === t.id ? 'bold' : 'normal',
-              fontFamily: FF, transition: 'all .12s',
-              WebkitTapHighlightColor: 'transparent',
-            }}>
-              <span style={{ fontSize: isMobile ? 18 : 13 }}>{t.icon}</span>
-              <span style={{ fontSize: isMobile ? 7 : 10, whiteSpace: 'nowrap' }}>{t.label}</span>
-            </button>
-          ))}
-        </div>
-
-        {/* ── CONTENT — every pane gets minHeight:0 so iOS can scroll ── */}
-        <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-          {tab === 'stats'   && <div style={{ flex: 1, ...scroll }}><StatsTab myPostac={postac} /></div>}
-          {tab === 'players' && <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}><PlayersTab myId={postac.id} /></div>}
-          {tab === 'mobs'    && <div style={{ flex: 1, ...scroll }}><MobsTab currentMap={postac.mapa} /></div>}
-          {tab === 'maps'    && <div style={{ flex: 1, ...scroll }}><MapsTab /></div>}
-          {tab === 'server'  && <div style={{ flex: 1, ...scroll }}><ServerTab /></div>}
-          {tab === 'chat'    && <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}><ChatTab /></div>}
-          {tab === 'audit'   && <div style={{ flex: 1, ...scroll }}><AuditTab /></div>}
-          {tab === 'assets'  && <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}><AssetsTab /></div>}
-          {tab === 'events'  && <div style={{ flex: 1, ...scroll }}><EventsBossTab /></div>}
-        </div>
-      </div>
-    </div>
+    <AdminApp
+      me={{ nazwa: postac.nazwa, ranga: postac.ranga }}
+      tabs={adminTabs({ myId: postac.id, currentMap: postac.mapa })}
+      onClose={onClose}
+      onLogout={onLogout}
+    />
   );
 }

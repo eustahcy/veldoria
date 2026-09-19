@@ -188,7 +188,7 @@ export function TopBar({ postac, mapa, worldState, tokens, onAuction, onRanking,
 }
 
 // ── Lewy panel bohatera ──────────────────────────────────────────────────────
-export function HeroPanel({ postac, actions }) {
+export function HeroPanel({ postac, actions, footer }) {
   const exp = expInfo(postac);
   const [hov, setHov] = useState(null);
 
@@ -274,8 +274,8 @@ export function HeroPanel({ postac, actions }) {
             onMouseEnter={() => setHov(a.label)} onMouseLeave={() => setHov(null)}
             title={a.skrot ? `${a.label} (${a.skrot})` : a.label}
             style={{
-              position: 'relative', padding: '9px 4px', cursor: 'pointer', borderRadius: 4,
-              display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5,
+              position: 'relative', padding: '7px 8px', cursor: 'pointer', borderRadius: 4,
+              display: 'flex', alignItems: 'center', gap: 7, textAlign: 'left', minWidth: 0,
               background: hov === a.label ? 'linear-gradient(180deg,#2c2418,#171208)' : G.stone,
               border: `1px solid ${hov === a.label ? G.gold : G.bronze}`,
               boxShadow: hov === a.label
@@ -285,10 +285,10 @@ export function HeroPanel({ postac, actions }) {
               fontSize: 11, fontFamily: G.serif, letterSpacing: 0.3,
               transition: 'all .12s',
             }}>
-            <span style={{ fontSize: 17, filter: 'drop-shadow(0 2px 3px rgba(0,0,0,0.7))' }}>{a.icon}</span>
-            {a.label}
+            <span style={{ fontSize: 15, width: 18, textAlign: 'center', flexShrink: 0, filter: 'drop-shadow(0 2px 3px rgba(0,0,0,0.7))' }}>{a.icon}</span>
+            <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{a.label}</span>
             {a.skrot && (
-              <span style={{ position: 'absolute', top: 3, right: 5, fontSize: 8, color: G.dim }}>{a.skrot}</span>
+              <span style={{ position: 'absolute', top: 2, right: 4, fontSize: 8, color: G.dim }}>{a.skrot}</span>
             )}
             {a.uwaga && <span style={{
               position: 'absolute', top: 5, left: 6, width: 7, height: 7, borderRadius: '50%',
@@ -297,6 +297,9 @@ export function HeroPanel({ postac, actions }) {
           </button>
         ))}
       </div>
+
+      {/* Czat pod przyciskami menu — zajmuje resztę wysokości panelu */}
+      {footer && <div style={{ flex: 1, minHeight: 250, display: 'flex', flexDirection: 'column' }}>{footer}</div>}
     </aside>
   );
 }
@@ -520,3 +523,48 @@ export function QuickAccess({ items = [] }) {
 }
 
 export { G as hudColors };
+
+// ── Komunikat administratora na środku ekranu (socket: admin_announce) ───────
+export function AdminAnnounce({ socket }) {
+  const [msg, setMsg] = useState(null);
+  useEffect(() => {
+    if (!socket) return;
+    let timer;
+    const on = (m) => {
+      setMsg(m);
+      clearTimeout(timer);
+      timer = setTimeout(() => setMsg(null), 8000);
+      if (m.sound) {
+        try {
+          const ac = new (window.AudioContext || window.webkitAudioContext)();
+          [660, 880].forEach((f, i) => {
+            const o = ac.createOscillator(), g = ac.createGain();
+            o.frequency.value = f; o.type = 'triangle';
+            g.gain.setValueAtTime(0.0001, ac.currentTime + i * 0.18);
+            g.gain.exponentialRampToValueAtTime(0.18, ac.currentTime + i * 0.18 + 0.02);
+            g.gain.exponentialRampToValueAtTime(0.0001, ac.currentTime + i * 0.18 + 0.35);
+            o.connect(g).connect(ac.destination);
+            o.start(ac.currentTime + i * 0.18); o.stop(ac.currentTime + i * 0.18 + 0.4);
+          });
+        } catch { /* przeglądarka blokuje dźwięk bez interakcji — pomijamy */ }
+      }
+    };
+    socket.on('admin_announce', on);
+    return () => { socket.off('admin_announce', on); clearTimeout(timer); };
+  }, [socket]);
+
+  if (!msg) return null;
+  return (
+    <div onClick={() => setMsg(null)} style={{
+      position: 'fixed', left: '50%', top: '22%', transform: 'translateX(-50%)', zIndex: 990,
+      width: 'min(620px, calc(100vw - 32px))', cursor: 'pointer', animation: 'annIn .35s ease-out',
+    }}>
+      <Ornate pad="16px 22px" style={{ textAlign: 'center', boxShadow: '0 0 40px rgba(231,193,88,0.25), 0 20px 50px rgba(0,0,0,0.8)' }}>
+        <div style={{ fontFamily: G.serif, fontSize: 12, letterSpacing: 4, color: G.goldDim, marginBottom: 6 }}>📢 KOMUNIKAT SERWERA</div>
+        <div style={{ fontFamily: G.serif, fontSize: 19, color: G.goldHi, lineHeight: 1.4, textShadow: '0 2px 6px #000' }}>{msg.message}</div>
+        {msg.from && <div style={{ fontSize: 11.5, color: G.muted, marginTop: 8 }}>— {msg.from}</div>}
+      </Ornate>
+      <style>{`@keyframes annIn{from{opacity:0;transform:translate(-50%,-14px)}to{opacity:1;transform:translate(-50%,0)}}`}</style>
+    </div>
+  );
+}

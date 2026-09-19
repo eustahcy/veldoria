@@ -12,7 +12,7 @@ router.get('/', requireSession, async (req, res, next) => {
     if (!postac) return res.json([]);
     const [rows] = await db.query(
       `SELECT kto, tresc, kanal FROM chat
-       WHERE kanal IN ('globalny','handel') OR (kanal = 'lokalny' AND mapa_id = ?)
+       WHERE kanal IN ('globalny','handel','system') OR (kanal = 'lokalny' AND mapa_id = ?)
        ORDER BY id DESC LIMIT 40`,
       [postac.mapa]
     );

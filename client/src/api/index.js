@@ -26,7 +26,7 @@ export const api = {
     status:        ()           => req('GET',   '/admin/server-status'),
     config:        ()           => req('GET',   '/admin/server-config'),
     saveConfig:    (changes)    => req('POST',  '/admin/server-config', { changes }),
-    broadcast:     (message)    => req('POST',  '/admin/broadcast',     { message }),
+    broadcast:     (message, opts={}) => req('POST',  '/admin/broadcast', { message, ...opts }),
     auditLog:      (params={})  => req('GET',   `/admin/audit-log${Object.keys(params).length ? '?'+new URLSearchParams(params) : ''}`),
     players:       (search)     => req('GET',   `/admin/players${search?`?search=${encodeURIComponent(search)}`:''}` ),
     banPlayer:     (id, reason) => req('POST',  `/admin/ban/${id}`,     { reason }),

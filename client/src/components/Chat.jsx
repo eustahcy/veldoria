@@ -24,7 +24,7 @@ const PLACEHOLDER = {
 const kanalOf = (m) => m.kanal || (/SYSTEM|BOSS|ADMIN/.test(m.kto || '') ? 'system' : 'lokalny');
 
 // mode: 'docked' (bottom panel, always visible) | 'floating' (mobile overlay)
-export default function Chat({ socket, isMobile, onMessage, mode='floating', playerName }) {
+export default function Chat({ socket, isMobile, onMessage, mode='floating', playerName, fill, compact }) {
   const [messages, setMessages]   = useState([]);
   const [input,    setInput]      = useState('');
   const [open,     setOpen]       = useState(!isMobile);
@@ -102,7 +102,7 @@ export default function Chat({ socket, isMobile, onMessage, mode='floating', pla
     const OT = TABS.filter(t => t.id !== 'lokalny');
     return (
       <div style={{
-        width: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden',
+        width: '100%', height: fill ? '100%' : undefined, display: 'flex', flexDirection: 'column', overflow: 'hidden',
         background: 'linear-gradient(180deg, rgba(14,11,8,0.86), rgba(8,6,5,0.9))',
         border: '1px solid #7a5f2a', borderRadius: 4,
         boxShadow: '0 0 0 1px rgba(0,0,0,0.8), 0 10px 26px rgba(0,0,0,0.6)',
@@ -113,13 +113,13 @@ export default function Chat({ socket, isMobile, onMessage, mode='floating', pla
             const on = tab === t.id;
             return (
               <button key={t.id} onClick={() => { setTab(t.id); setDockOpen(true); }} style={{
-                flex: 1, padding: '6px 4px', cursor: 'pointer', border: 'none', whiteSpace: 'nowrap',
+                flex: 1, minWidth: 0, padding: compact ? '6px 1px' : '6px 4px', cursor: 'pointer', border: 'none', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
                 borderRight: '1px solid rgba(122,95,42,0.35)',
                 background: on ? 'linear-gradient(180deg, rgba(231,193,88,0.22), rgba(231,193,88,0.04))' : 'transparent',
                 boxShadow: on ? 'inset 0 -2px 0 #e7c158' : 'none',
-                color: on ? '#f7e3a4' : '#9a9182', fontSize: 11.5,
+                color: on ? '#f7e3a4' : '#9a9182', fontSize: compact ? 10 : 11.5,
                 fontFamily: "'Cinzel','Palatino Linotype',serif",
-              }}><span style={{ color: on ? '#e7c158' : '#5e584c', fontSize: 8, marginRight: 4 }}>◆</span>{t.label}</button>
+              }}>{!compact && <span style={{ color: on ? '#e7c158' : '#5e584c', fontSize: 8, marginRight: 4 }}>◆</span>}{compact && t.id === 'wszystkie' ? 'Wszyst.' : t.label}</button>
             );
           })}
           <button onClick={() => setDockOpen(o => !o)} title={dockOpen ? 'Zwiń' : 'Rozwiń'} style={{
@@ -127,7 +127,7 @@ export default function Chat({ socket, isMobile, onMessage, mode='floating', pla
           }}>{dockOpen ? '▼' : '▲'}</button>
         </div>
         {dockOpen && <>
-          <div ref={listRef} style={{ height: 120, overflowY: 'auto', padding: '5px 10px', display: 'flex', flexDirection: 'column', gap: 1 }}>
+          <div ref={listRef} style={{ height: fill ? undefined : 120, flex: fill ? 1 : undefined, minHeight: fill ? 60 : undefined, overflowY: 'auto', padding: '5px 10px', display: 'flex', flexDirection: 'column', gap: 1 }}>
             {shown.length === 0 && <div style={{ color: '#5e584c', fontSize: 11.5, textAlign: 'center', marginTop: 12, fontStyle: 'italic' }}>{tab === 'system' ? 'Brak komunikatów' : 'Cisza…'}</div>}
             {shown.map((m, i) => {
               const k = kanalOf(m);

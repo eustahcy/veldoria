@@ -6,7 +6,7 @@ import { usePathfinding, buildBlockSet } from '../hooks/usePathfinding';
 import GameMap              from './GameMap';
 import IsoGameMap           from './IsoGameMap';
 import { applyTilePatch }   from '../ui/iso';
-import { TopBar, HeroPanel, QuestTracker, BottomBar, LocationBox, QuickAccess } from './hud/GameHud';
+import { TopBar, HeroPanel, QuestTracker, BottomBar, LocationBox, AdminAnnounce } from './hud/GameHud';
 
 // Widok świata: izometryczny dla map z iso=1, inaczej klasyczny z góry.
 // Gdy mapa ma włączoną izometrię, ale nie została jeszcze pomalowana, pokazujemy
@@ -812,7 +812,7 @@ export default function Game({ onLogout, onDisconnect }) {
           {showQuests && <QuestPanel onClose={()=>setShowQuests(false)} onReward={msg=>{ addToast(msg,'info'); loadState(); setShowQuests(false); }} />}
           {showSocial && <SocialPanel onClose={()=>setShowSocial(false)} onViewProfile={id=>{ setViewProfile(id); setShowSocial(false); }} />}
           {showGuild  && <GuildPanel  onClose={()=>setShowGuild(false)} socket={socket} postacId={state.postac.id} />}
-          {showAdmin  && <AdminPanel postac={state.postac} onClose={()=>setShowAdmin(false)} />}
+          {showAdmin  && <AdminPanel postac={state.postac} onClose={()=>setShowAdmin(false)} onLogout={()=>(onDisconnect || onLogout)()} />}
           {showOutfit && <OutfitSelector postac={state.postac} onClose={()=>setShowOutfit(false)} onChanged={()=>{ loadState(); setShowOutfit(false); }} />}
           {battle     && (
             <BattleModal mob={battle.mob} postac={battle.postac} mapa={state.mapa}
@@ -894,6 +894,7 @@ export default function Game({ onLogout, onDisconnect }) {
             />
           )}
           <Toast toasts={toasts} />
+          <AdminAnnounce socket={socket} />
           <style>{globalCSS}</style>
         </>
       );
@@ -1015,7 +1016,7 @@ export default function Game({ onLogout, onDisconnect }) {
         {showInv && <InventoryScreen postac={state.postac} onClose={()=>setShowInv(false)} onRefresh={()=>{ loadState(); loadPotions(); }} />}
         {npcDialog && <NpcDialog npc={npcDialog} postac={state.postac} onClose={()=>setNpcDialog(null)} onBought={loadState} onQuestReward={msg=>{ addToast(msg,'info'); loadState(); }} />}
         {showQuests && <QuestPanel onClose={()=>setShowQuests(false)} onReward={msg=>{ addToast(msg,'info'); loadState(); setShowQuests(false); }} />}
-        {showAdmin && <AdminPanel postac={state.postac} onClose={()=>setShowAdmin(false)} />}
+        {showAdmin && <AdminPanel postac={state.postac} onClose={()=>setShowAdmin(false)} onLogout={()=>(onDisconnect || onLogout)()} />}
         {battle    && (
           <BattleModal mob={battle.mob} postac={battle.postac} mapa={state.mapa}
             onClose={() => { setBattle(null); setTarget(null); loadState(); }}
@@ -1105,6 +1106,7 @@ export default function Game({ onLogout, onDisconnect }) {
           />
         )}
         <Toast toasts={toasts} />
+          <AdminAnnounce socket={socket} />
         <style>{globalCSS}</style>
       </div>
     );
@@ -1122,6 +1124,7 @@ export default function Game({ onLogout, onDisconnect }) {
       {/* LEFT: panel bohatera */}
       <HeroPanel
         postac={state.postac}
+        footer={<Chat socket={socket} isMobile={false} onMessage={handleChatMessage} mode="overlay" fill compact playerName={state.postac.nazwa} />}
         actions={[
           { icon:'🧍', label:'Postać',       onClick:()=>setShowOutfit(true) },
           { icon:'🎒', label:'Ekwipunek',    skrot:'I', onClick:()=>setShowInv(v=>!v) },
@@ -1216,11 +1219,8 @@ export default function Game({ onLogout, onDisconnect }) {
             <QuestTracker onOpen={()=>setShowQuests(true)} />
           </div>
 
-          {/* Dół mapy: czat (lewy róg) + pasek z kulami HP/EN */}
-          <div style={{ position:'absolute', left:10, right:10, bottom:8, zIndex:60, display:'flex', alignItems:'flex-end', gap:14, pointerEvents:'none' }}>
-            <div style={{ width:340, flexShrink:0, pointerEvents:'auto' }}>
-              <Chat socket={socket} isMobile={false} onMessage={handleChatMessage} mode="overlay" playerName={state.postac.nazwa} />
-            </div>
+          {/* Dół mapy: pasek z kulami HP/EN (czat jest w lewym panelu) */}
+          <div style={{ position:'absolute', left:10, right:10, bottom:8, zIndex:60, display:'flex', alignItems:'flex-end', pointerEvents:'none' }}>
             <div style={{ flex:1, minWidth:0, display:'flex', justifyContent:'center' }}>
               <div style={{ pointerEvents:'auto' }}>
                 <BottomBar
@@ -1254,7 +1254,7 @@ export default function Game({ onLogout, onDisconnect }) {
       {/* Modals — poza skalowanym kontenerem, zawsze pełny viewport */}
       {showInv    && <Inventory onClose={()=>setShowInv(false)} onRefresh={()=>{ loadState(); loadPotions(); }} postac={state.postac} onNavigate={openPanel} />}
       {npcDialog  && <NpcDialog npc={npcDialog} postac={state.postac} onClose={()=>setNpcDialog(null)} onBought={loadState} />}
-      {showAdmin  && <AdminPanel postac={state.postac} onClose={()=>setShowAdmin(false)} />}
+      {showAdmin  && <AdminPanel postac={state.postac} onClose={()=>setShowAdmin(false)} onLogout={()=>(onDisconnect || onLogout)()} />}
       {battle     && (
         <BattleModal mob={battle.mob} postac={battle.postac} mapa={state.mapa}
           onClose={() => { setBattle(null); setTarget(null); loadState(); }}
@@ -1376,6 +1376,7 @@ export default function Game({ onLogout, onDisconnect }) {
         />
       )}
       <Toast toasts={toasts} />
+          <AdminAnnounce socket={socket} />
       <style>{globalCSS}</style>
     </div>
   );
