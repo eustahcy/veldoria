@@ -504,7 +504,7 @@ export default function BattleModal2({ mob: initMob, postac: initPostac, mapa, o
         <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
           <div style={{ display: 'flex', flexDirection: narrow ? 'column' : 'row', flexShrink: 0 }}>
             {/* ── ARENA ── */}
-            <div style={{ flex: 1, position: 'relative', height: narrow ? 300 : 330, overflow: 'hidden', background: 'linear-gradient(180deg,#1d2a17,#0f140b)' }}>
+            <div style={{ flex: narrow ? 'none' : 1, position: 'relative', height: narrow ? 300 : 330, overflow: 'hidden', background: 'linear-gradient(180deg,#1d2a17,#0f140b)' }}>
               {mapa?.obrazek && (
                 <div style={{
                   position: 'absolute', left: '50%', top: '58%', width: W * TILE_BG, height: H * TILE_BG,
