@@ -3,7 +3,7 @@ const router = express.Router();
 const db = require('../db');
 const { requireSession } = require('../middleware/auth');
 const { giveItem, equipError } = require('../game/inventory');
-const { clampStoredHp } = require('../game/stats');
+const { clampStoredHp, computeStats } = require('../game/stats');
 const { collectTax } = require('../game/taxes');
 const { logError, serverError } = require('../game/log');
 
@@ -78,6 +78,35 @@ router.post('/sell', requireSession, async (req, res, next) => {
     await db.query('UPDATE postac SET zloto = zloto + ? WHERE id = ?', [gold, postacId]);
 
     res.json({ ok: true, gold });
+  } catch (e) { next(e); }
+});
+
+// POST /api/items/use — wypij miksturę poza walką
+router.post('/use', requireSession, async (req, res, next) => {
+  try {
+    const { itemId } = req.body;
+    const postacId = req.session.postacId;
+
+    const [[item]] = await db.query(
+      "SELECT * FROM przedmiot_postac WHERE id=? AND postac=? AND typ='Konsupcyjne'",
+      [itemId, postacId]
+    );
+    if (!item) return res.json({ ok: false, error: 'Nie masz takiego przedmiotu' });
+
+    const [[raw]] = await db.query('SELECT * FROM postac WHERE id=?', [postacId]);
+    if (!raw) return res.json({ ok: false, error: 'Brak postaci' });
+    const stats = await computeStats(db, raw);
+    if (raw.zycie >= stats.zycie_max) return res.json({ ok: false, error: 'Masz pełne życie' });
+
+    // Usunięcie warunkowe — dwa kliknięcia naraz nie wypiją jednej mikstury dwa razy
+    const [del] = await db.query('DELETE FROM przedmiot_postac WHERE id=? AND postac=?', [item.id, postacId]);
+    if (del.affectedRows !== 1) return res.json({ ok: false, error: 'Nie masz takiego przedmiotu' });
+
+    const heal = item.pelne_leczenie ? stats.zycie_max : (item.mikstura_leczenie || 0);
+    const nowe = Math.min(stats.zycie_max, raw.zycie + heal);
+    await db.query('UPDATE postac SET zycie=? WHERE id=?', [nowe, postacId]);
+
+    res.json({ ok: true, zycie: nowe, zycie_max: stats.zycie_max, wyleczono: nowe - raw.zycie, nazwa: item.nazwa });
   } catch (e) { next(e); }
 });
 

@@ -6,6 +6,7 @@ import { usePathfinding, buildBlockSet } from '../hooks/usePathfinding';
 import GameMap              from './GameMap';
 import IsoGameMap           from './IsoGameMap';
 import { applyTilePatch }   from '../ui/iso';
+import { TopBar, HeroPanel, QuestTracker, BottomBar } from './hud/GameHud';
 
 // Widok świata: izometryczny dla map z iso=1, inaczej klasyczny z góry
 function MapRenderer({ iso, tiles, ...props }) {
@@ -244,6 +245,8 @@ function Hotbar({ postac, onInventory, onHeal, onPvpToggle, onQuests, onSocial, 
 export default function Game({ onLogout, onDisconnect }) {
   const [state,       setState]      = useState(null);
   const [tiles,       setTiles]      = useState({});   // kafle izometryczne bieżącej mapy
+  const [potions,     setPotions]    = useState([]);   // mikstury na pasek szybkich akcji
+  const [unread,      setUnread]     = useState(0);
   const [direction,   setDirection]  = useState(0);
   const [animStep,    setAnimStep]   = useState(0);
   const [combatLog,   setCombatLog]  = useState([]);
@@ -368,6 +371,27 @@ export default function Game({ onLogout, onDisconnect }) {
   }, [loadState]);
 
   const socket = useSocket(state?.mapa?.id);
+
+  // ── Mikstury na pasek + licznik poczty ────────────────────────────────────
+  const loadPotions = useCallback(async () => {
+    try {
+      const inv = await api.items.inventory();
+      if (Array.isArray(inv)) setPotions(inv.filter(i => i.typ === 'Konsupcyjne' && i.zalozony !== 1));
+    } catch { /* pasek zostaje z poprzednim stanem */ }
+  }, []);
+
+  useEffect(() => {
+    loadPotions();
+    const id = setInterval(loadPotions, 15000);
+    return () => clearInterval(id);
+  }, [loadPotions]);
+
+  useEffect(() => {
+    const load = () => api.social.unreadCount().then(r => setUnread(r?.count || 0)).catch(() => {});
+    load();
+    const id = setInterval(load, 30000);
+    return () => clearInterval(id);
+  }, []);
 
   // ── Kafle izometryczne: pobierz przy wejściu na mapę, aktualizuj na żywo ──
   const mapaId = state?.mapa?.id;
@@ -940,31 +964,37 @@ export default function Game({ onLogout, onDisconnect }) {
     <div style={{ width:'100vw', height:'100vh', overflow:'hidden', position:'relative', background:'#2A1A08' }}>
     <div style={{ display:'flex', width:_innerW, height:_innerH, overflow:'hidden', zoom:_zoom }}>
 
-      {/* LEFT: Character panel */}
-      <CharPanel
+      {/* LEFT: panel bohatera */}
+      <HeroPanel
         postac={state.postac}
-        mapa={state.mapa}
-        isAdmin={isAdmin}
-        onInventory={() => setShowInv(true)}
-        onHeal={() => api.character.heal().then(loadState)}
-        onPvpToggle={() => api.character.pvpToggle().then(loadState)}
-        onAdmin={() => setShowAdmin(true)}
-        onDisconnect={onDisconnect}
-        onLogout={onLogout}
-        onQuests={() => setShowQuests(v=>!v)}
-        onSocial={() => setShowSocial(v=>!v)}
-        onGuild={() => setShowGuild(v=>!v)}
-        onOutfit={() => setShowOutfit(true)}
-        onTalents={() => setShowTalents(v=>!v)}
-        onStatAssigned={loadState}
+        actions={[
+          { icon:'🧍', label:'Postać',       onClick:()=>setShowOutfit(true) },
+          { icon:'🎒', label:'Ekwipunek',    skrot:'I', onClick:()=>setShowInv(v=>!v) },
+          { icon:'⭐', label:'Talenty',      skrot:'T', onClick:()=>setShowTalents(v=>!v), uwaga: state.postac.punkty_talentow > 0 },
+          { icon:'📜', label:'Zadania',      skrot:'Q', onClick:()=>setShowQuests(v=>!v) },
+          { icon:'⚜', label:'Gildia',       skrot:'G', onClick:()=>setShowGuild(v=>!v) },
+          { icon:'👥', label:'Znajomi',      skrot:'U', onClick:()=>setShowSocial(v=>!v) },
+          { icon:'⚒', label:'Rzemiosło',    skrot:'C', onClick:()=>setShowCraft(v=>!v) },
+          { icon:'🐟', label:'Wędka',        skrot:'F', onClick:()=>setShowFishing(v=>!v) },
+          { icon:'🏰', label:'Lochy',        skrot:'D', onClick:()=>setShowDungeon(v=>!v) },
+          ...(isAdmin ? [{ icon:'★', label:'Admin', onClick:()=>setShowAdmin(true) }] : []),
+        ]}
       />
 
       {/* CENTER: Map + panels column */}
       <div style={{ flex:1, display:'flex', overflow:'hidden', minWidth:0 }}>
       <div style={{ flex:1, display:'flex', flexDirection:'column', overflow:'hidden', minWidth:0 }}>
 
-        {/* Top info bar */}
-        <MapTopBar mapa={state.mapa} players={state.players} postac={state.postac} />
+        {/* Górny pasek */}
+        <TopBar
+          postac={state.postac} mapa={state.mapa} worldState={worldState}
+          tokens={state.postac.event_tokeny}
+          unread={unread}
+          onAuction={()=>setShowAuction(v=>!v)}
+          onRanking={()=>setShowGuild(v=>!v)}
+          onMail={()=>setShowSocial(v=>!v)}
+          onSettings={()=>setShowOutfit(true)}
+        />
 
         {/* Map area (fills remaining vertical space) */}
         <div style={{ flex:1, position:'relative', overflow:'hidden' }}>
@@ -1024,24 +1054,29 @@ export default function Game({ onLogout, onDisconnect }) {
           {/* Minimap (bottom-right of map area) */}
           <Minimap state={state} />
           <DungeonHUD addToast={addToast} onLeave={() => { loadState(); }} />
-        </div>
 
-        {/* Hotbar — pasek akcji fantasy */}
-        <Hotbar
-          postac={state.postac}
-          onInventory={() => setShowInv(v=>!v)}
-          onHeal={() => api.character.heal().then(loadState)}
-          onPvpToggle={() => api.character.pvpToggle().then(loadState)}
-          onQuests={() => setShowQuests(v=>!v)}
-          onSocial={() => setShowSocial(v=>!v)}
-          onGuild={() => setShowGuild(v=>!v)}
-          onAuction={() => setShowAuction(v=>!v)}
-          onCraft={() => setShowCraft(v=>!v)}
-          onFishing={() => setShowFishing(v=>!v)}
-          onTalents={() => setShowTalents(v=>!v)}
-          onDungeon={() => setShowDungeon(v=>!v)}
-          hasBoss={!!worldBoss}
-        />
+          {/* Śledzenie zadań */}
+          <div style={{ position:'absolute', top:56, right:10, width:268, zIndex:55 }}>
+            <QuestTracker onOpen={()=>setShowQuests(true)} />
+          </div>
+
+          {/* Kule HP/EN + szybkie akcje */}
+          <BottomBar
+            postac={state.postac}
+            potions={potions}
+            onUsePotion={async (p) => {
+              const r = await api.items.use(p.id);
+              addToast(r?.ok ? `${p.nazwa}: +${r.wyleczono} HP` : (r?.error || 'Nie udało się użyć'), r?.ok ? 'success' : 'info');
+              loadState(); loadPotions();
+            }}
+            shortcuts={[
+              { icon:'🎒', label:'Ekwipunek', skrot:'I', onClick:()=>setShowInv(v=>!v) },
+              { icon:'📜', label:'Zadania',   skrot:'Q', onClick:()=>setShowQuests(v=>!v) },
+              { icon:'🏪', label:'Aukcja',    skrot:'B', onClick:()=>setShowAuction(v=>!v) },
+              { icon:'⚔', label:'PvP',       skrot:'P', onClick:()=>api.character.pvpToggle().then(loadState) },
+            ]}
+          />
+        </div>
 
         {/* Bottom: Chat panel */}
         <Chat socket={socket} isMobile={false} onMessage={handleChatMessage} mode="docked" playerName={state.postac.nazwa} />
