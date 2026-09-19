@@ -29,6 +29,7 @@ COMPOSE = ["docker", "compose", "-f", str(BASE / "app/deploy/docker-compose.yml"
            "--env-file", str(BASE / ".env")]
 BACKUP_DIR = BASE / "backups"
 BACKUP_SCRIPT = BASE / "app/deploy/backup.sh"
+UPDATE_SCRIPT = BASE / "app/deploy/update.sh"
 PANEL_ENV_FILE = Path("/etc/veldoria-panel.env")
 PASSWORD_HASH = os.environ.get("PANEL_PASSWORD_HASH", "")
 GAME_URL = "http://127.0.0.1:" + os.environ.get("GAME_PORT", "3002")
@@ -117,6 +118,7 @@ def run(cmd, timeout=60):
 
 
 ACTIONS = {
+    "update":     ("Aktualizuj z GitHuba", ["/bin/sh", str(UPDATE_SCRIPT)]),
     "start":      ("Start gry",          COMPOSE + ["up", "-d"]),
     "stop":       ("Stop gry",           COMPOSE + ["stop", "app"]),
     "restart":    ("Restart gry",        COMPOSE + ["restart", "app"]),
@@ -193,6 +195,14 @@ def host_stats():
             "disk_total_gb": round(st.f_blocks * st.f_frsize / 1e9, 1)}
 
 
+def version():
+    code, out = run(["git", "-C", str(BASE / "app"), "log", "-1", "--format=%h|%s|%cr"], timeout=10)
+    if code != 0 or "|" not in out:
+        return None
+    h, subject, when = out.split("|", 2)
+    return {"hash": h, "subject": subject, "when": when}
+
+
 def backups():
     BACKUP_DIR.mkdir(parents=True, exist_ok=True)
     files = sorted(BACKUP_DIR.glob("veldoria-*.sql.gz"), key=lambda p: p.stat().st_mtime, reverse=True)
@@ -238,7 +248,7 @@ def api_status():
     c = containers()
     names = [v["name"] for v in c.values() if v.get("state") == "running"]
     return jsonify(containers=c, stats=container_stats(names), game=game_stats(),
-                   host=host_stats(), backups=backups()[:15],
+                   host=host_stats(), backups=backups()[:15], version=version(),
                    action={k: v for k, v in _action.items() if k != "output"})
 
 
@@ -335,6 +345,7 @@ MAIN_HTML = """<!doctype html><html lang="pl"><head><meta charset="utf-8">
   <div class="row"><span>Konta</span><b id="accounts">–</b></div>
   <div class="row"><span>Kontener gry</span><span id="app-status">–</span></div>
   <div class="row"><span>Baza danych</span><span id="db-status">–</span></div>
+  <div class="row"><span>Wersja</span><span id="version" class="muted" style="text-align:right">–</span></div>
 </div>
 <div class="card"><h2>Zasoby</h2>
   <div class="row"><span>Gra CPU / RAM</span><span id="app-res">–</span></div>
@@ -346,7 +357,7 @@ MAIN_HTML = """<!doctype html><html lang="pl"><head><meta charset="utf-8">
 <div class="card"><h2>Sterowanie</h2>
   <div class="btns">
   {% for key, (label, _) in actions.items() %}
-    <button data-action="{{ key }}" {% if key in ('stop','restart-db','rebuild') %}class="danger"{% endif %}>{{ label }}</button>
+    <button data-action="{{ key }}" {% if key in ('stop','restart-db','rebuild','update') %}class="danger"{% endif %}>{{ label }}</button>
   {% endfor %}
   </div>
   <p class="muted" id="action-state" style="margin:12px 0 6px">Brak uruchomionych akcji</p>
@@ -374,7 +385,7 @@ MAIN_HTML = """<!doctype html><html lang="pl"><head><meta charset="utf-8">
 <script>
 const CSRF = {{ csrf|tojson }};
 const $ = id => document.getElementById(id);
-const CONFIRM = {stop:'Zatrzymać grę? Gracze zostaną rozłączeni.', restart:'Zrestartować grę?',
+const CONFIRM = {update:'Pobrać najnowszą wersję z GitHuba i zrestartować grę?', stop:'Zatrzymać grę? Gracze zostaną rozłączeni.', restart:'Zrestartować grę?',
   'restart-db':'Zrestartować bazę? Gra na chwilę straci połączenie.', rebuild:'Przebudować obraz i uruchomić grę ponownie?'};
 function stateTxt(c){ if(!c) return '<span class="bad">brak</span>';
   const cls = c.state==='running' ? (c.health && c.health!=='healthy' ? 'warn':'ok') : 'bad';
@@ -386,6 +397,7 @@ async function refresh(){
   $('game-state').innerHTML = up ? '<span class="ok">● Działa</span>' : '<span class="bad">● Nie odpowiada</span>';
   $('online').textContent = up ? s.game.online : '–'; $('accounts').textContent = up ? s.game.total : '–';
   $('app-status').innerHTML = stateTxt(app); $('db-status').innerHTML = stateTxt(db);
+  $('version').textContent = s.version ? `${s.version.hash} · ${s.version.subject} (${s.version.when})` : '–';
   const st = n => { const x = n && s.stats[n.name]; return x ? `${x.cpu} / ${x.mem.split('/')[0]}` : '–'; };
   $('app-res').textContent = st(app); $('db-res').textContent = st(db);
   $('load').textContent = s.host.load.join(' / ');
