@@ -7,8 +7,8 @@ const { requireSession } = require('../middleware/auth');
 router.get('/tree', requireSession, async (req, res, next) => {
   try {
     const postacId = req.session.postacId;
-    const [[postac]] = await db.query('SELECT klasa, profesja, punkty_talentow FROM postac WHERE id=?', [postacId]);
-    const klasa = postac.klasa || postac.profesja;
+    const [[postac]] = await db.query('SELECT profesja, punkty_talentow FROM postac WHERE id=?', [postacId]);
+    const klasa = postac.profesja; // talenty są przypisane do profesji
 
     const [talents] = await db.query(
       'SELECT * FROM talenty WHERE klasa=? ORDER BY sciezka, pozycja',
@@ -51,11 +51,11 @@ router.post('/invest', requireSession, async (req, res, next) => {
     const postacId = req.session.postacId;
     const { talent_id } = req.body;
 
-    const [[postac]] = await db.query('SELECT klasa, profesja, punkty_talentow FROM postac WHERE id=?', [postacId]);
+    const [[postac]] = await db.query('SELECT profesja, punkty_talentow FROM postac WHERE id=?', [postacId]);
     if ((postac.punkty_talentow || 0) <= 0)
       return res.json({ ok: false, error: 'Brak punktów talentów' });
 
-    const klasa = postac.klasa || postac.profesja;
+    const klasa = postac.profesja; // talenty są przypisane do profesji
     const [[talent]] = await db.query('SELECT * FROM talenty WHERE id=? AND klasa=?', [talent_id, klasa]);
     if (!talent) return res.json({ ok: false, error: 'Talent nie istnieje lub nie dla twojej klasy' });
 

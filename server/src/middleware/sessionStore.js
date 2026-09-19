@@ -36,7 +36,8 @@ class MySQLStore extends session.Store {
       .catch(cb);
   }
 
-  set(sid, sess, cb) {
+  // express-session nie zawsze podaje callback (np. req.session.destroy() bez argumentu)
+  set(sid, sess, cb = () => {}) {
     const ttl = sess.cookie?.maxAge ? Date.now() + sess.cookie.maxAge : Date.now() + 86_400_000;
     this.db.query(
       'REPLACE INTO sessions (sid, sess, expired) VALUES (?,?,?)',
@@ -44,7 +45,7 @@ class MySQLStore extends session.Store {
     ).then(() => cb(null)).catch(cb);
   }
 
-  destroy(sid, cb) {
+  destroy(sid, cb = () => {}) {
     this.db.query('DELETE FROM sessions WHERE sid=?', [sid])
       .then(() => cb(null)).catch(cb);
   }
