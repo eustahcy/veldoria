@@ -126,6 +126,10 @@ router.post('/move', requireSession, moveLimit, async (req, res, next) => {
 
     await db.query('UPDATE postac SET x = ?, y = ? WHERE id = ?', [nx, ny, postac.id]);
 
+    // Na żywo dla innych graczy na tej mapie — bez tego widzą skoki co odświeżenie stanu
+    const io = req.app.locals.io;
+    io?.to(`map_${postac.mapa}`).emit('player_moved', { id: postac.id, x: nx, y: ny, kierunek: direction });
+
     // Check location quests
     try {
       const [locQuests] = await db.query(
@@ -172,6 +176,7 @@ router.post('/move', requireSession, moveLimit, async (req, res, next) => {
       await db.query('UPDATE postac SET mapa = ?, x = ?, y = ? WHERE id = ?', [
         teleport.do_mapa, teleport.do_x, teleport.do_y, postac.id,
       ]);
+      io?.to(`map_${postac.mapa}`).emit('player_left', { id: postac.id });
       return res.json({ ok: true, teleported: true, newMap: teleport.do_mapa });
     }
 

@@ -538,6 +538,26 @@ async function clearCS(db, postacId) {
 }
 
 // ── POST /api/combat/start2 — init nowej walki lub wznów ────────────────────
+// GET /api/combat/skills — umiejętności klasy (pasek skrótów 1–4)
+router.get('/skills', requireSession, async (req, res, next) => {
+  try {
+    const [[p]] = await db.query('SELECT profesja, poziom FROM postac WHERE id=?', [req.session.postacId]);
+    if (!p) return res.json([]);
+    res.json(sk2.getSkills2(p.profesja, p.poziom).map(({ id, name, icon, desc, cost, cooldown, tier }) => ({ id, name, icon, desc, cost, cooldown, tier })));
+  } catch (e) { next(e); }
+});
+
+// Podgląd do panelu akcji: szansa trafienia i zakres obrażeń (te same wzory co combat2)
+function attackPreview(postac, mob) {
+  const hit = Math.max(5, Math.min(95, (postac.sa || 100) - (mob.ac || 0)));
+  const hitChance = Math.round(hit * (1 - Math.min(100, mob.unik || 0) / 100));
+  const abs = Math.max(0, Math.round((mob.absorbcja || 0) * (1 - (postac.przebicie || 0) / 100)));
+  const dmgMin = Math.max(1, (postac.obrazenia_min || 1) - abs);
+  const dmgMax = Math.max(1, (postac.obrazenia_max || 2) - abs);
+  const mobHit = Math.max(5, Math.min(95, (mob.sa || 85) - (postac.ac || 0)));
+  return { hitChance, dmgMin, dmgMax, ck: postac.ck || 0, mobHitChance: Math.round(mobHit * (1 - Math.min(100, postac.unik || 0) / 100)) };
+}
+
 router.post('/start2', requireSession, async (req, res, next) => {
   try {
     const { mobId } = req.body;
@@ -561,6 +581,7 @@ router.post('/start2', requireSession, async (req, res, next) => {
         turn: cs.turn || 0,
         cooldowns: cs.cooldowns || {},
         skills: sk2.getSkills2(postac.profesja, postac.poziom),
+        preview: attackPreview(postac, cs.mob_snapshot),
       });
     }
 
@@ -612,6 +633,7 @@ router.post('/start2', requireSession, async (req, res, next) => {
       mob: newCS.mob_snapshot,
       turn: 0, cooldowns: {},
       skills: sk2.getSkills2(postac.profesja, postac.poziom),
+      preview: attackPreview(postac, newCS.mob_snapshot),
     });
   } catch (e) { next(e); }
 });

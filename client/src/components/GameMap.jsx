@@ -124,11 +124,11 @@ const WorldEntities = memo(function WorldEntities({ mobs, npcs, players, chatBub
             style={{
               position:'absolute', left:0, top:0, width:HERO_W, height:HERO_H,
               transform:`translate(${p.x*TILE}px,${p.y*TILE}px)`,
-              transition:'transform 0.38s linear', willChange:'transform',
+              transition:'transform 0.22s linear', willChange:'transform',
               cursor:'pointer', zIndex:25,
             }}
           >
-            <Sprite src={`/assets/${p.obrazek}`} w={HERO_W} h={HERO_H} />
+            <Sprite src={`/assets/${p.obrazek}`} w={HERO_W} h={HERO_H} kier={p._kier || 0} step={p._step || 0} />
             <div style={{ position:'absolute', bottom:'100%', left:'50%', transform:'translateX(-50%)', display:'flex', flexDirection:'column', alignItems:'center', gap:3, pointerEvents:'none' }}>
               {chatBubbles[p.nazwa] && <ChatBubble text={chatBubbles[p.nazwa]} />}
               <NameTag name={p.nazwa} level={p.poziom} rankColor={rc} rankLabel={RANKA_LABEL[p.ranga]} guildTag={p.gildia_tag} tytulNazwa={p.tytul_nazwa} prestige={p.prestige} />

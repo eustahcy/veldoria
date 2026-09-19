@@ -374,99 +374,120 @@ export function QuestTracker({ onOpen }) {
   );
 }
 
-// ── Kula zasobu ──────────────────────────────────────────────────────────────
-function Orb({ value, max, from, to, label, size = 84 }) {
+// ── Kula zasobu w ozdobnej oprawie ───────────────────────────────────────────
+function Orb({ value, max, from, to, label, size = 104 }) {
   const pct = max > 0 ? Math.max(0, Math.min(1, value / max)) : 0;
+  const frame = size + 22;
   return (
-    <div title={`${label}: ${value} / ${max}`} style={{
-      width: size, height: size, borderRadius: '50%', position: 'relative', flexShrink: 0,
-      background: '#07060a',
-      border: `2px solid ${G.bronze}`,
-      boxShadow: `0 10px 26px rgba(0,0,0,0.75), inset 0 0 22px rgba(0,0,0,0.95), 0 0 0 1px rgba(0,0,0,0.9)`,
-      overflow: 'hidden',
-    }}>
+    <div title={`${label}: ${value} / ${max}`} style={{ position: 'relative', width: frame, height: frame, flexShrink: 0, zIndex: 2 }}>
+      {/* zewnętrzna obręcz z nitami */}
       <div style={{
-        position: 'absolute', left: 0, right: 0, bottom: 0, height: `${pct * 100}%`,
-        background: `linear-gradient(180deg, ${to} 0%, ${to} 35%, ${from} 100%)`,
-        boxShadow: `0 0 30px ${to}, inset 0 0 18px rgba(255,255,255,0.18)`, transition: 'height .35s',
+        position: 'absolute', inset: 0, borderRadius: '50%',
+        background: 'radial-gradient(circle at 50% 30%, #3a2f1f, #120e09 70%)',
+        border: `2px solid ${G.goldDim}`,
+        boxShadow: `0 12px 28px rgba(0,0,0,0.8), inset 0 2px 0 rgba(255,255,255,0.08), 0 0 0 1px #000, 0 0 18px ${to}22`,
       }} />
-      {/* połysk szkła */}
-      <span style={{
-        position: 'absolute', top: '8%', left: '16%', width: '52%', height: '32%', borderRadius: '50%',
-        background: 'linear-gradient(180deg, rgba(255,255,255,0.35), rgba(255,255,255,0))',
-        pointerEvents: 'none',
-      }} />
-      <span style={{
-        position: 'absolute', inset: 0, borderRadius: '50%', pointerEvents: 'none',
-        boxShadow: 'inset 0 -10px 18px rgba(0,0,0,0.7), inset 0 6px 14px rgba(255,255,255,0.07)',
-      }} />
+      {[0, 45, 90, 135, 180, 225, 270, 315].map(a => (
+        <span key={a} style={{
+          position: 'absolute', left: '50%', top: '50%', width: a % 90 ? 5 : 8, height: a % 90 ? 5 : 8,
+          transform: `translate(-50%,-50%) rotate(${a}deg) translateY(${-frame / 2 + 6}px) rotate(45deg)`,
+          background: a % 90 ? G.goldDim : G.gold, boxShadow: `0 0 5px ${G.gold}88`,
+        }} />
+      ))}
+      {/* szklana kula */}
       <div style={{
-        position: 'absolute', inset: 0, display: 'grid', placeItems: 'center',
-        color: '#fff', fontSize: 12, fontWeight: 700, textShadow: '0 1px 3px #000, 0 0 8px rgba(0,0,0,0.9)',
-        fontFamily: G.serif,
-      }}>{fmtNum(value)}</div>
+        position: 'absolute', inset: 11, borderRadius: '50%', overflow: 'hidden', background: '#07060a',
+        border: `2px solid ${G.bronze}`, boxShadow: 'inset 0 0 22px rgba(0,0,0,0.95), 0 0 0 1px #000',
+      }}>
+        <div style={{
+          position: 'absolute', left: 0, right: 0, bottom: 0, height: `${pct * 100}%`,
+          background: `radial-gradient(ellipse at 50% 0%, ${to} 0%, ${to} 30%, ${from} 95%)`,
+          boxShadow: `0 0 30px ${to}, inset 0 6px 14px rgba(255,255,255,0.22)`, transition: 'height .35s',
+        }} />
+        <span style={{
+          position: 'absolute', top: '7%', left: '18%', width: '48%', height: '30%', borderRadius: '50%',
+          background: 'linear-gradient(180deg, rgba(255,255,255,0.4), rgba(255,255,255,0))', pointerEvents: 'none',
+        }} />
+        <span style={{ position: 'absolute', inset: 0, borderRadius: '50%', boxShadow: 'inset 0 -12px 20px rgba(0,0,0,0.7)', pointerEvents: 'none' }} />
+        <div style={{
+          position: 'absolute', inset: 0, display: 'grid', placeItems: 'center', color: '#fff', fontSize: 13, fontWeight: 700,
+          textShadow: '0 1px 3px #000, 0 0 8px rgba(0,0,0,0.9)', fontFamily: G.serif, textAlign: 'center', lineHeight: 1.1,
+        }}>{fmtNum(value)}<br /><span style={{ fontSize: 9.5, opacity: 0.8 }}>/ {fmtNum(max)}</span></div>
+      </div>
     </div>
   );
 }
 
-// ── Dolny pasek ──────────────────────────────────────────────────────────────
-export function BottomBar({ postac, potions = [], onUsePotion, shortcuts = [] }) {
-  const exp = expInfo(postac);
-  const slot = (key, content, title, onClick, badge) => (
-    <button key={key} onClick={onClick} title={title} style={{
-      width: 48, height: 48, borderRadius: 3, cursor: 'pointer', position: 'relative',
-      background: 'linear-gradient(180deg,#221c14,#0c0a08)',
-      border: `1px solid ${G.bronze}`,
-      boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.07), inset 0 -6px 10px rgba(0,0,0,0.6)',
-      display: 'grid', placeItems: 'center', color: G.text, fontSize: 20,
-    }}
-      onMouseEnter={e => { e.currentTarget.style.borderColor = G.gold; }}
-      onMouseLeave={e => { e.currentTarget.style.borderColor = G.bronze; }}
-    >
-      {content}
-      {badge != null && (
-        <span style={{
-          position: 'absolute', bottom: 1, left: 4, fontSize: 9, color: G.goldHi,
-          textShadow: '0 1px 2px #000', fontWeight: 700,
-        }}>{badge}</span>
-      )}
-      {key && <span style={{ position: 'absolute', bottom: 1, right: 4, fontSize: 8, color: G.dim }}>{key}</span>}
-    </button>
-  );
-
+// Pojedyncze pole paska (kwadratowe lub okrągłe) z klawiszem pod spodem
+function BarSlot({ k, title, onClick, children, count, round, active, dim, badge }) {
+  const [hov, setHov] = useState(false);
   return (
-    <div style={{
-      position: 'absolute', left: 0, right: 0, bottom: 0, zIndex: 60,
-      display: 'flex', alignItems: 'flex-end', justifyContent: 'center', gap: 16,
-      padding: '0 16px 12px', pointerEvents: 'none', fontFamily: C.font,
-    }}>
-      <div style={{ pointerEvents: 'auto' }}>
-        <Orb value={postac.zycie} max={postac.zycie_max} from={G.hp} to={G.hpHi} label="Życie" />
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 }}>
+      <button onClick={onClick} title={title} onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)} style={{
+        width: 48, height: 48, borderRadius: round ? '50%' : 3, cursor: 'pointer', position: 'relative', padding: 0,
+        background: active ? 'radial-gradient(circle at 50% 35%, #5a4520, #1d160b)' : 'linear-gradient(180deg,#221c14,#0a0907)',
+        border: `1px solid ${active || hov ? G.gold : G.bronze}`,
+        boxShadow: active ? `0 0 14px ${G.gold}66` : 'inset 0 1px 0 rgba(255,255,255,0.07), inset 0 -8px 12px rgba(0,0,0,0.7), 0 0 0 1px #000',
+        display: 'grid', placeItems: 'center', color: G.text, fontSize: 22, opacity: dim ? 0.45 : 1,
+        transform: hov ? 'translateY(-1px)' : 'none', transition: 'all .1s',
+      }}>
+        {children}
+        {count != null && (
+          <span style={{ position: 'absolute', right: 3, bottom: 1, fontSize: 11, color: '#fff', fontWeight: 700, textShadow: '0 1px 2px #000, 0 0 3px #000' }}>{count}</span>
+        )}
+        {badge && <span style={{ position: 'absolute', top: 2, right: 2, width: 7, height: 7, borderRadius: '50%', background: '#5fd07a', boxShadow: '0 0 6px #5fd07a' }} />}
+      </button>
+      <span style={{ fontSize: 10, color: G.muted, fontFamily: G.serif, lineHeight: 1 }}>{k}</span>
+    </div>
+  );
+}
+
+// ── Dolny pasek: kule HP/EN, umiejętności 1–4, mikstury F1–F3, skróty ────────
+export function BottomBar({ postac, potions = [], onUsePotion, skills = [], onSkill, extras = [] }) {
+  const Sep = () => <span style={{ width: 1, alignSelf: 'stretch', margin: '4px 5px 16px', background: `linear-gradient(180deg,transparent,${G.goldDim},transparent)` }} />;
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', fontFamily: C.font }}>
+      <Orb value={postac.zycie} max={postac.zycie_max} from={G.hp} to={G.hpHi} label="Życie" />
+
+      <div style={{
+        position: 'relative', margin: '0 -16px', padding: '9px 28px 5px', display: 'flex', alignItems: 'flex-start', gap: 6,
+        background: 'linear-gradient(180deg,#221c14 0%,#15110c 55%,#0b0907 100%)',
+        borderTop: `2px solid ${G.goldDim}`, borderBottom: `2px solid ${G.goldDim}`,
+        boxShadow: '0 10px 24px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.08), 0 0 0 1px #000',
+      }}>
+        {[0, 1, 2, 3].map(i => {
+          const s = skills[i];
+          return (
+            <BarSlot key={`s${i}`} k={String(i + 1)} onClick={() => onSkill?.(i)} dim={!s}
+              title={s ? `${s.name} — ${s.desc} (EN ${s.cost}). Kliknij, aby zaatakować; w walce klawisz ${i + 1} użyje umiejętności.` : 'Brak umiejętności'}>
+              {s ? <span style={{ color: '#f7c77a', filter: 'drop-shadow(0 0 5px rgba(247,160,90,0.7))', fontFamily: G.serif }}>{s.icon}</span> : <span style={{ color: G.dim, fontSize: 14 }}>—</span>}
+            </BarSlot>
+          );
+        })}
+        <Sep />
+        {[0, 1, 2].map(i => {
+          const p = potions[i];
+          return (
+            <BarSlot key={`p${i}`} k={`F${i + 1}`} dim={!p} count={p ? (p.ilosc || 1) : null}
+              title={p ? `${p.nazwa} (F${i + 1})` : 'Brak mikstury'} onClick={() => p && onUsePotion?.(p)}>
+              {p ? (
+                <span style={{
+                  width: 32, height: 32, imageRendering: 'pixelated', display: 'block',
+                  backgroundImage: `url(/assets/${p.obrazek})`, backgroundSize: 'contain', backgroundPosition: 'center', backgroundRepeat: 'no-repeat',
+                }} />
+              ) : <span style={{ color: G.dim, fontSize: 14 }}>—</span>}
+            </BarSlot>
+          );
+        })}
+        {extras.length > 0 && <Sep />}
+        {extras.map(x => (
+          <BarSlot key={x.label} k={x.k} round title={x.label} onClick={x.onClick} active={x.active} badge={x.badge}>
+            <span style={{ fontSize: 20, filter: 'drop-shadow(0 1px 2px #000)' }}>{x.icon}</span>
+          </BarSlot>
+        ))}
       </div>
 
-      <div style={{ pointerEvents: 'auto' }}>
-        <Ornate pad={9} style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
-          <div style={{ display: 'flex', gap: 7 }}>
-            {shortcuts.map(s => slot(s.skrot, s.icon, `${s.label} (${s.skrot})`, s.onClick))}
-            <span style={{ width: 1, margin: '2px 3px', background: `linear-gradient(180deg,transparent,${G.bronze},transparent)` }} />
-            {potions.slice(0, 4).map((p, i) => slot(
-              `F${i + 1}`,
-              <span style={{
-                width: 32, height: 32, imageRendering: 'pixelated', display: 'block',
-                backgroundImage: `url(/assets/${p.obrazek})`, backgroundSize: 'contain',
-                backgroundPosition: 'center', backgroundRepeat: 'no-repeat',
-              }} />,
-              p.nazwa, () => onUsePotion?.(p), p.ilosc > 1 ? p.ilosc : null,
-            ))}
-            {potions.length === 0 && slot('F1', <span style={{ color: G.dim, fontSize: 12 }}>—</span>, 'Brak mikstur w plecaku')}
-          </div>
-          <Bar value={exp.pct} max={100} from={G.exp} to={G.expHi} height={9} label={`${exp.pct.toFixed(2)}%`} />
-        </Ornate>
-      </div>
-
-      <div style={{ pointerEvents: 'auto' }}>
-        <Orb value={postac.energia ?? 0} max={postac.energia_max ?? 100} from={G.en} to={G.enHi} label="Energia" />
-      </div>
+      <Orb value={postac.energia ?? 0} max={postac.energia_max ?? 100} from={G.en} to={G.enHi} label="Energia" />
     </div>
   );
 }

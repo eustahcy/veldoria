@@ -287,6 +287,10 @@ export default function Game({ onLogout, onDisconnect }) {
   const [mapFocus,      setMapFocus]     = useState(null);
   const [autoHunt,      setAutoHunt]     = useState(false);
   const [mChat,         setMChat]        = useState(false);
+  // Ruch innych graczy na żywo (socket) — { [id]: { x, y, kier, step, t } | { gone, t } }
+  const [liveMoves,     setLiveMoves]    = useState({});
+  const [skillBar,      setSkillBar]     = useState([]);   // umiejętności klasy na pasek 1–4
+  const hotkeys = useRef({});                             // akcje dla klawiszy 1–4 / F1–F3
   const isMobile    = useIsMobile();
   const isLandscape = useIsLandscape();
 
@@ -383,6 +387,37 @@ export default function Game({ onLogout, onDisconnect }) {
   }, [loadState]);
 
   const socket = useSocket(state?.mapa?.id);
+
+  // Każdy krok innego gracza przychodzi osobno, więc postać płynnie przechodzi kafel po kaflu
+  useEffect(() => {
+    if (!socket) return;
+    const idle = {};
+    const onMoved = (m) => {
+      if (m.id === stateRef.current?.postac?.id) return;
+      setLiveMoves(prev => {
+        const p = prev[m.id];
+        return { ...prev, [m.id]: { x: m.x, y: m.y, kier: DIR_ROW[m.kierunek] ?? 0, step: ((p?.step || 0) + 1) % 4, t: Date.now() } };
+      });
+      clearTimeout(idle[m.id]);
+      idle[m.id] = setTimeout(() => setLiveMoves(prev => (prev[m.id] && !prev[m.id].gone ? { ...prev, [m.id]: { ...prev[m.id], step: 0 } } : prev)), 330);
+    };
+    const onLeft = (m) => setLiveMoves(prev => ({ ...prev, [m.id]: { gone: true, t: Date.now() } }));
+    socket.on('player_moved', onMoved);
+    socket.on('player_left', onLeft);
+    return () => {
+      socket.off('player_moved', onMoved);
+      socket.off('player_left', onLeft);
+      Object.values(idle).forEach(clearTimeout);
+    };
+  }, [socket]);
+
+  useEffect(() => {
+    if (!state?.postac?.profesja) return;
+    api.combat.skills().then(r => Array.isArray(r) && setSkillBar(r)).catch(() => {});
+  }, [state?.postac?.profesja, state?.postac?.poziom]);
+
+  // Po zmianie mapy stare pozycje są bez znaczenia
+  useEffect(() => { setLiveMoves({}); }, [state?.mapa?.id]);
 
   // Przejście z paska zakładek ekwipunku do innych okien
   const openPanel = useCallback((id) => {
@@ -581,6 +616,12 @@ export default function Game({ onLogout, onDisconnect }) {
     };
     const onKey = e => {
       if (e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA'||e.target.tagName==='SELECT') return;
+      // W trakcie walki klawisze należą do okna walki (A/S/B/F/I, 1–9)
+      if (hotkeys.current.inBattle) return;
+      if (/^[1-4]$/.test(e.key)) { e.preventDefault(); hotkeys.current.attack?.(); return; }
+      const fk = { F1:0, F2:1, F3:2 }[e.key];
+      if (fk !== undefined) { e.preventDefault(); const p = hotkeys.current.potions?.[fk]; if (p) hotkeys.current.usePotion?.(p); return; }
+      if (e.key.toLowerCase()==='r') { e.preventDefault(); hotkeys.current.auto?.(); return; }
       const dir = KEY[e.key];
       if (dir) {
         e.preventDefault();
@@ -686,6 +727,20 @@ export default function Game({ onLogout, onDisconnect }) {
     loadState(); loadPotions();
   }, [addToast, loadState, loadPotions]);
 
+  // Atak: zaznaczony cel, a bez celu — najbliższy potwór
+  const attackOrEngage = useCallback(() => {
+    if (!target) { engageNearest(); return; }
+    const pos = posRef.current, cur = stateRef.current;
+    if (Math.abs(target.x - pos.x) <= 1 && Math.abs(target.y - pos.y) <= 1) openBattle(target);
+    else walkAdjacentTo(target.x, target.y, cur, () => openBattle(target));
+  }, [target, engageNearest, openBattle, walkAdjacentTo]);
+
+  const toggleAuto = useCallback(() => {
+    setAutoHunt(v => { addToast(v ? 'Auto-polowanie wyłączone' : 'Auto-polowanie włączone', 'info'); return !v; });
+  }, [addToast]);
+
+  hotkeys.current = { inBattle: !!battle, attack: attackOrEngage, potions, usePotion, auto: toggleAuto };
+
   // Auto: po każdej walce sam wybiera najbliższego potwora; wyłącza się przy niskim HP
   useEffect(() => {
     if (!autoHunt || battle || npcDialog) return;
@@ -709,7 +764,15 @@ export default function Game({ onLogout, onDisconnect }) {
   );
 
   const isAdmin    = state.postac.ranga === 'GameAdmin';
-  const stateForMap = walkTarget ? { ...state, _walkTarget:walkTarget } : state;
+  // Pozycje z socketu mają pierwszeństwo przed odpytywaniem (co 2,5 s) przez 4 s od ostatniego kroku
+  const nowMs = Date.now();
+  const livePlayers = (state.players || [])
+    .filter(p => !(liveMoves[p.id]?.gone && nowMs - liveMoves[p.id].t < 4000))
+    .map(p => {
+      const l = liveMoves[p.id];
+      return l && !l.gone && nowMs - l.t < 4000 ? { ...p, x: l.x, y: l.y, _kier: l.kier, _step: l.step } : p;
+    });
+  const stateForMap = { ...state, players: livePlayers, ...(walkTarget ? { _walkTarget: walkTarget } : {}) };
   const liveMob    = target ? state.mobs?.find(m => m.id === target.id) : null;
 
   // ── MOBILE LAYOUT (portrait only — landscape uses desktop layout) ────────────
@@ -744,7 +807,7 @@ export default function Game({ onLogout, onDisconnect }) {
           {showAdmin  && <AdminPanel postac={state.postac} onClose={()=>setShowAdmin(false)} />}
           {showOutfit && <OutfitSelector postac={state.postac} onClose={()=>setShowOutfit(false)} onChanged={()=>{ loadState(); setShowOutfit(false); }} />}
           {battle     && (
-            <BattleModal mob={battle.mob} postac={battle.postac}
+            <BattleModal mob={battle.mob} postac={battle.postac} mapa={state.mapa}
               onClose={() => { setBattle(null); setTarget(null); loadState(); }}
               onEnd={() => { loadState(); setTimeout(()=>setBattle(null),600); }}
               onLog={entries => setCombatLog(p => [...p.slice(-40), ...entries])}
@@ -906,14 +969,14 @@ export default function Game({ onLogout, onDisconnect }) {
               onMove={dir=>{ stopWalking(); setWalkTarget(null); move(dir).then(triggerIdle); }}
               onScreen={setMScreen}
               onChat={()=>setMChat(v=>!v)}
-              onAttack={()=>{ if (target) { const pos=posRef.current; const cur=stateRef.current; if(Math.abs(target.x-pos.x)<=1&&Math.abs(target.y-pos.y)<=1) openBattle(target); else walkAdjacentTo(target.x,target.y,cur,()=>openBattle(target)); } else engageNearest(); }}
+              onAttack={attackOrEngage}
               onTalk={talkNearest}
               onPotion={usePotion}
-              onAuto={()=>{ setAutoHunt(v => { addToast(v ? 'Auto-polowanie wyłączone' : 'Auto-polowanie włączone', 'info'); return !v; }); }}
+              onAuto={toggleAuto}
             />
             {mChat && (
               <div style={{ position:'fixed', left:0, right:0, bottom:'calc(env(safe-area-inset-bottom, 0px) + 78px)', zIndex:495 }}>
-                <Chat socket={socket} isMobile={false} onMessage={handleChatMessage} mode="docked" playerName={state.postac.nazwa} />
+                <Chat socket={socket} isMobile={false} onMessage={handleChatMessage} mode="overlay" playerName={state.postac.nazwa} />
               </div>
             )}
           </>
@@ -946,7 +1009,7 @@ export default function Game({ onLogout, onDisconnect }) {
         {showQuests && <QuestPanel onClose={()=>setShowQuests(false)} onReward={msg=>{ addToast(msg,'info'); loadState(); setShowQuests(false); }} />}
         {showAdmin && <AdminPanel postac={state.postac} onClose={()=>setShowAdmin(false)} />}
         {battle    && (
-          <BattleModal mob={battle.mob} postac={battle.postac}
+          <BattleModal mob={battle.mob} postac={battle.postac} mapa={state.mapa}
             onClose={() => { setBattle(null); setTarget(null); loadState(); }}
             onEnd={() => { loadState(); setTimeout(()=>setBattle(null),600); }}
             onLog={entries => setCombatLog(p => [...p.slice(-40), ...entries])}
@@ -1145,36 +1208,28 @@ export default function Game({ onLogout, onDisconnect }) {
             <QuestTracker onOpen={()=>setShowQuests(true)} />
           </div>
 
-          {/* Szybki dostęp — prawy dolny róg */}
-          <div style={{ position:'absolute', right:10, bottom:12, zIndex:55 }}>
-            <QuickAccess items={[
-              { skrot:'B', icon:'🏪', label:'Aukcja',    onClick:()=>setShowAuction(v=>!v) },
-              { skrot:'I', icon:'🎒', label:'Ekwipunek', onClick:()=>setShowInv(v=>!v) },
-              { skrot:'T', icon:'⭐', label:'Talenty',   onClick:()=>setShowTalents(v=>!v) },
-              { skrot:'Q', icon:'📜', label:'Zadania',   onClick:()=>setShowQuests(v=>!v) },
-            ]} />
+          {/* Dół mapy: czat (lewy róg) + pasek z kulami HP/EN */}
+          <div style={{ position:'absolute', left:10, right:10, bottom:8, zIndex:60, display:'flex', alignItems:'flex-end', gap:14, pointerEvents:'none' }}>
+            <div style={{ width:340, flexShrink:0, pointerEvents:'auto' }}>
+              <Chat socket={socket} isMobile={false} onMessage={handleChatMessage} mode="overlay" playerName={state.postac.nazwa} />
+            </div>
+            <div style={{ flex:1, minWidth:0, display:'flex', justifyContent:'center' }}>
+              <div style={{ pointerEvents:'auto' }}>
+                <BottomBar
+                  postac={state.postac}
+                  potions={potions}
+                  onUsePotion={usePotion}
+                  skills={skillBar}
+                  onSkill={attackOrEngage}
+                  extras={[
+                    { k:'R', icon:'Ⓜ', label:'Auto-polowanie: po walce sam atakuje najbliższego potwora', onClick:toggleAuto, active:autoHunt },
+                    { k:'I', icon:'🎒', label:'Ekwipunek (I)', onClick:()=>setShowInv(v=>!v) },
+                  ]}
+                />
+              </div>
+            </div>
           </div>
-
-          {/* Kule HP/EN + szybkie akcje */}
-          <BottomBar
-            postac={state.postac}
-            potions={potions}
-            onUsePotion={async (p) => {
-              const r = await api.items.use(p.id);
-              addToast(r?.ok ? `${p.nazwa}: +${r.wyleczono} HP` : (r?.error || 'Nie udało się użyć'), r?.ok ? 'success' : 'info');
-              loadState(); loadPotions();
-            }}
-            shortcuts={[
-              { icon:'🎒', label:'Ekwipunek', skrot:'I', onClick:()=>setShowInv(v=>!v) },
-              { icon:'📜', label:'Zadania',   skrot:'Q', onClick:()=>setShowQuests(v=>!v) },
-              { icon:'🏪', label:'Aukcja',    skrot:'B', onClick:()=>setShowAuction(v=>!v) },
-              { icon:'⚔', label:'PvP',       skrot:'P', onClick:()=>api.character.pvpToggle().then(loadState) },
-            ]}
-          />
         </div>
-
-        {/* Bottom: Chat panel */}
-        <Chat socket={socket} isMobile={false} onMessage={handleChatMessage} mode="docked" playerName={state.postac.nazwa} />
       </div>
 
       {/* RIGHT: Collapsible social panel */}
@@ -1193,7 +1248,7 @@ export default function Game({ onLogout, onDisconnect }) {
       {npcDialog  && <NpcDialog npc={npcDialog} postac={state.postac} onClose={()=>setNpcDialog(null)} onBought={loadState} />}
       {showAdmin  && <AdminPanel postac={state.postac} onClose={()=>setShowAdmin(false)} />}
       {battle     && (
-        <BattleModal mob={battle.mob} postac={battle.postac}
+        <BattleModal mob={battle.mob} postac={battle.postac} mapa={state.mapa}
           onClose={() => { setBattle(null); setTarget(null); loadState(); }}
           onEnd={() => { loadState(); setTimeout(()=>setBattle(null),600); }}
           onLog={entries => setCombatLog(p => [...p.slice(-40), ...entries])}

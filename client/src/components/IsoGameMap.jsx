@@ -63,7 +63,7 @@ const Entity = memo(function Entity({ e, kind, sx, sy, onClick, bubble, children
         width: 26, height: 12, borderRadius: '50%', background: 'rgba(0,0,0,0.38)',
         filter: 'blur(1px)', pointerEvents: 'none',
       }} />
-      <Sprite src={`/assets/${e.obrazek}`} w={HERO_W} h={HERO_H} kier={kind === 'hero' ? e._kier || 0 : 0} step={kind === 'hero' ? e._step || 0 : 0} />
+      <Sprite src={`/assets/${e.obrazek}`} w={HERO_W} h={HERO_H} kier={e._kier || 0} step={e._step || 0} />
       <div style={{
         position: 'absolute', bottom: '100%', left: '50%', transform: 'translateX(-50%)',
         display: 'flex', flexDirection: 'column', alignItems: 'center', pointerEvents: 'none',

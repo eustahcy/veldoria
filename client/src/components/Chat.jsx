@@ -32,6 +32,7 @@ export default function Chat({ socket, isMobile, onMessage, mode='floating', pla
   const [dockOpen, setDockOpen]   = useState(true);
   const [tab,      setTab]        = useState('wszystkie');
   const bottomRef  = useRef(null);
+  const listRef    = useRef(null);
   const inputRef   = useRef(null);
   const mounted    = useRef(true);
 
@@ -59,13 +60,16 @@ export default function Chat({ socket, isMobile, onMessage, mode='floating', pla
   }, [socket, open, onMessage, mode]);
 
   useEffect(() => {
-    const isOpen = mode === 'docked' ? true : open;
-    if (isOpen) { bottomRef.current?.scrollIntoView({ behavior:'smooth' }); setUnread(0); }
+    const isOpen = mode === 'docked' || mode === 'overlay' ? true : open;
+    // scrollTop zamiast scrollIntoView — ten drugi przewijałby też mapę pod nakładką
+    if (listRef.current) listRef.current.scrollTop = listRef.current.scrollHeight;
+    else if (isOpen) bottomRef.current?.scrollIntoView({ behavior:'smooth' });
+    if (isOpen) setUnread(0);
   }, [messages, open, mode]);
 
   // Keyboard shortcut: Enter to focus chat
   useEffect(() => {
-    if (mode !== 'docked') return;
+    if (mode !== 'docked' && mode !== 'overlay') return;
     const fn = (e) => {
       if (e.key === 'Enter' && document.activeElement !== inputRef.current) {
         e.preventDefault();
@@ -90,6 +94,69 @@ export default function Chat({ socket, isMobile, onMessage, mode='floating', pla
       api.chat.get().then(m => { if (mounted.current) setMessages(m); });
     }
   }, [input, socket, playerName, tab, onMessage]);
+
+  // ── OVERLAY MODE (półprzezroczyste okno na mapie, lewy dolny róg) ─────────────
+  if (mode === 'overlay') {
+    const shown = tab === 'wszystkie' ? messages : messages.filter(m => kanalOf(m) === tab);
+    const OV = { globalny: '#ff8a5c', handel: '#5ec8ff', gildia: '#7fd67a', system: '#c79bff', lokalny: '#e8e2d4' };
+    const OT = TABS.filter(t => t.id !== 'lokalny');
+    return (
+      <div style={{
+        width: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden',
+        background: 'linear-gradient(180deg, rgba(14,11,8,0.86), rgba(8,6,5,0.9))',
+        border: '1px solid #7a5f2a', borderRadius: 4,
+        boxShadow: '0 0 0 1px rgba(0,0,0,0.8), 0 10px 26px rgba(0,0,0,0.6)',
+        fontFamily: "'Trebuchet MS', Verdana, sans-serif", backdropFilter: 'blur(2px)',
+      }}>
+        <div style={{ display: 'flex', alignItems: 'stretch', borderBottom: '1px solid rgba(122,95,42,0.7)', flexShrink: 0 }}>
+          {OT.map(t => {
+            const on = tab === t.id;
+            return (
+              <button key={t.id} onClick={() => { setTab(t.id); setDockOpen(true); }} style={{
+                flex: 1, padding: '6px 4px', cursor: 'pointer', border: 'none', whiteSpace: 'nowrap',
+                borderRight: '1px solid rgba(122,95,42,0.35)',
+                background: on ? 'linear-gradient(180deg, rgba(231,193,88,0.22), rgba(231,193,88,0.04))' : 'transparent',
+                boxShadow: on ? 'inset 0 -2px 0 #e7c158' : 'none',
+                color: on ? '#f7e3a4' : '#9a9182', fontSize: 11.5,
+                fontFamily: "'Cinzel','Palatino Linotype',serif",
+              }}><span style={{ color: on ? '#e7c158' : '#5e584c', fontSize: 8, marginRight: 4 }}>◆</span>{t.label}</button>
+            );
+          })}
+          <button onClick={() => setDockOpen(o => !o)} title={dockOpen ? 'Zwiń' : 'Rozwiń'} style={{
+            padding: '0 9px', border: 'none', background: 'none', cursor: 'pointer', color: '#9a9182', fontSize: 10,
+          }}>{dockOpen ? '▼' : '▲'}</button>
+        </div>
+        {dockOpen && <>
+          <div ref={listRef} style={{ height: 120, overflowY: 'auto', padding: '5px 10px', display: 'flex', flexDirection: 'column', gap: 1 }}>
+            {shown.length === 0 && <div style={{ color: '#5e584c', fontSize: 11.5, textAlign: 'center', marginTop: 12, fontStyle: 'italic' }}>{tab === 'system' ? 'Brak komunikatów' : 'Cisza…'}</div>}
+            {shown.map((m, i) => {
+              const k = kanalOf(m);
+              const own = m.kto === playerName;
+              return (
+                <div key={i} style={{ fontSize: 12.5, lineHeight: 1.45, textShadow: '0 1px 2px #000' }}>
+                  {k !== 'lokalny' && <span style={{ color: OV[k] }}>[{ETYKIETA[k]}] </span>}
+                  <span style={{ color: own ? '#9be8ac' : k === 'system' ? OV.system : '#f0c060' }}>{m.kto}:</span>{' '}
+                  <span style={{ color: k === 'system' ? '#d9c8f5' : '#e8e2d4' }}>{m.tresc}</span>
+                </div>
+              );
+            })}
+            <div ref={bottomRef} />
+          </div>
+          {tab !== 'system' && (
+            <form onSubmit={send} style={{ display: 'flex', gap: 6, padding: '6px 8px', borderTop: '1px solid rgba(122,95,42,0.45)', flexShrink: 0 }}>
+              <input ref={inputRef} value={input} onChange={e => setInput(e.target.value)} maxLength={250}
+                placeholder={tab === 'wszystkie' ? 'Napisz wiadomość… [Enter]' : PLACEHOLDER[tab]}
+                style={{ flex: 1, minWidth: 0, background: 'rgba(0,0,0,0.55)', color: '#e8e2d4', border: '1px solid rgba(122,95,42,0.55)', borderRadius: 3, padding: '7px 10px', fontSize: 12.5, outline: 'none', fontFamily: 'inherit' }} />
+              <button type="submit" style={{
+                width: 38, borderRadius: 3, cursor: 'pointer', background: 'linear-gradient(180deg,#5a4520,#2d2210)',
+                color: '#f7e3a4', border: '1px solid #e7c158', fontSize: 13,
+              }}>➤</button>
+            </form>
+          )}
+        </>}
+      </div>
+    );
+  }
 
   // ── DOCKED MODE (desktop bottom panel) ───────────────────────────────────────
   if (mode === 'docked') {

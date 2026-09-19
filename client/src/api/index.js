@@ -88,6 +88,7 @@ export const api = {
     pvp:      (targetId)                 => req('POST', '/combat/pvp',    { targetId }),
     // ── Nowy system v2 ──────────────────────────────────────────────────────
     start2:   (mobId)                    => req('POST', '/combat/start2',   { mobId }),
+    skills:   ()                         => req('GET',  '/combat/skills'),
     turn2:    (mobId, action, skillId, itemId) => req('POST', '/combat/turn2', { mobId, action, skillId, itemId }),
     state2:   ()                         => req('GET',  '/combat/state2'),
     abort2:   ()                         => req('DELETE','/combat/abort2'),
