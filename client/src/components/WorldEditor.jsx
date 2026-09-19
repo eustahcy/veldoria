@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { api } from '../api';
+import IsoMapEditor from './IsoMapEditor';
 
 // ── Design tokens ─────────────────────────────────────────────────────────────
 const T = {
@@ -1349,6 +1350,7 @@ function SearchTab({ maps, onNavigate }) {
 
 // ── MAIN ──────────────────────────────────────────────────────────────────────
 const TABS = [
+  { id: 'iso',     icon: '🧭',  label: 'Mapa 3D'      },
   { id: 'map',     icon: '🗺',  label: 'Edytor mapy'  },
   { id: 'mobs',    icon: '👾',  label: 'Wrogowie'     },
   { id: 'npcs',    icon: '🧑',  label: 'NPC'          },
@@ -1490,6 +1492,7 @@ export default function WorldEditor({ currentMapId }) {
 
       {/* Content */}
       <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+        {tab === 'iso'     && <IsoMapEditor mapId={mapId} />}
         {tab === 'map'     && <MapTileEditor mapId={mapId} maps={maps} pickMode={pickMode} onPick={handlePick} />}
         {tab === 'mobs'    && <MobEditor    mapId={mapId} onRequestPick={() => handleRequestPick('mobs')} pendingPos={pickMode === null ? pickedPos : null} onPosConsumed={() => setPickedPos(null)} />}
         {tab === 'npcs'    && <NpcEditor    mapId={mapId} onRequestPick={() => handleRequestPick('npcs')} pendingPos={pickMode === null ? pickedPos : null} onPosConsumed={() => setPickedPos(null)} />}

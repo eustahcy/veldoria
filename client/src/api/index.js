@@ -67,6 +67,7 @@ export const api = {
     state:      ()    => req('GET',  '/game/state'),
     move:       (dir) => req('POST', '/game/move', { direction: dir }),
     worldState: ()    => req('GET',  '/game/world-state'),
+    tiles:      (mapaId) => req('GET', `/game/tiles/${mapaId}`),
   },
   events: {
     active:   ()    => req('GET',  '/events/active'),
@@ -92,6 +93,8 @@ export const api = {
   world: {
     maps:           ()              => req('GET',    '/world/maps'),
     updateMap:      (id, data)      => req('PUT',    `/world/maps/${id}`, data),
+    tiles:          (mapaId)        => req('GET',    `/world/tiles/${mapaId}`),
+    saveTiles:      (mapaId, data)  => req('PUT',    `/world/tiles/${mapaId}`, data),
     mobs:           (mapaId)        => req('GET',    `/world/mobs/${mapaId}`),
     createMob:      (data)          => req('POST',   '/world/mobs', data),
     updateMob:      (id, data)      => req('PUT',    `/world/mobs/${id}`, data),

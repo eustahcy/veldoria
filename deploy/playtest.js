@@ -232,6 +232,7 @@ async function main() {
     '/quests/chains', '/quests/daily', '/quests/weekly', '/quests/reputation', '/quests/history',
     '/quests/achievements', '/quests/events/active', '/events/active', '/events/shop',
     '/items/temple-status', '/items/boss-portal', '/items/guild-board', '/items/event-zone',
+    `/game/tiles/${st.postac.mapa}`,
     `/combat/mob-info/${st.mobs[0]?.id || 1}`, ...st.npcs.slice(0, 3).map(n => `/quests/npc/${n.id}`)]) {
     await call('GET', p);
   }

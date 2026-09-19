@@ -16,6 +16,7 @@ echo "== phase10_combat.sql"; sql < "$DIR/app/server/src/migrations/phase10_comb
 $COMPOSE up -d app && sleep 8
 echo "== phase12 (InnoDB + utf8mb4)"; $COMPOSE run --rm -T app node server/src/migrations/phase12_innodb_utf8mb4.js --apply
 node_mig phase13_schema_uzupelnienie
+node_mig phase14_iso_mapy
 echo "== phase9_worldboss.sql"; sql < "$DIR/app/server/src/migrations/phase9_worldboss.sql"
 $COMPOSE restart app
 echo "Baza gotowa."

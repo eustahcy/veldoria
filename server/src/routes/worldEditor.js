@@ -3,6 +3,8 @@ const router  = express.Router();
 const db      = require('../db');
 const serverConfig = require('../game/serverConfig');
 const mapCache = require('../game/mapCache');
+const { logError } = require('../game/log');
+const { parseTiles, applyTilePatch, MAX_TILES } = require('../game/tiles');
 
 // Middleware — tylko GameAdmin (in-game lub pre-game)
 async function requireAdmin(req, res, next) {
@@ -26,7 +28,48 @@ router.put('/maps/:id', requireAdmin, async (req, res, next) => {
     const { strefy } = req.body;
     const val = typeof strefy === 'string' ? strefy : JSON.stringify(strefy || []);
     await db.query('UPDATE mapa SET strefy=? WHERE id=?', [val, req.params.id]);
+    mapCache.invalidate(req.params.id);
     res.json({ ok: true });
+  } catch(e) { next(e); }
+});
+
+// ── KAFLE IZOMETRYCZNE ───────────────────────────────────────────────────────
+// Format: { "x,y": { t: "teren", o: "obiekt" } } — jeden JSON na mapę.
+
+router.get('/tiles/:mapaId', requireAdmin, async (req, res, next) => {
+  try {
+    const [[mapa]] = await db.query('SELECT id, nazwa, maks_x, maks_y, iso, kafle FROM mapa WHERE id=?', [req.params.mapaId]);
+    if (!mapa) return res.status(404).json({ error: 'Mapa nie istnieje' });
+    res.json({ ...mapa, kafle: parseTiles(mapa.kafle) });
+  } catch(e) { next(e); }
+});
+
+// Zapis różnicowy: [{x,y,t,o}] — t/o = null usuwa. Zwraca liczbę kafli po zmianie.
+router.put('/tiles/:mapaId', requireAdmin, async (req, res, next) => {
+  try {
+    const mapaId = Number(req.params.mapaId);
+    const { patch, iso } = req.body;
+    const [[mapa]] = await db.query('SELECT maks_x, maks_y, kafle FROM mapa WHERE id=?', [mapaId]);
+    if (!mapa) return res.status(404).json({ error: 'Mapa nie istnieje' });
+
+    const kafle = parseTiles(mapa.kafle);
+    applyTilePatch(kafle, patch, mapa);
+    if (Object.keys(kafle).length > MAX_TILES) return res.status(400).json({ error: 'Za dużo kafli' });
+
+    const fields = ['kafle=?'];
+    const params = [JSON.stringify(kafle)];
+    if (iso !== undefined) { fields.push('iso=?'); params.push(iso ? 1 : 0); }
+    params.push(mapaId);
+    await db.query(`UPDATE mapa SET ${fields.join(',')} WHERE id=?`, params);
+    mapCache.invalidate(mapaId);
+
+    // Podgląd na żywo u innych edytorów i graczy na tej mapie
+    const io = req.app.locals.io;
+    if (io && Array.isArray(patch) && patch.length) {
+      io.to(`map_${mapaId}`).to(`edit_${mapaId}`).emit('map_tiles', { mapa_id: mapaId, patch });
+    }
+
+    res.json({ ok: true, count: Object.keys(kafle).length });
   } catch(e) { next(e); }
 });
 

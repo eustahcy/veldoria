@@ -7,6 +7,7 @@ const { computeStats } = require('../game/stats');
 const { createLimiter } = require('../middleware/rateLimiter');
 const mapCache = require('../game/mapCache');
 const worldCycle = require('../game/worldCycle');
+const { parseTiles } = require('../game/tiles');
 
 const moveLimit = createLimiter(20, 1000); // max 20 moves/s
 
@@ -69,9 +70,11 @@ router.get('/state', requireSession, async (req, res, next) => {
     } catch (e) { logError('game:69')(e); }
 
     const { haslo: _h, equippedItems: _eq, ...safePostac } = postac;
+    // kafle izometryczne bywają duże — klient pobiera je osobno (/game/tiles) i trzyma w pamięci
+    const { kafle: _k, ...safeMapa } = mapa;
     res.json({
       postac: { ...safePostac, tytul_nazwa: tytulNazwa, tytul_ikona: tytulIkona },
-      mapa, mobs, npcs, portals, blockers, players,
+      mapa: safeMapa, mobs, npcs, portals, blockers, players,
       worldState: worldCycle.getState(),
     });
   } catch (e) { next(e); }
@@ -173,6 +176,19 @@ router.post('/move', requireSession, moveLimit, async (req, res, next) => {
     }
 
     res.json({ ok: true, x: nx, y: ny });
+  } catch (e) { next(e); }
+});
+
+// GET /api/game/tiles/:mapaId — kafle izometryczne mapy (pobierane raz na wejście na mapę)
+router.get('/tiles/:mapaId', requireSession, async (req, res, next) => {
+  try {
+    const mapa = await mapCache.getMap(db, Number(req.params.mapaId));
+    if (!mapa) return res.status(404).json({ error: 'Mapa nie istnieje' });
+    res.json({
+      mapa_id: mapa.id, iso: mapa.iso || 0,
+      maks_x: mapa.maks_x, maks_y: mapa.maks_y,
+      kafle: parseTiles(mapa.kafle),
+    });
   } catch (e) { next(e); }
 });
 

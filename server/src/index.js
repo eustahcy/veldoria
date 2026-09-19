@@ -291,6 +291,16 @@ io.on('connection', (socket) => {
     .then(([[gc]]) => { if (gc) socket.join(`guild_${gc.gildia_id}`); })
     .catch(logError('socket:guildJoin'));
 
+  // Pokój podglądu edytora — zmiany kafli na żywo, bez ruszania pokoju mapy gracza
+  socket.on('join_edit', async (mapId) => {
+    try {
+      const [[p]] = await db.query('SELECT ranga FROM postac WHERE id=?', [postacId]);
+      if (!p || p.ranga !== 'GameAdmin') return;
+      socket.rooms.forEach(r => { if (r.startsWith('edit_')) socket.leave(r); });
+      if (mapId) socket.join(`edit_${mapId}`);
+    } catch (e) { logError('socket:join_edit')(e); }
+  });
+
   socket.on('join_map', (mapId) => {
     socket.rooms.forEach(r => { if (r.startsWith('map_')) socket.leave(r); });
     if (mapId) socket.join(`map_${mapId}`);
