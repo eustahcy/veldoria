@@ -500,7 +500,8 @@ export default function Inventory({ onClose, onRefresh, postac, onNavigate }) {
 
   return (
     <div style={{
-      position: 'fixed', inset: 0, zIndex: 200, display: 'flex', flexDirection: 'column',
+      // nad kontrolkami mobilnymi (do 500), pod powiadomieniami (999)
+      position: 'fixed', inset: 0, zIndex: 600, display: 'flex', flexDirection: 'column',
       background: 'rgba(4,3,2,0.55)', fontFamily: FONT, color: G.text,
     }}>
       <TopNav postac={postac} onNavigate={onNavigate} onClose={onClose} narrow={narrow} />
