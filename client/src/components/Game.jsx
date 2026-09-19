@@ -11,9 +11,11 @@ import { TopBar, HeroPanel, QuestTracker, BottomBar } from './hud/GameHud';
 // Widok świata: izometryczny dla map z iso=1, inaczej klasyczny z góry.
 // Gdy mapa ma włączoną izometrię, ale nie została jeszcze pomalowana, pokazujemy
 // klasyczny widok — inaczej gracze zobaczyliby pustą przestrzeń.
-const MIN_KAFLI = 12;
+// Mapa uchodzi za gotową, gdy pomalowano co najmniej 25% jej powierzchni
 function MapRenderer({ iso, tiles, ...props }) {
-  const gotowa = iso && Object.keys(tiles || {}).length >= MIN_KAFLI;
+  const { maks_x = 0, maks_y = 0 } = props.state?.mapa || {};
+  const pol = (maks_x + 1) * (maks_y + 1);
+  const gotowa = iso && Object.keys(tiles || {}).length >= Math.max(50, pol * 0.25);
   return gotowa ? <IsoGameMap {...props} tiles={tiles} /> : <GameMap {...props} />;
 }
 import Chat                from './Chat';
