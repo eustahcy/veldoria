@@ -97,9 +97,11 @@ export function TopBar({ postac, mapa, worldState, tokens, onAuction, onRanking,
         width: 26, height: 34, flexShrink: 0, imageRendering: 'pixelated',
         backgroundImage: `url(/assets/${postac.obrazek})`, backgroundPosition: '0 0', backgroundRepeat: 'no-repeat',
       }} />
-      <span style={{ color: G.text, fontSize: 13 }}>Lv. {postac.poziom} <b style={{ color: G.gold }}>{postac.nazwa}</b></span>
+      <span style={{ color: G.text, fontSize: 13, whiteSpace: 'nowrap' }}>
+        Lv. {postac.poziom} <b style={{ color: G.gold }}>{postac.nazwa}</b>
+      </span>
       <span style={{
-        padding: '2px 9px', borderRadius: 999, fontSize: 11,
+        padding: '2px 9px', borderRadius: 999, fontSize: 11, whiteSpace: 'nowrap',
         background: 'rgba(192,57,43,0.18)', border: '1px solid rgba(229,98,76,0.45)', color: '#ff9a88',
       }}>{postac.profesja}</span>
 
@@ -107,7 +109,7 @@ export function TopBar({ postac, mapa, worldState, tokens, onAuction, onRanking,
         <Bar value={exp.pct} max={100} from={G.exp} to={G.expHi} height={11} label={`${exp.pct.toFixed(2)}%`} />
       </div>
 
-      <span style={{ display: 'flex', alignItems: 'center', gap: 6, color: G.gold, fontSize: 13 }}>
+      <span style={{ display: 'flex', alignItems: 'center', gap: 6, color: G.gold, fontSize: 13, whiteSpace: 'nowrap' }}>
         🪙 {fmtNum(postac.zloto)}
       </span>
       {tokens > 0 && (

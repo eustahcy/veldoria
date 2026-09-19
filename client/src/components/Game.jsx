@@ -8,9 +8,13 @@ import IsoGameMap           from './IsoGameMap';
 import { applyTilePatch }   from '../ui/iso';
 import { TopBar, HeroPanel, QuestTracker, BottomBar } from './hud/GameHud';
 
-// Widok świata: izometryczny dla map z iso=1, inaczej klasyczny z góry
+// Widok świata: izometryczny dla map z iso=1, inaczej klasyczny z góry.
+// Gdy mapa ma włączoną izometrię, ale nie została jeszcze pomalowana, pokazujemy
+// klasyczny widok — inaczej gracze zobaczyliby pustą przestrzeń.
+const MIN_KAFLI = 12;
 function MapRenderer({ iso, tiles, ...props }) {
-  return iso ? <IsoGameMap {...props} tiles={tiles} /> : <GameMap {...props} />;
+  const gotowa = iso && Object.keys(tiles || {}).length >= MIN_KAFLI;
+  return gotowa ? <IsoGameMap {...props} tiles={tiles} /> : <GameMap {...props} />;
 }
 import Chat                from './Chat';
 import CombatLog           from './CombatLog';
@@ -1056,7 +1060,7 @@ export default function Game({ onLogout, onDisconnect }) {
           <DungeonHUD addToast={addToast} onLeave={() => { loadState(); }} />
 
           {/* Śledzenie zadań */}
-          <div style={{ position:'absolute', top:56, right:10, width:268, zIndex:55 }}>
+          <div style={{ position:'absolute', top:116, right:10, width:268, zIndex:55 }}>
             <QuestTracker onOpen={()=>setShowQuests(true)} />
           </div>
 
