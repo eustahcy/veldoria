@@ -69,6 +69,7 @@ export const api = {
     move:       (dir) => req('POST', '/game/move', { direction: dir }),
     worldState: ()    => req('GET',  '/game/world-state'),
     tiles:      (mapaId) => req('GET', `/game/tiles/${mapaId}`),
+    mapList:    ()    => req('GET',  '/game/map-list'),
   },
   events: {
     active:   ()    => req('GET',  '/events/active'),
@@ -297,6 +298,7 @@ export const api = {
   },
   quests: {
     list:       ()            => req('GET',  '/quests'),
+    overview:   ()            => req('GET',  '/quests/overview'),
     forNpc:     (npcId)       => req('GET',  `/quests/npc/${npcId}`),
     accept:     (questId)     => req('POST', '/quests/accept',  { questId }),
     turnin:     (questId)     => req('POST', '/quests/turnin',  { questId }),

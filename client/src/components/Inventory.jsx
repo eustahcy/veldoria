@@ -9,7 +9,7 @@ const FONT = "'Trebuchet MS', Verdana, sans-serif";
 const PROFESJE = ['Wojownik', 'Paladyn', 'Tancerz Ostrzy', 'Lowca', 'Tropiciel', 'Mag'];
 
 // Rozkład slotów wokół postaci (kolumna, wiersz)
-const DOLL = [
+export const DOLL = [
   { id: 'armor',  types: ['Zbroja'],    label: 'Zbroja',    col: 1, row: 1 },
   { id: 'weapon', types: WEAPON_TYPES,  label: 'Broń',      col: 1, row: 2 },
   { id: 'gloves', types: ['Rekawice'],  label: 'Rękawice',  col: 1, row: 3 },
@@ -21,16 +21,16 @@ const DOLL = [
   { id: 'boots',  types: ['Buty'],      label: 'Buty',      col: 3, row: 3 },
   { id: 'arrows', types: ['Strzaly'],   label: 'Strzały',   col: 3, row: 4 },
 ];
-const GEAR = DOLL.flatMap(d => d.types);
+export const GEAR = DOLL.flatMap(d => d.types);
 
-const CATS = [
+export const CATS = [
   { id: 'all',   label: 'Wszystko',  test: () => true },
   { id: 'gear',  label: 'Ekwipunek', test: i => GEAR.includes(i.typ) },
   { id: 'mikst', label: 'Mikstury',  test: i => i.typ === 'Konsupcyjne' },
   { id: 'inne',  label: 'Inne',      test: i => !GEAR.includes(i.typ) && i.typ !== 'Konsupcyjne' },
 ];
 
-function expInfo(p) {
+export function expPct(p) {
   const lvl = p?.poziom || 1;
   const a = lvl > 1 ? Math.pow(lvl - 1, 4) + 10 : 0;
   const b = Math.pow(lvl, 4) + 10;
@@ -55,7 +55,7 @@ function Title({ children, onClose }) {
   );
 }
 
-function Icon({ item, size }) {
+export function Icon({ item, size }) {
   return (
     <span style={{
       width: size, height: size, display: 'block', imageRendering: 'pixelated',
@@ -66,7 +66,7 @@ function Icon({ item, size }) {
   );
 }
 
-function Slot({ item, size = 62, selected, label, onClick, dim }) {
+export function Slot({ item, size = 62, selected, label, onClick, dim }) {
   const r = item ? rarityOf(item) : null;
   const [hov, setHov] = useState(false);
   return (
@@ -103,7 +103,7 @@ function Slot({ item, size = 62, selected, label, onClick, dim }) {
   );
 }
 
-function Bar({ pct, from, to, height = 10 }) {
+export function Bar({ pct, from, to, height = 10 }) {
   return (
     <div style={{
       flex: 1, height, borderRadius: 2, overflow: 'hidden', background: '#08070a',
@@ -133,7 +133,7 @@ function ActionBtn({ children, onClick, disabled, tone }) {
 }
 
 // ── Karta przedmiotu ─────────────────────────────────────────────────────────
-function ItemDetails({ item, compare, postac }) {
+export function ItemDetails({ item, compare, postac }) {
   if (!item) {
     return <div style={{ color: G.dim, fontSize: 13, textAlign: 'center', padding: '40px 10px' }}>
       Wybierz przedmiot, aby zobaczyć szczegóły
@@ -334,7 +334,7 @@ export default function Inventory({ onClose, onRefresh, postac, onNavigate }) {
 
   const cols = narrow ? 5 : 7;
   const emptyCount = Math.max(0, Math.ceil(Math.max(shown.length, cols * 5) / cols) * cols - shown.length);
-  const exp = expInfo(postac);
+  const exp = expPct(postac);
 
   // Akcje dolnego paska
   const isGear = sel && GEAR.includes(sel.typ);

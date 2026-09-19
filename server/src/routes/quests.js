@@ -241,6 +241,42 @@ router.get('/', requireSession, async (req, res, next) => {
   } catch(e) { next(e); }
 });
 
+// ── GET /api/quests/overview — aktywne, dostępne i zakończone (z miejscem NPC) ─
+router.get('/overview', requireSession, async (req, res, next) => {
+  try {
+    const postacId = req.session.postacId;
+    const npcCols = (a) => `${a}.id AS ${a}_id, ${a}.nazwa AS ${a}_nazwa, ${a}.mapa AS ${a}_mapa, ${a}.x AS ${a}_x, ${a}.y AS ${a}_y, m_${a}.nazwa AS ${a}_mapa_nazwa`;
+    const npcJoin = (a, col) => `LEFT JOIN npc ${a} ON ${a}.id = q.${col} LEFT JOIN mapa m_${a} ON m_${a}.id = ${a}.mapa`;
+    const place = (r, a) => r[`${a}_id`] ? { id: r[`${a}_id`], nazwa: r[`${a}_nazwa`], mapa: r[`${a}_mapa`], mapa_nazwa: r[`${a}_mapa_nazwa`], x: r[`${a}_x`], y: r[`${a}_y`] } : null;
+    const shape = (r) => ({
+      quest_id: r.quest_id ?? r.id, nazwa: r.nazwa, opis: r.opis, typ: r.typ,
+      postep: r.postep ?? 0, cel_ilosc: r.cel_ilosc, status: r.status ?? null,
+      nagroda_exp: r.nagroda_exp, nagroda_zloto: r.nagroda_zloto, wymagany_poziom: r.wymagany_poziom,
+      start: place(r, 'ns'), koniec: place(r, 'ne'),
+    });
+
+    const [mine] = await db.query(
+      `SELECT pq.quest_id, pq.postep, pq.status, q.*, ${npcCols('ns')}, ${npcCols('ne')}
+       FROM postac_questy pq JOIN questy q ON q.id = pq.quest_id
+       ${npcJoin('ns', 'npc_start_id')} ${npcJoin('ne', 'npc_end_id')}
+       WHERE pq.postac_id = ? ORDER BY pq.data_przyj DESC`, [postacId]);
+
+    const [cands] = await db.query(
+      `SELECT q.*, ${npcCols('ns')}, ${npcCols('ne')}
+       FROM questy q ${npcJoin('ns', 'npc_start_id')} ${npcJoin('ne', 'npc_end_id')}
+       WHERE q.aktywny = 1 AND IFNULL(q.ukryty, 0) = 0
+       ORDER BY q.wymagany_poziom, q.id LIMIT 200`);
+    const available = [];
+    for (const q of cands) if (await canAccept(postacId, q)) available.push(shape(q));
+
+    res.json({
+      active: mine.filter(r => r.status !== 'oddane').map(shape),
+      available,
+      done: mine.filter(r => r.status === 'oddane').slice(0, 50).map(shape),
+    });
+  } catch (e) { next(e); }
+});
+
 // ── GET /api/quests/npc/:npcId — quests available or active for this NPC ─────
 router.get('/npc/:npcId', requireSession, async (req, res, next) => {
   try {

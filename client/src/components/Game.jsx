@@ -47,6 +47,7 @@ import DungeonHUD from './DungeonHUD';
 import WorldBossUI from './WorldBossUI';
 import { OfflineRewardModal } from './OfflineProgress';
 import { LandscapeHUD } from './LandscapeControls';
+import { MobileHud, MenuScreen, InventoryScreen, CharacterScreen, SkillsScreen, QuestsScreen, MapScreen } from './mobile/MobileUI';
 
 const DIR_ROW    = { dol:0, lewo:1, prawo:2, gora:3 };
 const MOVE_MS    = 215;
@@ -281,6 +282,11 @@ export default function Game({ onLogout, onDisconnect }) {
   const [showDungeon,   setShowDungeon]  = useState(false);
   const [worldBoss,     setWorldBoss]    = useState(null);
   const [offlineDone,   setOfflineDone]  = useState(null); // session data when done
+  // Telefon (pionowo): otwarty ekran, cel „pokaż na mapie”, auto-polowanie, czat
+  const [mScreen,       setMScreen]      = useState(null);
+  const [mapFocus,      setMapFocus]     = useState(null);
+  const [autoHunt,      setAutoHunt]     = useState(false);
+  const [mChat,         setMChat]        = useState(false);
   const isMobile    = useIsMobile();
   const isLandscape = useIsLandscape();
 
@@ -648,6 +654,48 @@ export default function Game({ onLogout, onDisconnect }) {
 
   const handleChatMessage = useCallback((msg) => { showBubble(msg.kto, msg.tresc); }, [showBubble]);
 
+  // ── Szybkie akcje (pasek na telefonie) ────────────────────────────────────────
+  const nearest = (list) => {
+    const pos = posRef.current;
+    let best = null, bd = Infinity;
+    for (const o of list) {
+      const d = Math.abs(o.x - pos.x) + Math.abs(o.y - pos.y);
+      if (d < bd) { best = o; bd = d; }
+    }
+    return best ? { obj: best, dist: bd } : null;
+  };
+
+  const engageNearest = useCallback(() => {
+    const cur = stateRef.current;
+    const n = cur && nearest((cur.mobs || []).filter(m => m.zycie > 0));
+    if (!n) { addToast('Brak potworów w pobliżu', 'info'); return false; }
+    handleMobClick(n.obj);
+    return true;
+  }, [handleMobClick, addToast]);
+
+  const talkNearest = useCallback(() => {
+    const cur = stateRef.current;
+    const n = cur && nearest(cur.npcs || []);
+    if (!n || n.dist > 12) { addToast('Nikogo nie ma w pobliżu', 'info'); return; }
+    handleNpcClick(n.obj);
+  }, [handleNpcClick, addToast]);
+
+  const usePotion = useCallback(async (p) => {
+    const r = await api.items.use(p.id);
+    addToast(r?.ok ? `${p.nazwa}: +${r.wyleczono} HP` : (r?.error || 'Nie udało się użyć'), r?.ok ? 'success' : 'info');
+    loadState(); loadPotions();
+  }, [addToast, loadState, loadPotions]);
+
+  // Auto: po każdej walce sam wybiera najbliższego potwora; wyłącza się przy niskim HP
+  useEffect(() => {
+    if (!autoHunt || battle || npcDialog) return;
+    const p = stateRef.current?.postac;
+    if (!p) return;
+    if (p.zycie < p.zycie_max * 0.35) { setAutoHunt(false); addToast('Auto wyłączone — mało życia', 'info'); return; }
+    const t = setTimeout(() => { if (!engageNearest()) setAutoHunt(false); }, 1200);
+    return () => clearTimeout(t);
+  }, [autoHunt, battle, npcDialog, engageNearest, addToast]);
+
   // ── Loading screen ────────────────────────────────────────────────────────────
   if (!state) return (
     <div style={{ display:'flex', alignItems:'center', justifyContent:'center', height:'100vh', background:'#2A1A08', flexDirection:'column', gap:16, fontFamily:'"Palatino Linotype",Palatino,serif' }}>
@@ -848,35 +896,52 @@ export default function Game({ onLogout, onDisconnect }) {
           />
         )}
         {combatLog.length > 0 && <CombatLog entries={combatLog} />}
-        <Minimap state={state} />
-        {/* Floating HUD (position:fixed elements) */}
-        <MobileControls
-          onMove={dir=>{stopWalking();setWalkTarget(null);move(dir).then(triggerIdle);}}
-          onInventory={()=>setShowInv(true)}
-          onPvpToggle={()=>api.character.pvpToggle().then(loadState)}
-          isAdmin={isAdmin}
-          onAdmin={()=>setShowAdmin(true)}
-          onLogout={onLogout}
-          onDisconnect={onDisconnect}
-          postac={state.postac}
-          mapa={state.mapa}
-          worldState={worldState}
-          pillTxt={pillTxt}
-          socket={socket}
-          onChatMessage={handleChatMessage}
-          onQuests={()=>setShowQuests(v=>!v)}
-          onSocial={()=>setShowSocial(v=>!v)}
-          onGuild={()=>setShowGuild(v=>!v)}
-          onAuction={()=>setShowAuction(v=>!v)}
-          onCraft={()=>setShowCraft(v=>!v)}
-          onFishing={()=>setShowFishing(v=>!v)}
-          onTalents={()=>setShowTalents(v=>!v)}
-          onDungeon={()=>setShowDungeon(v=>!v)}
-          onOutfit={()=>setShowOutfit(v=>!v)}
-          onHeal={()=>api.character.heal().then(loadState)}
-        />
+        {/* HUD chowa się, gdy otwarte jest dowolne okno — inaczej przykrywałby je */}
+        {!(mScreen || battle || npcDialog || showQuests || showSocial || showGuild || showAdmin || showOutfit || showAuction
+          || showCraft || showFishing || showTalents || showDungeon || viewProfile || showTrade || showInv) && (
+          <>
+            <MobileHud
+              state={state} potions={potions} unread={unread} pillTxt={pillTxt}
+              autoHunt={autoHunt} chatOpen={mChat}
+              onMove={dir=>{ stopWalking(); setWalkTarget(null); move(dir).then(triggerIdle); }}
+              onScreen={setMScreen}
+              onChat={()=>setMChat(v=>!v)}
+              onAttack={()=>{ if (target) { const pos=posRef.current; const cur=stateRef.current; if(Math.abs(target.x-pos.x)<=1&&Math.abs(target.y-pos.y)<=1) openBattle(target); else walkAdjacentTo(target.x,target.y,cur,()=>openBattle(target)); } else engageNearest(); }}
+              onTalk={talkNearest}
+              onPotion={usePotion}
+              onAuto={()=>{ setAutoHunt(v => { addToast(v ? 'Auto-polowanie wyłączone' : 'Auto-polowanie włączone', 'info'); return !v; }); }}
+            />
+            {mChat && (
+              <div style={{ position:'fixed', left:0, right:0, bottom:'calc(env(safe-area-inset-bottom, 0px) + 78px)', zIndex:495 }}>
+                <Chat socket={socket} isMobile={false} onMessage={handleChatMessage} mode="docked" playerName={state.postac.nazwa} />
+              </div>
+            )}
+          </>
+        )}
 
-        {showInv   && <Inventory onClose={()=>setShowInv(false)} onRefresh={()=>{ loadState(); loadPotions(); }} postac={state.postac} onNavigate={openPanel} />}
+        {mScreen === 'menu' && (
+          <MenuScreen postac={state.postac} isAdmin={isAdmin} unread={unread} onClose={()=>setMScreen(null)}
+            onPick={(id) => {
+              if (['postac','ekwipunek','umiejetnosci','zadania','mapa'].includes(id)) { setMScreen(id); return; }
+              setMScreen(null);
+              ({
+                gildia: () => setShowGuild(true), ranking: () => setShowGuild(true), aukcja: () => setShowAuction(true),
+                poczta: () => setShowSocial(true), rzemioslo: () => setShowCraft(true), lowienie: () => setShowFishing(true),
+                lochy: () => setShowDungeon(true), wyglad: () => setShowOutfit(true), admin: () => setShowAdmin(true),
+                pvp: () => api.character.pvpToggle().then(loadState),
+                wyloguj: () => (onDisconnect || onLogout)(),
+              })[id]?.();
+            }} />
+        )}
+        {mScreen === 'ekwipunek' && <InventoryScreen postac={state.postac} onClose={()=>setMScreen(null)} onRefresh={()=>{ loadState(); loadPotions(); }} />}
+        {mScreen === 'postac' && <CharacterScreen postac={state.postac} onClose={()=>setMScreen(null)} onRefresh={()=>{ loadState(); loadPotions(); }} onOutfit={()=>{ setMScreen(null); setShowOutfit(true); }} />}
+        {mScreen === 'umiejetnosci' && <SkillsScreen postac={state.postac} onClose={()=>setMScreen(null)} onRefresh={loadState} />}
+        {mScreen === 'zadania' && <QuestsScreen onClose={()=>setMScreen(null)} onShowOnMap={(f)=>{ setMapFocus(f); setMScreen('mapa'); }} />}
+        {mScreen === 'mapa' && (
+          <MapScreen state={state} focus={mapFocus} onClose={()=>setMScreen(null)}
+            onWalk={(x,y)=>handleMapClick(x,y)} onNpc={handleNpcClick} />
+        )}
+        {showInv && <InventoryScreen postac={state.postac} onClose={()=>setShowInv(false)} onRefresh={()=>{ loadState(); loadPotions(); }} />}
         {npcDialog && <NpcDialog npc={npcDialog} postac={state.postac} onClose={()=>setNpcDialog(null)} onBought={loadState} onQuestReward={msg=>{ addToast(msg,'info'); loadState(); }} />}
         {showQuests && <QuestPanel onClose={()=>setShowQuests(false)} onReward={msg=>{ addToast(msg,'info'); loadState(); setShowQuests(false); }} />}
         {showAdmin && <AdminPanel postac={state.postac} onClose={()=>setShowAdmin(false)} />}
