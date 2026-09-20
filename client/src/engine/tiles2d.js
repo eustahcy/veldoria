@@ -24,6 +24,13 @@ export const TILE = 32;
 // Kafle i obiekty, dla których mamy gotową grafikę, rysujemy z atlasu; reszta
 // leci dalej kodem. Po wczytaniu obrazka czyścimy pamięć podręczną kafli, żeby
 // przerysowały się już z grafiki.
+// Ile pikseli atlasu przypada na kafel (grafika jest w podwójnej rozdzielczości)
+const ATL = ATLAS.skala || 1;
+// W ilu pikselach ekranu rysujemy kafel: na telefonie i ekranach HiDPI w dwóch,
+// więc grafika 64 px trafia na ekran 1:1 zamiast być rozciągana.
+const R = (typeof window !== 'undefined' && window.devicePixelRatio > 1.25) ? 2 : 1;
+export const skalaRysowania = () => R;
+
 let atlasObraz = null, atlasOk = false;
 export const czyAtlas = () => atlasOk;
 export const sprite = (id) => (atlasOk && id ? ATLAS.sprity[id] : null);
@@ -301,8 +308,11 @@ function rysujTerenZAtlasu(ctx, t, tx, ty) {
   const id = lista[Math.floor(szum(tx, ty, 301) * lista.length) % lista.length];
   const s = ATLAS.sprity[id];
   if (!s) return false;
-  ctx.drawImage(atlasObraz, s[0], s[1], s[2], s[3], 0, 0, TILE, TILE);
-  if (t.tint) { ctx.fillStyle = t.tint; ctx.fillRect(0, 0, TILE, TILE); }
+  const dokad = TILE * R;
+  ctx.imageSmoothingEnabled = s[2] !== dokad;      // zmniejszamy → wygładzamy, 1:1 → nie
+  ctx.imageSmoothingQuality = 'high';
+  ctx.drawImage(atlasObraz, s[0], s[1], s[2], s[3], 0, 0, dokad, dokad);
+  if (t.tint) { ctx.fillStyle = t.tint; ctx.fillRect(0, 0, dokad, dokad); }
   return true;
 }
 
@@ -1146,7 +1156,20 @@ function rysujObiekt(ctx, o, x, y, maska) {
 
 // ── Pamięć podręczna kafli ───────────────────────────────────────────────────
 const pamiec = new Map();
-const MAX_PAMIEC = 6000;
+const MAX_PAMIEC = R > 1 ? 2200 : 6000;   // kafel 64x64 waży cztery razy tyle
+
+// Rysowanie kodem robimy zawsze w 32 px i dopiero powiększamy — bez tego
+// trzeba by skalować każdy piksel osobno.
+let szkicownik = null;
+function szkic() {
+  if (!szkicownik) szkicownik = plotno(TILE, TILE);
+  szkicownik.ctx.clearRect(0, 0, TILE, TILE);
+  return szkicownik;
+}
+const powieksz = (ctx, zrodlo) => {
+  ctx.imageSmoothingEnabled = false;
+  ctx.drawImage(zrodlo, 0, 0, TILE, TILE, 0, 0, TILE * R, TILE * R);
+};
 
 function plotno(w, h) {
   const c = document.createElement('canvas');
@@ -1193,15 +1216,19 @@ export function rysujKafelTerenu(ctx, px, py, kafle, x, y, anim = 0) {
   };
   // tekstura powtarza się co 8 kafli, więc do klucza wystarczy reszta z 8
   const klucz = `t|${tid}|${atlasOk ? 'a' : 'p'}|${x & 7},${y & 7}|${sas.n},${sas.e},${sas.s},${sas.w}|${sas.nw},${sas.ne},${sas.sw},${sas.se}`;
-  const canvas = zPamieci(klucz, TILE, TILE, (c) => {
+  const canvas = zPamieci(klucz, TILE * R, TILE * R, (c) => {
     const zAtlasu = atlasOk && t.obrazy && rysujTerenZAtlasu(c, t, x, y);
     if (!zAtlasu) {
-      rysujTerenBazowy(c, t, x, y);
-      rysujDetalTerenu(c, t, x, y);
+      const sz = szkic();
+      rysujTerenBazowy(sz.ctx, t, x, y);
+      rysujDetalTerenu(sz.ctx, t, x, y);
+      powieksz(c, sz.c);
     }
-    rysujKrawedzie(c, t, sas, x, y);
+    const kr = szkic();                       // przejścia rysujemy kodem i nakładamy
+    rysujKrawedzie(kr.ctx, t, sas, x, y);
+    powieksz(c, kr.c);
   });
-  ctx.drawImage(canvas, px, py);
+  ctx.drawImage(canvas, px, py, TILE, TILE);
 
   if (t.woda) {                     // animowane fale rysujemy na wierzchu
     const f  = Math.sin(anim / 520 + (x * 0.9 + y * 1.3)) * 0.5 + 0.5;
@@ -1233,17 +1260,20 @@ export function rysujKafelObiektu(ctx, px, py, kafle, x, y, anim = 0) {
   const spr = sprite(o.spr);
   if (spr) {
     const [sx, sy, sw, sh] = spr;
-    const dx = Math.round(px + ((o.kx || 1) * TILE - sw) / 2);
-    const dy = Math.round(py + TILE - sh);
-    ctx.drawImage(atlasObraz, sx, sy, sw, sh, dx, dy, sw, sh);
-    if (o.swieci) poswiata(ctx, px, py + TILE - sh + (o.swiecY || 8), anim, x, y);
+    const dw = Math.round(sw / ATL), dh = Math.round(sh / ATL);   // rozmiar w punktach
+    const dx = Math.round(px + ((o.kx || 1) * TILE - dw) / 2);
+    const dy = Math.round(py + TILE - dh);
+    if (R < ATL) { ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high'; }
+    ctx.drawImage(atlasObraz, sx, sy, sw, sh, dx, dy, dw, dh);
+    ctx.imageSmoothingEnabled = false;
+    if (o.swieci) poswiata(ctx, px, py + TILE - dh + (o.swiecY || 8), anim, x, y);
     return;
   }
 
   const maska = o.laczy ? maskaSasiadow(kafle, x, y, oid) : 0;
   const klucz = `o|${oid}|${maska}|${x & 3},${y & 3}`;
   const canvas = zPamieci(klucz, OBJ_W, OBJ_H, (c) => rysujObiekt(c, o, x, y, maska));
-  ctx.drawImage(canvas, px - OBJ_OX, py - OBJ_OY);
+  ctx.drawImage(canvas, px - OBJ_OX, py - OBJ_OY, OBJ_W, OBJ_H);
 
   if (o.rys === 'ognisko' || o.rys === 'latarnia') {   // migotanie światła
     const cy = o.rys === 'latarnia' ? py + 4 : py + 16;
@@ -1282,9 +1312,12 @@ export function rysujPodgladObiektu(ctx, oid, tid = TEREN_DOMYSLNY) {
       for (let i = 0; i < Math.ceil(OBJ_W / TILE); i++)
         rysujKafelTerenu(ctx, i * TILE, j * TILE, tlo, i, j, 0);
     const [sx, sy, sw, sh] = spr;
-    const sk = Math.min(1, (OBJ_W - 4) / sw, (OBJ_H - 4) / sh);
-    const w = Math.round(sw * sk), h = Math.round(sh * sk);
+    const pw = sw / ATL, ph = sh / ATL;                  // rozmiar w punktach
+    const sk = Math.min(1, (OBJ_W - 4) / pw, (OBJ_H - 4) / ph);
+    const w = Math.round(pw * sk), h = Math.round(ph * sk);
+    ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
     ctx.drawImage(atlasObraz, sx, sy, sw, sh, Math.round((OBJ_W - w) / 2), OBJ_H - h - 2, w, h);
+    ctx.imageSmoothingEnabled = false;
     return;
   }
   rysujKafelTerenu(ctx, OBJ_OX, OBJ_OY, kafle, 0, 0, 0);
