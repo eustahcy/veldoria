@@ -29,13 +29,13 @@ function useNarrow(bp = 860) {
   return n;
 }
 
-function Stat({ icon, value, label, sub }) {
+function Stat({ icon, value, label, sub, compact }) {
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '0 22px' }}>
-      <span style={{ fontSize: 22, opacity: 0.85 }}>{icon}</span>
-      <div>
-        <div style={{ fontFamily: S.serif, fontSize: 20, color: S.text, lineHeight: 1.1 }}>{value}</div>
-        <div style={{ fontSize: 11, color: S.muted, fontFamily: S.sans }}>{label}</div>
+    <div style={{ display: 'flex', alignItems: 'center', gap: compact ? 9 : 12, padding: compact ? 0 : '0 22px', minWidth: 0 }}>
+      <span style={{ fontSize: compact ? 18 : 22, opacity: 0.85, flexShrink: 0 }}>{icon}</span>
+      <div style={{ minWidth: 0 }}>
+        <div style={{ fontFamily: S.serif, fontSize: compact ? 16 : 20, color: S.text, lineHeight: 1.15, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{value}</div>
+        <div style={{ fontSize: compact ? 10.5 : 11, color: S.muted, fontFamily: S.sans, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{label}</div>
         {sub && <div style={{ fontSize: 10, color: S.dim, fontFamily: S.sans }}>{sub}</div>}
       </div>
     </div>
@@ -133,19 +133,20 @@ export default function Landing({ stats, classes = [], onPlay, onLogin, onSectio
 
         {/* Pasek statystyk */}
         <div id="swiat" style={{
-          marginTop: narrow ? 30 : 56, alignSelf: 'center',
-          display: 'flex', flexWrap: 'wrap', justifyContent: 'center',
-          padding: '16px 10px', borderRadius: 14,
+          marginTop: narrow ? 26 : 56, alignSelf: 'center', width: narrow ? '100%' : 'auto', boxSizing: 'border-box',
+          display: narrow ? 'grid' : 'flex', gridTemplateColumns: narrow ? '1fr 1fr' : undefined,
+          flexWrap: 'wrap', justifyContent: 'center', gap: narrow ? 10 : 0,
+          padding: narrow ? 14 : '16px 10px', borderRadius: 14,
           background: 'rgba(7,10,20,0.8)', border: `1px solid ${S.lineSoft}`, backdropFilter: 'blur(6px)',
           boxShadow: '0 20px 50px rgba(0,0,0,0.6)',
         }}>
-          <Stat icon="👥" value={stats?.online ?? 0} label="Graczy online" />
-          <span style={{ width: 1, background: S.lineSoft, margin: '4px 0' }} />
-          <Stat icon="🌍" value="Rozległy świat" label="Miasta • Lochy • Dzikie tereny" />
-          <span style={{ width: 1, background: S.lineSoft, margin: '4px 0' }} />
-          <Stat icon="🛡" value={`${classes.length || 6} klas`} label="Wybierz swoją drogę" />
-          <span style={{ width: 1, background: S.lineSoft, margin: '4px 0' }} />
-          <Stat icon="⚔" value={stats?.total ?? 0} label="Założonych kont" />
+          <Stat compact={narrow} icon="👥" value={stats?.online ?? 0} label="Graczy online" />
+          {!narrow && <span style={{ width: 1, background: S.lineSoft, margin: '4px 0' }} />}
+          <Stat compact={narrow} icon="⚔" value={stats?.total ?? 0} label="Założonych kont" />
+          {!narrow && <span style={{ width: 1, background: S.lineSoft, margin: '4px 0' }} />}
+          <Stat compact={narrow} icon="🛡" value={`${classes.length || 6} klas`} label="Wybierz swoją drogę" />
+          {!narrow && <span style={{ width: 1, background: S.lineSoft, margin: '4px 0' }} />}
+          <Stat compact={narrow} icon="🌍" value="Rozległy świat" label={narrow ? 'Miasta i lochy' : 'Miasta • Lochy • Dzikie tereny'} />
         </div>
       </main>
 

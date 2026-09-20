@@ -35,7 +35,7 @@ function Bar({ pct, color, glow }) {
   );
 }
 
-function CharCard({ ch, mapName, onEnter, onDelete, busy }) {
+function CharCard({ ch, mapName, onEnter, onDelete, busy, narrow }) {
   const [hover, setHover] = useState(false);
   const [confirm, setConfirm] = useState(false);
   const hpPct = ch.zycie_max > 0 ? Math.round((ch.zycie / ch.zycie_max) * 100) : 0;
@@ -45,16 +45,18 @@ function CharCard({ ch, mapName, onEnter, onDelete, busy }) {
     <div
       onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}
       style={{
-        ...panel, width: '100%', maxWidth: 340, padding: 16, boxSizing: 'border-box',
+        ...panel, width: '100%', maxWidth: narrow ? 520 : 340, padding: narrow ? 12 : 16, boxSizing: 'border-box',
         border: `1px solid ${hover ? S.gold : S.line}`,
         boxShadow: hover ? '0 24px 60px rgba(0,0,0,0.8), 0 0 0 1px rgba(231,193,88,0.25)' : panel.boxShadow,
         transition: 'border-color .15s, box-shadow .15s, transform .15s',
         transform: hover ? 'translateY(-3px)' : 'none',
       }}
     >
+      <div style={{ display: narrow ? 'flex' : 'block', gap: 12, alignItems: 'stretch' }}>
       {/* Sprite na cokole */}
       <div style={{
-        position: 'relative', height: 150, borderRadius: 10, marginBottom: 12,
+        position: 'relative', height: narrow ? 132 : 150, width: narrow ? 118 : 'auto', flexShrink: 0,
+        borderRadius: 10, marginBottom: narrow ? 0 : 12,
         background: 'radial-gradient(ellipse at 50% 95%, rgba(231,193,88,0.16), rgba(4,7,14,0.9) 65%)',
         border: `1px solid ${S.lineSoft}`, display: 'grid', placeItems: 'center', overflow: 'hidden',
       }}>
@@ -80,8 +82,9 @@ function CharCard({ ch, mapName, onEnter, onDelete, busy }) {
         }} />
       </div>
 
-      <div style={{ textAlign: 'center', fontFamily: S.serif, fontSize: 22, color: S.text }}>{ch.nazwa}</div>
-      <div style={{ display: 'flex', justifyContent: 'center', gap: 8, margin: '6px 0 12px' }}>
+      <div style={{ flex: 1, minWidth: 0 }}>
+      <div style={{ textAlign: narrow ? 'left' : 'center', fontFamily: S.serif, fontSize: narrow ? 19 : 22, color: S.text }}>{ch.nazwa}</div>
+      <div style={{ display: 'flex', justifyContent: narrow ? 'flex-start' : 'center', flexWrap: 'wrap', gap: 8, margin: '6px 0 10px' }}>
         <span style={{
           padding: '3px 10px', borderRadius: 999, fontSize: 11,
           background: `${color}1f`, border: `1px solid ${color}66`, color,
@@ -98,7 +101,7 @@ function CharCard({ ch, mapName, onEnter, onDelete, busy }) {
       </div>
 
       {mapName && (
-        <div style={{ textAlign: 'center', color: S.muted, fontSize: 12, marginBottom: 10 }}>📍 {mapName}</div>
+        <div style={{ textAlign: narrow ? 'left' : 'center', color: S.muted, fontSize: 12, marginBottom: 10 }}>📍 {mapName}</div>
       )}
 
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
@@ -106,11 +109,14 @@ function CharCard({ ch, mapName, onEnter, onDelete, busy }) {
         <Bar pct={hpPct} color="linear-gradient(90deg,#8e2f22,#e5624c)" glow="rgba(229,98,76,0.5)" />
         <span style={{ color: S.muted, fontSize: 11, width: 56, textAlign: 'right' }}>{ch.zycie}/{ch.zycie_max}</span>
       </div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: narrow ? 0 : 14 }}>
         <span style={{ color: S.green, fontSize: 11, width: 26 }}>EXP</span>
         <Bar pct={expPct(ch)} color="linear-gradient(90deg,#2f6a3a,#5fd07a)" glow="rgba(95,208,122,0.45)" />
         <span style={{ color: S.muted, fontSize: 11, width: 56, textAlign: 'right' }}>{expPct(ch)}%</span>
       </div>
+      </div>
+      </div>
+      <div style={{ height: narrow ? 12 : 0 }} />
 
       {confirm ? (
         <div>
@@ -183,16 +189,23 @@ export default function CharacterSelect({
         </div>
       </div>
       <div style={{ height: 1, background: S.lineSoft, margin: '4px 0 12px' }} />
-      {me?.isAdmin && (
-        <button onClick={onAdmin} style={{
-          ...ghostBtn(), width: '100%', marginBottom: 8,
-          color: '#ff8b78', borderColor: 'rgba(229,98,76,0.45)',
-        }}>★ Panel administratora</button>
-      )}
-      <button onClick={onHome} style={{ ...ghostBtn(), width: '100%', marginBottom: 8 }}>← Strona główna</button>
-      <button onClick={onLogout} style={{ ...ghostBtn(), width: '100%', color: '#ff8b78', borderColor: 'rgba(229,98,76,0.4)' }}>
-        ⎋ Wyloguj się
-      </button>
+      <div style={{ display: narrow ? 'flex' : 'block', gap: 8 }}>
+        {me?.isAdmin && (
+          <button onClick={onAdmin} style={{
+            ...ghostBtn(), flex: 1, width: narrow ? 'auto' : '100%', marginBottom: narrow ? 0 : 8,
+            padding: narrow ? '9px 8px' : undefined, fontSize: narrow ? 12 : undefined,
+            color: '#ff8b78', borderColor: 'rgba(229,98,76,0.45)',
+          }}>★ {narrow ? 'Panel' : 'Panel administratora'}</button>
+        )}
+        <button onClick={onHome} style={{
+          ...ghostBtn(), flex: 1, width: narrow ? 'auto' : '100%', marginBottom: narrow ? 0 : 8,
+          padding: narrow ? '9px 8px' : undefined, fontSize: narrow ? 12 : undefined,
+        }}>← {narrow ? 'Strona' : 'Strona główna'}</button>
+        <button onClick={onLogout} style={{
+          ...ghostBtn(), flex: 1, width: narrow ? 'auto' : '100%', color: '#ff8b78', borderColor: 'rgba(229,98,76,0.4)',
+          padding: narrow ? '9px 8px' : undefined, fontSize: narrow ? 12 : undefined,
+        }}>⎋ {narrow ? 'Wyloguj' : 'Wyloguj się'}</button>
+      </div>
     </div>
   );
 
@@ -216,7 +229,7 @@ export default function CharacterSelect({
         <div style={{ textAlign: 'center', marginBottom: 6 }}><Ornament>Wybierz bohatera</Ornament></div>
         <h1 style={{
           textAlign: 'center', margin: '10px 0 4px', fontFamily: S.serif, fontWeight: 700,
-          fontSize: narrow ? 30 : 44, letterSpacing: narrow ? 3 : 6,
+          fontSize: narrow ? 26 : 44, letterSpacing: narrow ? 2 : 6,
           background: 'linear-gradient(180deg,#fdf1c8,#e7c158 55%,#a87f2b)',
           WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
         }}>TWOJE POSTACIE</h1>
@@ -240,7 +253,7 @@ export default function CharacterSelect({
             justifyContent: narrow ? 'center' : 'stretch', justifyItems: 'center',
           }}>
             {chars.map(ch => (
-              <CharCard key={ch.id} ch={ch} mapName={mapNames[ch.mapa]}
+              <CharCard key={ch.id} ch={ch} mapName={mapNames[ch.mapa]} narrow={narrow}
                         onEnter={onEnterGame} onDelete={onDelete} busy={loading} />
             ))}
             {Array.from({ length: Math.max(0, slots - chars.length) }, (_, i) => (
