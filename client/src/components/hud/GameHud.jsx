@@ -93,7 +93,7 @@ function Bar({ value, max, from, to, label, height = 14 }) {
 }
 
 // ── Górny pasek ──────────────────────────────────────────────────────────────
-export function TopBar({ postac, mapa, worldState, tokens, onAuction, onRanking, onMail, onSettings, unread }) {
+export function TopBar({ postac, mapa, worldState, tokens, onAuction, onRanking, onMail, onSettings, unread, online }) {
   const exp = expInfo(postac);
   const [zegar, setZegar] = useState(() => new Date());
   useEffect(() => {
@@ -180,6 +180,17 @@ export function TopBar({ postac, mapa, worldState, tokens, onAuction, onRanking,
         <span style={{ color: G.muted, fontSize: 12.5, whiteSpace: 'nowrap', fontFamily: G.serif }}>
           {worldState?.pora === 'noc' ? '🌙' : worldState?.pora === 'swit' ? '🌅' : worldState?.pora === 'zmierzch' ? '🌇' : '☀'}{' '}
           {zegar.toLocaleTimeString('pl-PL', { hour: '2-digit', minute: '2-digit' })}
+        </span>
+        {/* Połączenie z serwerem */}
+        <span title={online ? 'Połączono z serwerem' : 'Brak połączenia — gra dogrywa stan co 2,5 s'}
+          style={{ display: 'flex', alignItems: 'flex-end', gap: 2, height: 14, marginLeft: 4 }}>
+          {[6, 9, 12].map((h, i) => (
+            <span key={h} style={{
+              width: 3, height: h, borderRadius: 1,
+              background: online ? (i === 2 ? '#5fd07a' : '#4aa862') : '#4a453c',
+              boxShadow: online ? '0 0 6px rgba(95,208,122,0.5)' : 'none',
+            }} />
+          ))}
         </span>
 
       </div>
@@ -268,14 +279,14 @@ export function HeroPanel({ postac, actions, reserve = 0 }) {
       </Ornate>
 
       {/* Menu */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 7 }}>
         {actions.map(a => (
           <button key={a.label} onClick={a.onClick}
             onMouseEnter={() => setHov(a.label)} onMouseLeave={() => setHov(null)}
             title={a.skrot ? `${a.label} (${a.skrot})` : a.label}
             style={{
-              position: 'relative', padding: '7px 8px', cursor: 'pointer', borderRadius: 4,
-              display: 'flex', alignItems: 'center', gap: 7, textAlign: 'left', minWidth: 0,
+              position: 'relative', padding: '9px 3px 7px', cursor: 'pointer', borderRadius: 4,
+              display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5, minWidth: 0,
               background: hov === a.label ? 'linear-gradient(180deg,#2c2418,#171208)' : G.stone,
               border: `1px solid ${hov === a.label ? G.gold : G.bronze}`,
               boxShadow: hov === a.label
@@ -285,8 +296,8 @@ export function HeroPanel({ postac, actions, reserve = 0 }) {
               fontSize: 11, fontFamily: G.serif, letterSpacing: 0.3,
               transition: 'all .12s',
             }}>
-            <span style={{ fontSize: 15, width: 18, textAlign: 'center', flexShrink: 0, filter: 'drop-shadow(0 2px 3px rgba(0,0,0,0.7))' }}>{a.icon}</span>
-            <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{a.label}</span>
+            <span style={{ fontSize: 19, lineHeight: 1, filter: 'drop-shadow(0 2px 3px rgba(0,0,0,0.7))' }}>{a.icon}</span>
+            <span style={{ fontSize: 10.5, width: '100%', textAlign: 'center', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{a.label}</span>
             {a.skrot && (
               <span style={{ position: 'absolute', top: 2, right: 4, fontSize: 8, color: G.dim }}>{a.skrot}</span>
             )}
@@ -422,10 +433,10 @@ function Orb({ value, max, from, to, label, size = 104 }) {
 }
 
 // Pojedyncze pole paska (kwadratowe lub okrągłe) z klawiszem pod spodem
-function BarSlot({ k, title, onClick, children, count, round, active, dim, badge }) {
+function BarSlot({ k, title, onClick, children, count, round, active, dim, badge, sep }) {
   const [hov, setHov] = useState(false);
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, marginLeft: sep ? 12 : 0 }}>
       <button onClick={onClick} title={title} onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)} style={{
         width: 48, height: 48, borderRadius: round ? '50%' : 3, cursor: 'pointer', position: 'relative', padding: 0,
         background: active ? 'radial-gradient(circle at 50% 35%, #5a4520, #1d160b)' : 'linear-gradient(180deg,#221c14,#0a0907)',
@@ -445,53 +456,72 @@ function BarSlot({ k, title, onClick, children, count, round, active, dim, badge
   );
 }
 
-// ── Dolny pasek: kule HP/EN, umiejętności 1–4, mikstury F1–F3, skróty ────────
-export function BottomBar({ postac, potions = [], onUsePotion, skills = [], onSkill, extras = [] }) {
-  const Sep = () => <span style={{ width: 1, alignSelf: 'stretch', margin: '4px 5px 16px', background: `linear-gradient(180deg,transparent,${G.goldDim},transparent)` }} />;
+// ── Dolny pasek: kule HP/EN i dziesięć pól akcji (1–9, 0) ───────────────────
+export function BottomBar({ postac, potions = [], onUsePotion, skills = [], onSkill }) {
+  // Pola 1–8 to umiejętności klasy, 9 i 0 to dwie pierwsze mikstury z plecaka
+  const slots = Array.from({ length: 10 }, (_, i) => {
+    const key = i === 9 ? '0' : String(i + 1);
+    if (i >= 8) {
+      const p = potions[i - 8];
+      return p
+        ? { key, title: `${p.nazwa} — kliknij, aby wypić (${key})`, count: p.ilosc || 1, onClick: () => onUsePotion?.(p),
+            content: <span style={{ width: 30, height: 30, display: 'block', imageRendering: 'pixelated', backgroundImage: `url(/assets/${p.obrazek})`, backgroundSize: 'contain', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }} /> }
+        : { key, title: 'Puste pole na miksturę' };
+    }
+    const sk = skills[i];
+    return sk
+      ? { key, title: `${sk.name} — ${sk.desc} (EN ${sk.cost}). Kliknij, aby zaatakować; w walce klawisz ${key} użyje umiejętności.`,
+          onClick: () => onSkill?.(i),
+          content: <span style={{ fontSize: 22, color: '#f7c77a', filter: 'drop-shadow(0 0 6px rgba(247,160,90,0.65))', fontFamily: G.serif }}>{sk.icon}</span> }
+      : { key, title: 'Puste pole' };
+  });
+
   return (
     <div style={{ display: 'flex', alignItems: 'center', fontFamily: C.font }}>
       <Orb value={postac.zycie} max={postac.zycie_max} from={G.hp} to={G.hpHi} label="Życie" />
 
       <div style={{
-        position: 'relative', margin: '0 -16px', padding: '9px 28px 5px', display: 'flex', alignItems: 'flex-start', gap: 6,
+        position: 'relative', margin: '0 -16px', padding: '9px 26px 5px', display: 'flex', alignItems: 'flex-start', gap: 5,
         background: 'linear-gradient(180deg,#221c14 0%,#15110c 55%,#0b0907 100%)',
         borderTop: `2px solid ${G.goldDim}`, borderBottom: `2px solid ${G.goldDim}`,
         boxShadow: '0 10px 24px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.08), 0 0 0 1px #000',
       }}>
-        {[0, 1, 2, 3].map(i => {
-          const s = skills[i];
-          return (
-            <BarSlot key={`s${i}`} k={String(i + 1)} onClick={() => onSkill?.(i)} dim={!s}
-              title={s ? `${s.name} — ${s.desc} (EN ${s.cost}). Kliknij, aby zaatakować; w walce klawisz ${i + 1} użyje umiejętności.` : 'Brak umiejętności'}>
-              {s ? <span style={{ color: '#f7c77a', filter: 'drop-shadow(0 0 5px rgba(247,160,90,0.7))', fontFamily: G.serif }}>{s.icon}</span> : <span style={{ color: G.dim, fontSize: 14 }}>—</span>}
-            </BarSlot>
-          );
-        })}
-        <Sep />
-        {[0, 1, 2].map(i => {
-          const p = potions[i];
-          return (
-            <BarSlot key={`p${i}`} k={`F${i + 1}`} dim={!p} count={p ? (p.ilosc || 1) : null}
-              title={p ? `${p.nazwa} (F${i + 1})` : 'Brak mikstury'} onClick={() => p && onUsePotion?.(p)}>
-              {p ? (
-                <span style={{
-                  width: 32, height: 32, imageRendering: 'pixelated', display: 'block',
-                  backgroundImage: `url(/assets/${p.obrazek})`, backgroundSize: 'contain', backgroundPosition: 'center', backgroundRepeat: 'no-repeat',
-                }} />
-              ) : <span style={{ color: G.dim, fontSize: 14 }}>—</span>}
-            </BarSlot>
-          );
-        })}
-        {extras.length > 0 && <Sep />}
-        {extras.map(x => (
-          <BarSlot key={x.label} k={x.k} round title={x.label} onClick={x.onClick} active={x.active} badge={x.badge}>
-            <span style={{ fontSize: 20, filter: 'drop-shadow(0 1px 2px #000)' }}>{x.icon}</span>
+        {slots.map((s, i) => (
+          <BarSlot key={s.key} k={s.key} title={s.title} onClick={s.onClick} count={s.count} dim={!s.content}
+            sep={i === 8}>
+            {s.content || <span style={{ color: G.dim, fontSize: 13 }}>—</span>}
           </BarSlot>
         ))}
       </div>
 
       <Orb value={postac.energia ?? 0} max={postac.energia_max ?? 100} from={G.en} to={G.enHi} label="Energia" />
     </div>
+  );
+}
+
+// ── Pionowy pasek skrótów przy prawej krawędzi ──────────────────────────────
+export function QuickRail({ items = [] }) {
+  const [hov, setHov] = useState(null);
+  return (
+    <Ornate pad={6} style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+      {items.map(it => (
+        <button key={it.label} onClick={it.onClick}
+          onMouseEnter={() => setHov(it.label)} onMouseLeave={() => setHov(null)}
+          title={it.skrot ? `${it.label} (${it.skrot})` : it.label}
+          style={{
+            position: 'relative', width: 46, height: 48, borderRadius: 3, cursor: 'pointer',
+            display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 2,
+            background: hov === it.label ? 'linear-gradient(180deg,#2c2418,#171208)' : G.stone,
+            border: `1px solid ${hov === it.label ? G.gold : G.bronze}`,
+            boxShadow: hov === it.label ? '0 0 12px rgba(231,193,88,0.25)' : 'inset 0 1px 0 rgba(255,255,255,0.05)',
+            color: hov === it.label ? G.goldHi : G.text, transition: 'all .12s',
+          }}>
+          <span style={{ fontSize: 19, lineHeight: 1 }}>{it.icon}</span>
+          <span style={{ fontSize: 9, color: hov === it.label ? G.goldHi : G.dim, fontFamily: G.serif }}>{it.skrot}</span>
+          {it.uwaga && <span style={{ position: 'absolute', top: 3, right: 4, width: 7, height: 7, borderRadius: '50%', background: G.gold, boxShadow: `0 0 7px ${G.gold}` }} />}
+        </button>
+      ))}
+    </Ornate>
   );
 }
 

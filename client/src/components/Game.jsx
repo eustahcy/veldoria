@@ -6,7 +6,7 @@ import { usePathfinding, buildBlockSet } from '../hooks/usePathfinding';
 import GameMap              from './GameMap';
 import IsoGameMap           from './IsoGameMap';
 import { applyTilePatch }   from '../ui/iso';
-import { TopBar, HeroPanel, QuestTracker, BottomBar, LocationBox, AdminAnnounce } from './hud/GameHud';
+import { TopBar, HeroPanel, QuestTracker, BottomBar, LocationBox, QuickRail, AdminAnnounce } from './hud/GameHud';
 
 // Widok świata: izometryczny dla map z iso=1, inaczej klasyczny z góry.
 // Gdy mapa ma włączoną izometrię, ale nie została jeszcze pomalowana, pokazujemy
@@ -596,9 +596,9 @@ export default function Game({ onLogout, onDisconnect }) {
       if (e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA'||e.target.tagName==='SELECT') return;
       // W trakcie walki klawisze należą do okna walki (A/S/B/F/I, 1–9)
       if (hotkeys.current.inBattle) return;
-      if (/^[1-4]$/.test(e.key)) { e.preventDefault(); hotkeys.current.attack?.(); return; }
-      const fk = { F1:0, F2:1, F3:2 }[e.key];
-      if (fk !== undefined) { e.preventDefault(); const p = hotkeys.current.potions?.[fk]; if (p) hotkeys.current.usePotion?.(p); return; }
+      if (/^[1-8]$/.test(e.key)) { e.preventDefault(); hotkeys.current.attack?.(); return; }
+      const pk = { '9': 0, '0': 1, F1: 0, F2: 1, F3: 2 }[e.key];
+      if (pk !== undefined) { e.preventDefault(); const p = hotkeys.current.potions?.[pk]; if (p) hotkeys.current.usePotion?.(p); return; }
       if (e.key.toLowerCase()==='r') { e.preventDefault(); hotkeys.current.auto?.(); return; }
       const dir = KEY[e.key];
       if (dir) {
@@ -962,10 +962,6 @@ export default function Game({ onLogout, onDisconnect }) {
           { icon:'📜', label:'Zadania',      skrot:'Q', onClick:()=>setShowQuests(v=>!v) },
           { icon:'⚜', label:'Gildia',       skrot:'G', onClick:()=>setShowGuild(v=>!v) },
           { icon:'👥', label:'Przyjaciele',  skrot:'U', onClick:()=>setShowSocial(v=>!v) },
-          { icon:'⚒', label:'Rzemiosło',    skrot:'C', onClick:()=>setShowCraft(v=>!v) },
-          { icon:'🐟', label:'Wędka',        skrot:'F', onClick:()=>setShowFishing(v=>!v) },
-          { icon:'🏰', label:'Lochy',        skrot:'D', onClick:()=>setShowDungeon(v=>!v) },
-          ...(isAdmin ? [{ icon:'★', label:'Admin', onClick:()=>setShowAdmin(true) }] : []),
         ]}
       />
 
@@ -982,6 +978,7 @@ export default function Game({ onLogout, onDisconnect }) {
           onRanking={()=>setShowGuild(v=>!v)}
           onMail={()=>setShowSocial(v=>!v)}
           onSettings={()=>setShowOutfit(true)}
+          online={!!socket?.connected}
         />
 
         {/* Map area (fills remaining vertical space) */}
@@ -1050,6 +1047,19 @@ export default function Game({ onLogout, onDisconnect }) {
             <QuestTracker onOpen={()=>setShowQuests(true)} />
           </div>
 
+          {/* Pasek skrótów przy prawej krawędzi */}
+          <div style={{ position:'absolute', right:10, top:'50%', transform:'translateY(-50%)', zIndex:56 }}>
+            <QuickRail items={[
+              { icon:'🏪', skrot:'B', label:'Aukcja',    onClick:()=>setShowAuction(v=>!v) },
+              { icon:'⚒', skrot:'C', label:'Rzemiosło', onClick:()=>setShowCraft(v=>!v) },
+              { icon:'🐟', skrot:'F', label:'Wędka',     onClick:()=>setShowFishing(v=>!v) },
+              { icon:'🏰', skrot:'D', label:'Lochy',     onClick:()=>setShowDungeon(v=>!v) },
+              { icon:'Ⓜ', skrot:'R', label:'Auto-polowanie', onClick:toggleAuto, uwaga:autoHunt },
+              { icon:'🗡', skrot:'P', label:'PvP',       onClick:()=>api.character.pvpToggle().then(loadState), uwaga: !!state.postac.pvp },
+              ...(isAdmin ? [{ icon:'★', skrot:'', label:'Panel admina', onClick:()=>setShowAdmin(true) }] : []),
+            ]} />
+          </div>
+
           {/* Dół mapy: pasek z kulami HP/EN — przesunięty w prawo, by nie wchodzić na czat */}
           <div style={{ position:'absolute', left:222, right:10, bottom:8, zIndex:60, display:'flex', alignItems:'flex-end', pointerEvents:'none' }}>
             <div style={{ flex:1, minWidth:0, display:'flex', justifyContent:'center' }}>
@@ -1060,10 +1070,6 @@ export default function Game({ onLogout, onDisconnect }) {
                   onUsePotion={usePotion}
                   skills={skillBar}
                   onSkill={attackOrEngage}
-                  extras={[
-                    { k:'R', icon:'Ⓜ', label:'Auto-polowanie: po walce sam atakuje najbliższego potwora', onClick:toggleAuto, active:autoHunt },
-                    { k:'I', icon:'🎒', label:'Ekwipunek (I)', onClick:()=>setShowInv(v=>!v) },
-                  ]}
                 />
               </div>
             </div>
