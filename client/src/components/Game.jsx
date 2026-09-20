@@ -837,7 +837,7 @@ export default function Game({ onLogout, onDisconnect }) {
             onWalk={(x,y)=>handleMapClick(x,y)} onNpc={handleNpcClick} />
         )}
         {showInv && <InventoryScreen postac={state.postac} onClose={()=>setShowInv(false)} onRefresh={()=>{ loadState(); loadPotions(); }} />}
-        {npcDialog && <NpcDialog npc={npcDialog} postac={state.postac} onClose={()=>setNpcDialog(null)} onBought={loadState} onQuestReward={msg=>{ addToast(msg,'info'); loadState(); }} />}
+        {npcDialog && <NpcDialog npc={npcDialog} postac={state.postac} mapa={state.mapa} onClose={()=>setNpcDialog(null)} onBought={loadState} onQuestReward={msg=>{ addToast(msg,'info'); loadState(); }} />}
         {showQuests && <QuestPanel onClose={()=>setShowQuests(false)} onReward={msg=>{ addToast(msg,'info'); loadState(); setShowQuests(false); }} />}
         {showAdmin && <AdminPanel postac={state.postac} onClose={()=>setShowAdmin(false)} onLogout={()=>(onDisconnect || onLogout)()} />}
         {showOutfit && <OutfitSelector postac={state.postac} onClose={()=>setShowOutfit(false)} onChanged={()=>{ loadState(); setShowOutfit(false); }} />}
@@ -1082,7 +1082,7 @@ export default function Game({ onLogout, onDisconnect }) {
 
       {/* Modals — poza skalowanym kontenerem, zawsze pełny viewport */}
       {showInv    && <Inventory onClose={()=>setShowInv(false)} onRefresh={()=>{ loadState(); loadPotions(); }} postac={state.postac} onNavigate={openPanel} />}
-      {npcDialog  && <NpcDialog npc={npcDialog} postac={state.postac} onClose={()=>setNpcDialog(null)} onBought={loadState} />}
+      {npcDialog  && <NpcDialog npc={npcDialog} postac={state.postac} mapa={state.mapa} onClose={()=>setNpcDialog(null)} onBought={loadState} onQuestReward={msg=>{ addToast(msg,"info"); loadState(); }} />}
       {showAdmin  && <AdminPanel postac={state.postac} onClose={()=>setShowAdmin(false)} onLogout={()=>(onDisconnect || onLogout)()} />}
       {battle     && (
         <BattleModal mob={battle.mob} postac={battle.postac} mapa={state.mapa}
