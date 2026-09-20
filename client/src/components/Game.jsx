@@ -944,7 +944,21 @@ export default function Game({ onLogout, onDisconnect }) {
   const _innerH = uiScale < 1 ? `${(100 / uiScale).toFixed(2)}vh` : '100vh';
   return (
     <div style={{ width:'100vw', height:'100vh', overflow:'hidden', position:'relative', background:'#2A1A08' }}>
-    <div style={{ display:'flex', width:_innerW, height:_innerH, overflow:'hidden', zoom:_zoom, position:'relative' }}>
+    <div style={{ display:'flex', flexDirection:'column', width:_innerW, height:_innerH, overflow:'hidden', zoom:_zoom, position:'relative' }}>
+
+      {/* Górny pasek — na całą szerokość okna */}
+      <TopBar
+        postac={state.postac} mapa={state.mapa} worldState={worldState}
+        tokens={state.postac.event_tokeny}
+        unread={unread}
+        onAuction={()=>setShowAuction(v=>!v)}
+        onRanking={()=>setShowGuild(v=>!v)}
+        onMail={()=>setShowSocial(v=>!v)}
+        onSettings={()=>setShowOutfit(true)}
+        online={!!socket?.connected}
+      />
+
+      <div style={{ flex:1, minHeight:0, display:'flex', overflow:'hidden' }}>
 
       {/* Czat — pod przyciskami panelu bohatera, szerokość 2× wysokość */}
       <div style={{ position:'absolute', left:10, bottom:10, width:440, height: chatOpen ? 220 : 'auto', zIndex:80 }}>
@@ -968,18 +982,6 @@ export default function Game({ onLogout, onDisconnect }) {
       {/* CENTER: Map + panels column */}
       <div style={{ flex:1, display:'flex', overflow:'hidden', minWidth:0 }}>
       <div style={{ flex:1, display:'flex', flexDirection:'column', overflow:'hidden', minWidth:0 }}>
-
-        {/* Górny pasek */}
-        <TopBar
-          postac={state.postac} mapa={state.mapa} worldState={worldState}
-          tokens={state.postac.event_tokeny}
-          unread={unread}
-          onAuction={()=>setShowAuction(v=>!v)}
-          onRanking={()=>setShowGuild(v=>!v)}
-          onMail={()=>setShowSocial(v=>!v)}
-          onSettings={()=>setShowOutfit(true)}
-          online={!!socket?.connected}
-        />
 
         {/* Map area (fills remaining vertical space) */}
         <div style={{ flex:1, position:'relative', overflow:'hidden' }}>
@@ -1038,11 +1040,11 @@ export default function Game({ onLogout, onDisconnect }) {
           )}
 
           {/* Minimap (bottom-right of map area) */}
-          <Minimap state={state} size={168} />
+          <Minimap state={state} size={168} right={76} />
           <DungeonHUD addToast={addToast} onLeave={() => { loadState(); }} />
 
           {/* Lokalizacja + śledzenie zadań pod minimapą */}
-          <div style={{ position:'absolute', top:186, right:10, width:268, zIndex:55, display:'flex', flexDirection:'column', gap:10 }}>
+          <div style={{ position:'absolute', top:186, right:76, width:268, zIndex:55, display:'flex', flexDirection:'column', gap:10 }}>
             <LocationBox mapa={state.mapa} postac={state.postac} />
             <QuestTracker onOpen={()=>setShowQuests(true)} />
           </div>
@@ -1085,6 +1087,7 @@ export default function Game({ onLogout, onDisconnect }) {
         onTurnInReward={msg => { addToast(msg, 'info'); loadState(); }}
         onGuild={() => setShowGuild(v=>!v)}
       />
+      </div>
       </div>
     </div>{/* end scaled layout */}
 

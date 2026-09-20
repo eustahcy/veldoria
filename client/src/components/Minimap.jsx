@@ -86,7 +86,7 @@ function overlay(ctx, W, H, postac, mobs, npcs, portals, blockers, pulse) {
 // ── Component ─────────────────────────────────────────────────────────────────
 const EXPANDED_MAX = 260;
 
-export default function Minimap({ state, size = 72 }) {
+export default function Minimap({ state, size = 72, right = 8 }) {
   const canvasRef  = useRef(null);
   const wrapRef    = useRef(null);
   const dragRef    = useRef(null);
@@ -160,7 +160,7 @@ export default function Minimap({ state, size = 72 }) {
 
   const posStyle = pos
     ? { position: 'absolute', left: pos.left, top: pos.top }
-    : { position: 'absolute', top: 8, right: 8 };   // domyślnie w prawym górnym rogu (można przeciągnąć)
+    : { position: 'absolute', top: 8, right };   // domyślnie w prawym górnym rogu (można przeciągnąć)
 
   const GOLD   = 'rgba(200,150,32,0.75)';
   const GOLDDIM = 'rgba(200,150,32,0.3)';
