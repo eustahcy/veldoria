@@ -426,8 +426,8 @@ export default function PlayerProfile({ postacId, myId, onClose, onSendMessage, 
                   <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
                     <Btn tone="green" onClick={addFriend}>+ Dodaj do znajomych</Btn>
                     <Btn tone="blue" onClick={() => onSendMessage?.({ toId: postacId, toName: profile.nazwa })}>✉ Wyślij wiadomość</Btn>
-                    {profile.zalogowany && <Btn tone="red" onClick={() => { onChallengePvp?.(postacId); onClose(); }}>⚔ Wyzwij na pojedynek</Btn>}
-                    {profile.zalogowany && <Btn onClick={() => { onTradeRequest?.(postacId); onClose(); }}>🤝 Handluj</Btn>}
+                    {!!profile.zalogowany && <Btn tone="red" onClick={() => { onChallengePvp?.(postacId); onClose(); }}>⚔ Wyzwij na pojedynek</Btn>}
+                    {!!profile.zalogowany && <Btn onClick={() => { onTradeRequest?.(postacId); onClose(); }}>🤝 Handluj</Btn>}
                   </div>
                 )}
               </div>
@@ -560,7 +560,7 @@ export default function PlayerProfile({ postacId, myId, onClose, onSendMessage, 
           <div style={{ display: 'flex', gap: 8, padding: '10px 12px', borderTop: `1px solid ${G.bronze}88`, background: '#0d0b08', flexWrap: 'wrap', flexShrink: 0 }}>
             <Btn tone="green" onClick={addFriend}>+ Znajomi</Btn>
             <Btn tone="blue" onClick={() => onSendMessage?.({ toId: postacId, toName: profile.nazwa })}>✉ Wiadomość</Btn>
-            {profile.zalogowany && <Btn tone="red" onClick={() => { onChallengePvp?.(postacId); onClose(); }}>⚔ PvP</Btn>}
+            {!!profile.zalogowany && <Btn tone="red" onClick={() => { onChallengePvp?.(postacId); onClose(); }}>⚔ PvP</Btn>}
           </div>
         )}
       </div>
