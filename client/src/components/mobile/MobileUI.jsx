@@ -231,12 +231,12 @@ function RoundBtn({ icon, label, onClick, size = 50, badge, active }) {
   );
 }
 
-function Joystick({ onMove }) {
+function Joystick({ onMove, landscape = false }) {
   const baseRef = useRef(null);
   const timer = useRef(null);
   const dirRef = useRef(null);
   const [knob, setKnob] = useState({ x: 0, y: 0 });
-  const R = 56;
+  const R = landscape ? 68 : 56;
 
   const stop = useCallback(() => {
     clearInterval(timer.current); timer.current = null; dirRef.current = null; setKnob({ x: 0, y: 0 });
@@ -273,7 +273,7 @@ function Joystick({ onMove }) {
         }}>{a}</span>
       ))}
       <span style={{
-        position: 'absolute', left: '50%', top: '50%', width: 46, height: 46, borderRadius: '50%',
+        position: 'absolute', left: '50%', top: '50%', width: landscape ? 54 : 46, height: landscape ? 54 : 46, borderRadius: '50%',
         transform: `translate(calc(-50% + ${knob.x}px), calc(-50% + ${knob.y}px))`,
         background: 'radial-gradient(circle at 40% 35%,#6b6358,#2c2822 60%,#15120f)',
         border: `1px solid ${G.bronze}`, boxShadow: '0 4px 10px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.2)',
@@ -339,31 +339,40 @@ export function MobileHud({
       {/* Górny pasek */}
       <div style={{
         position: 'fixed', top: 0, left: 0, right: 0, zIndex: 500, paddingTop: SAFE_T,
-        background: 'linear-gradient(180deg,rgba(18,14,10,0.97),rgba(10,8,6,0.9))',
+        height: landscape ? 52 : undefined,
+        background: 'linear-gradient(180deg,rgba(12,9,6,0.98),rgba(10,8,6,0.86))',
         borderBottom: `1px solid ${G.bronze}`, boxShadow: '0 4px 16px rgba(0,0,0,0.6)',
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', height: 46, padding: '0 8px' }}>
-          <button onClick={() => onScreen('menu')} aria-label="Menu" style={{ width: 40, height: 40, background: 'none', border: 'none', color: G.gold, fontSize: 24, cursor: 'pointer' }}>☰</button>
-          <div style={{ flex: 1, display: 'flex', justifyContent: 'center' }}><Logo size={17} /></div>
-          <button onClick={() => onScreen('zadania')} aria-label="Zadania" style={{ width: 40, height: 40, background: 'none', border: 'none', color: G.gold, fontSize: 21, cursor: 'pointer' }}>📜</button>
+        <div style={{ display: 'flex', alignItems: 'center', height: landscape ? 50 : 46, padding: landscape ? '0 12px' : '0 8px' }}>
+          <button onClick={() => onScreen('menu')} aria-label="Menu" style={{
+            width: landscape ? 42 : 40, height: landscape ? 42 : 40, background: 'none', border: 'none',
+            color: G.gold, fontSize: landscape ? 25 : 24, cursor: 'pointer',
+          }}>☰</button>
+          <div style={{ flex: 1, display: 'flex', justifyContent: 'center' }}><Logo size={landscape ? 19 : 17} /></div>
+          <button onClick={() => onScreen('zadania')} aria-label="Zadania" style={{
+            width: landscape ? 42 : 40, height: landscape ? 42 : 40, background: 'none', border: 'none',
+            color: G.gold, fontSize: landscape ? 21 : 21, cursor: 'pointer',
+          }}>📜</button>
         </div>
       </div>
 
       {/* Karta bohatera */}
       <div style={{
-        position: 'fixed', top: `calc(${SAFE_T} + 54px)`, left: `calc(${SAFE_L} + 8px)`, zIndex: 480, width: 'min(58vw, 230px)',
-        display: 'flex', gap: 7, padding: 6, borderRadius: 4,
+        position: 'fixed', top: landscape ? `calc(${SAFE_T} + 60px)` : `calc(${SAFE_T} + 54px)`,
+        left: `calc(${SAFE_L} + ${landscape ? 12 : 8}px)`, zIndex: 480,
+        width: landscape ? 'min(31vw, 285px)' : 'min(58vw, 230px)',
+        display: 'flex', gap: landscape ? 9 : 7, padding: landscape ? 8 : 6, borderRadius: 5,
         background: 'linear-gradient(180deg,rgba(26,21,15,0.88),rgba(10,8,6,0.88))', border: `1px solid ${G.bronze}`,
         boxShadow: '0 6px 16px rgba(0,0,0,0.6)',
       }} onClick={() => onScreen('postac')}>
         <div style={{
-          width: 44, height: 54, flexShrink: 0, borderRadius: 3, border: `1px solid ${G.goldDim}`,
+          width: landscape ? 48 : 44, height: landscape ? 58 : 54, flexShrink: 0, borderRadius: 3, border: `1px solid ${G.goldDim}`,
           background: 'radial-gradient(ellipse at 50% 85%, rgba(231,193,88,0.25), #0b0907 70%)', display: 'grid', placeItems: 'center', overflow: 'hidden',
         }}>
-          <span style={{ width: 32, height: 48, imageRendering: 'pixelated', backgroundImage: `url(/assets/${p.obrazek})`, backgroundPosition: '0 0', backgroundRepeat: 'no-repeat' }} />
+          <span style={{ width: 32, height: 48, imageRendering: 'pixelated', transform: landscape ? 'scale(1.05)' : 'none', backgroundImage: `url(/assets/${p.obrazek})`, backgroundPosition: '0 0', backgroundRepeat: 'no-repeat' }} />
         </div>
         <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 3 }}>
-          <div style={{ fontFamily: G.serif, fontSize: 12, color: G.goldHi, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+          <div style={{ fontFamily: G.serif, fontSize: landscape ? 13 : 12, color: G.goldHi, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
             Lv. {p.poziom} {p.nazwa}
           </div>
           <div style={{ animation: low ? 'mHudPulse 1s ease-in-out infinite' : 'none' }}>
@@ -376,13 +385,14 @@ export function MobileHud({
       </div>
 
       {/* Minimapa + położenie */}
-      <div style={{ position: 'fixed', top: `calc(${SAFE_T} + 54px)`, right: `calc(${SAFE_R} + 8px)`, zIndex: 480, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
-        <RoundMinimap state={state} size={landscape ? 78 : 96} onClick={() => onScreen('mapa')} />
+      <div style={{ position: 'fixed', top: landscape ? `calc(${SAFE_T} + 60px)` : `calc(${SAFE_T} + 54px)`,
+          right: `calc(${SAFE_R} + ${landscape ? 12 : 8}px)`, zIndex: 480, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+        <RoundMinimap state={state} size={landscape ? 92 : 96} onClick={() => onScreen('mapa')} />
         <div style={{
-          padding: '3px 8px', borderRadius: 3, textAlign: 'center', maxWidth: 120,
+          padding: landscape ? '4px 10px' : '3px 8px', borderRadius: 3, textAlign: 'center', maxWidth: landscape ? 150 : 120,
           background: 'rgba(10,8,6,0.82)', border: `1px solid ${G.bronze}99`,
         }}>
-          <div style={{ fontFamily: G.serif, fontSize: 10.5, color: G.goldHi, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{state.mapa?.nazwa}</div>
+          <div style={{ fontFamily: G.serif, fontSize: landscape ? 11.5 : 10.5, color: G.goldHi, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{state.mapa?.nazwa}</div>
           <div style={{ fontSize: 9.5, color: G.muted }}>X: {p.x} Y: {p.y}</div>
         </div>
         {pillTxt && (
@@ -391,25 +401,27 @@ export function MobileHud({
       </div>
 
       {/* Szybkie przyciski po prawej */}
-      <div style={{ position: 'fixed', right: `calc(${SAFE_R} + 10px)`, bottom: landscape ? `calc(${SAFE_B} + 10px)` : `calc(${SAFE_B} + 150px)`, zIndex: 480, display: 'flex', flexDirection: 'column', gap: landscape ? 8 : 10 }}>
-        <RoundBtn icon="🎒" label="Ekwipunek" onClick={() => onScreen('ekwipunek')} />
-        <RoundBtn icon="⭐" label="Umiejętności" onClick={() => onScreen('umiejetnosci')} badge={p.punkty_talentow > 0 ? p.punkty_talentow : null} />
-        <RoundBtn icon="🗺" label="Mapa" onClick={() => onScreen('mapa')} />
+      <div style={{ position: 'fixed', right: `calc(${SAFE_R} + ${landscape ? 14 : 10}px)`,
+        bottom: landscape ? `calc(${SAFE_B} + 12px)` : `calc(${SAFE_B} + 150px)`, zIndex: 480, display: 'flex', flexDirection: 'column', gap: landscape ? 8 : 10 }}>
+        <RoundBtn size={landscape ? 56 : 50} icon="🎒" label="Ekwipunek" onClick={() => onScreen('ekwipunek')} />
+        <RoundBtn size={landscape ? 56 : 50} icon="⭐" label="Umiejętności" onClick={() => onScreen('umiejetnosci')} badge={p.punkty_talentow > 0 ? p.punkty_talentow : null} />
+        <RoundBtn size={landscape ? 56 : 50} icon="🗺" label="Mapa" onClick={() => onScreen('mapa')} />
       </div>
 
       {/* Joystick */}
-      <div style={{ position: 'fixed', left: `calc(${SAFE_L} + 16px)`, bottom: landscape ? `calc(${SAFE_B} + 10px)` : `calc(${SAFE_B} + 84px)`, zIndex: 480 }}>
-        <Joystick onMove={onMove} />
+      <div style={{ position: 'fixed', left: `calc(${SAFE_L} + ${landscape ? 18 : 16}px)`, bottom: landscape ? `calc(${SAFE_B} + 12px)` : `calc(${SAFE_B} + 84px)`, zIndex: 480 }}>
+        <Joystick landscape={landscape} onMove={onMove} />
       </div>
 
       {/* Dolny pasek akcji */}
       <div style={{
         position: 'fixed', left: landscape ? '50%' : 0, right: landscape ? 'auto' : 0, bottom: 0, zIndex: 490,
-        width: landscape ? 'min(460px, calc(100vw - 320px))' : undefined, transform: landscape ? 'translateX(-50%)' : undefined,
+        width: landscape ? 'min(500px, calc(100vw - 330px))' : undefined, transform: landscape ? 'translateX(-50%)' : undefined,
         paddingBottom: `calc(${SAFE_B} + 6px)`,
         background: landscape ? 'none' : 'linear-gradient(180deg,rgba(18,14,10,0.0),rgba(10,8,6,0.92) 30%)',
       }}>
-        <div style={{ display: 'flex', gap: 6, padding: landscape ? '0' : '10px 8px 0' }}>
+        <div style={{ display: 'flex', gap: landscape ? 7 : 6, padding: landscape ? '0' : '10px 8px 0',
+          transform: landscape ? 'scale(0.96)' : 'none', transformOrigin: 'center bottom' }}>
           <BottomSlot label="Czat" onClick={onChat} active={chatOpen} count={unread > 0 && !chatOpen ? unread : null}>💬</BottomSlot>
           <BottomSlot label="Atak" onClick={onAttack}>⚔️</BottomSlot>
           <BottomSlot label="Rozmowa" onClick={onTalk}>🗨️</BottomSlot>

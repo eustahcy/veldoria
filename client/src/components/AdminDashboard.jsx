@@ -3,7 +3,8 @@ import { api } from '../api';
 import AdminApp, { GoldBtn } from './admin/AdminApp';
 import { adminTabs } from './AdminPanel';
 
-const WorldEditor = lazy(() => import('./WorldEditor'));
+const WorldEditor = lazy(() => import('./WorldEditor'));       // stary edytor map z obrazkiem tła
+const MapEditor2D = lazy(() => import('./MapEditor2D'));      // edytor autorskiego silnika kafli
 const QuestEditor = lazy(() => import('./QuestEditor'));
 
 // ── Design system ─────────────────────────────────────────────────────────────
@@ -252,7 +253,8 @@ export default function AdminDashboard({ onEnterGame, onLogout }) {
   );
   const tabs = adminTabs({ myId: me?.id, currentMap: me?.mapa || 1 });
   tabs.splice(4, 0,
-    { id: 'world',   icon: '🧱', label: 'Edytor map', sub: 'Malowanie i kolizje', render: () => lazyPane(<WorldEditor />), fill: true },
+    { id: 'world',   icon: '🧱', label: 'Edytor map', sub: 'Kafle, teren i obiekty', render: () => lazyPane(<MapEditor2D />), fill: true },
+    { id: 'world0',  icon: '🗺', label: 'Mapy (stary)', sub: 'Moby, NPC, przejścia', render: () => lazyPane(<WorldEditor />), fill: true },
     { id: 'quests',  icon: '📜', label: 'Questy',     sub: 'Tworzenie zadań',     render: () => lazyPane(<QuestEditor />), fill: true },
   );
   tabs.push({ id: 'servers', icon: '🌐', label: 'Serwery', sub: 'Lista serwerów gry', render: () => <ServersTab />, legacy: true });

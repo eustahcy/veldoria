@@ -13,3 +13,7 @@ __pycache__/
 original/*
 !original/MAEGONEM_pliki/
 original/.git-OldMargonem/
+
+# Projekty poboczne trzymane obok gry (nie wchodzą do repozytorium serwera)
+Veldoria-Unity2D/
+VeldoriaMapEditor/

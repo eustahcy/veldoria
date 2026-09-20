@@ -16,7 +16,8 @@ function MapRenderer({ iso, tiles, ...props }) {
   const { maks_x = 0, maks_y = 0 } = props.state?.mapa || {};
   const pol = (maks_x + 1) * (maks_y + 1);
   const gotowa = iso && Object.keys(tiles || {}).length >= Math.max(50, pol * 0.25);
-  return gotowa ? <IsoGameMap {...props} tiles={tiles} /> : <GameMap {...props} />;
+  // mapy izometryczne rysuje IsoGameMap, pozostałe GameMap (kafle albo obrazek)
+  return gotowa ? <IsoGameMap {...props} tiles={tiles} /> : <GameMap {...props} tiles={tiles} />;
 }
 import Chat                from './Chat';
 import CombatLog           from './CombatLog';

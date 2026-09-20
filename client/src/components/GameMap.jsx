@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState, memo } from 'react';
 import { T } from '../theme';
 import WorldOverlay from './WorldOverlay';
+import { czyMapaKaflowa, rysujKafelTerenu, rysujKafelObiektu, TILE as KAFEL } from '../engine/tiles2d';
 
-const TILE   = 28;
+const TILE   = KAFEL;
 const HERO_W = 32;
 const HERO_H = 48;
 const RANKA       = { GameAdmin:'#f44', GameMaster:'#f90', Moderator:'#4af' };
@@ -141,11 +142,12 @@ const WorldEntities = memo(function WorldEntities({ mobs, npcs, players, chatBub
 });
 
 export default function GameMap({
-  state, direction, animStep, chatBubbles={},
+  state, direction, animStep, chatBubbles={}, tiles,
   onMobClick, onPlayerClick, onNpcClick, onMapClick, isMobile,
   worldState = {},
 }) {
   const containerRef = useRef(null);
+  const kaflowe = czyMapaKaflowa(tiles, state?.mapa);
   const [size, setSize] = useState({ w:window.innerWidth, h:window.innerHeight });
   const [ready, setReady] = useState(false);
 
@@ -161,6 +163,8 @@ export default function GameMap({
   }, []);
 
   const { postac, mapa, mobs, npcs, players } = state;
+  const plotnoRef = useRef(null);
+  const widokRef = useRef({ ox: 0, oy: 0, w: 0, h: 0 });
 
   const cx = Math.floor((size.w - HERO_W) / 2);
   const cy = Math.floor((size.h - HERO_H) / 2);
@@ -180,6 +184,44 @@ export default function GameMap({
   const heroX = Math.round(postac.x * TILE + ox);
   const heroY = Math.round(postac.y * TILE + oy);
 
+  widokRef.current = { ox, oy, w: size.w, h: size.h };
+
+  // Rysowanie mapy autorskim silnikiem — tylko kafle widoczne na ekranie
+  useEffect(() => {
+    if (!kaflowe) return;
+    let id;
+    const rysuj = () => {
+      const c = plotnoRef.current;
+      const { ox: vx, oy: vy, w, h } = widokRef.current;
+      if (c && w && h) {
+        const dpr = Math.min(2, window.devicePixelRatio || 1);
+        if (c.width !== Math.round(w * dpr) || c.height !== Math.round(h * dpr)) {
+          c.width = Math.round(w * dpr); c.height = Math.round(h * dpr);
+          c.style.width = `${w}px`; c.style.height = `${h}px`;
+        }
+        const ctx = c.getContext('2d');
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        ctx.imageSmoothingEnabled = false;
+        ctx.fillStyle = '#10150d';
+        ctx.fillRect(0, 0, w, h);
+        const x0 = Math.max(0, Math.floor(-vx / TILE) - 1);
+        const y0 = Math.max(0, Math.floor(-vy / TILE) - 1);
+        const x1 = Math.min(mapa.maks_x, x0 + Math.ceil(w / TILE) + 2);
+        const y1 = Math.min(mapa.maks_y, y0 + Math.ceil(h / TILE) + 2);
+        const anim = performance.now();
+        for (let y = y0; y <= y1; y++)
+          for (let x = x0; x <= x1; x++)
+            rysujKafelTerenu(ctx, Math.round(x * TILE + vx), Math.round(y * TILE + vy), tiles, x, y, anim);
+        for (let y = y0; y <= y1; y++)
+          for (let x = x0; x <= x1; x++)
+            rysujKafelObiektu(ctx, Math.round(x * TILE + vx), Math.round(y * TILE + vy), tiles, x, y, anim);
+      }
+      id = requestAnimationFrame(rysuj);
+    };
+    id = requestAnimationFrame(rysuj);
+    return () => cancelAnimationFrame(id);
+  }, [kaflowe, tiles, mapa.maks_x, mapa.maks_y]);
+
   const handleClick = (e) => {
     if (e.target.getAttribute('data-entity')) return;
     const rect = containerRef.current.getBoundingClientRect();
@@ -193,6 +235,11 @@ export default function GameMap({
     <div ref={containerRef} onClick={handleClick}
       style={{ position:'relative', width:'100%', height:'100%', overflow:'hidden', background:T.bgDeep, cursor:'crosshair' }}
     >
+      {/* Warstwa kafli (autorski silnik) — rysowana pod światem */}
+      {kaflowe && (
+        <canvas ref={plotnoRef} style={{ position:'absolute', left:0, top:0, imageRendering:'pixelated', pointerEvents:'none' }} />
+      )}
+
       {/* ── SCROLLING WORLD ──────────────────────────────────────────────── */}
       <div style={{
         position:'absolute', left:0, top:0,
@@ -200,13 +247,15 @@ export default function GameMap({
         transition: ready ? 'transform 215ms linear' : 'none',
         willChange:'transform',
       }}>
-        {/* Map background */}
-        <div style={{
-          position:'absolute', left:0, top:0, width:mapW, height:mapH,
-          backgroundImage:`url(/assets/${mapa.obrazek})`,
-          backgroundRepeat:'no-repeat', imageRendering:'pixelated',
-          backgroundSize:`${mapW}px ${mapH}px`,
-        }} />
+        {/* Tło mapy — obrazek tylko dla map bez kafli */}
+        {!kaflowe && (
+          <div style={{
+            position:'absolute', left:0, top:0, width:mapW, height:mapH,
+            backgroundImage:`url(/assets/${mapa.obrazek})`,
+            backgroundRepeat:'no-repeat', imageRendering:'pixelated',
+            backgroundSize:`${mapW}px ${mapH}px`,
+          }} />
+        )}
 
         {/* Walk target */}
         {state._walkTarget && (
