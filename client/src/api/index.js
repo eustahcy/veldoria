@@ -41,6 +41,7 @@ export const api = {
     giveExp:       (id, amount) => req('POST',  '/admin/give-exp',      { id, amount }),
     setLevel:      (id, level)  => req('POST',  '/admin/set-level',     { id, level }),
     setPrestige:   (id, p)      => req('POST',  '/admin/set-prestige',  { id, prestige: p }),
+    setPlayerSkin: (postacId, obrazek) => req('PATCH', '/admin/player-skin', { postacId, obrazek }),
     setClass:      (id, k)      => req('POST',  '/admin/set-class',     { id, profesja: k }),
     healPlayer:    (id)         => req('POST',  '/admin/heal-player',   { id }),
     stats:         ()           => req('GET',   '/admin/stats'),

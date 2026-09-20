@@ -58,6 +58,7 @@ router.get('/list/:category', requireAdmin, (req, res) => {
     mob:    'mob',
     npc:    'npc',
     guild:  'guild',
+    item:   'przedmiot',
     custom: 'custom',
   };
   const subdir = MAP[req.params.category];
@@ -187,6 +188,16 @@ router.post('/upload/npc', requireAdmin, (req, res, next) => {
       await db.query('UPDATE npc SET obrazek=? WHERE id=?', [filePath, parseInt(req.body.npcId)]).catch(logError('assets:187'));
     }
 
+    res.json({ ok: true, path: filePath, name: req.file.filename });
+  });
+});
+
+// ── UPLOAD: ikona przedmiotu ──────────────────────────────────────────────────
+router.post('/upload/item', requireAdmin, (req, res, next) => {
+  makeUpload('przedmiot').single('file')(req, res, async err => {
+    if (err) return res.status(400).json({ error: err.message });
+    if (!req.file) return res.status(400).json({ error: 'Brak pliku' });
+    const filePath = relPath(req.file.path);
     res.json({ ok: true, path: filePath, name: req.file.filename });
   });
 });

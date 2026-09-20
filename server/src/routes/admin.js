@@ -426,6 +426,18 @@ router.post('/session-check', async (req, res, next) => {
   } catch(e) { next(e); }
 });
 
+// ── Skórka dla całej klasy ────────────────────────────────────────────────────
+router.post('/set-class-skin', requireAdmin, async (req, res, next) => {
+  try {
+    const { profesja, obrazek } = req.body;
+    if (!profesja || !obrazek) return res.status(400).json({ error: 'Brak danych' });
+    if (String(obrazek).includes('..')) return res.status(400).json({ error: 'Nieprawidłowa ścieżka' });
+    const [r] = await db.query('UPDATE postac SET obrazek=? WHERE profesja=?', [obrazek, profesja]);
+    adminLog(req, 'skin_class', profesja, obrazek);
+    res.json({ ok: true, zmienione: r.affectedRows });
+  } catch (e) { next(e); }
+});
+
 // ── PATCH player skin ─────────────────────────────────────────────────────────
 router.patch('/player-skin', requireAdmin, async (req, res, next) => {
   try {

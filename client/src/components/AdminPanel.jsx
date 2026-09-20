@@ -7,6 +7,7 @@ import { api } from '../api';
 import AssetsTab from './AssetsTab';
 import AdminApp from './admin/AdminApp';
 import AdminOverview from './admin/AdminOverview';
+import Kreator from './Kreator';
 
 // ── Design tokens ─────────────────────────────────────────────────────────────
 // Ta sama paleta co reszta interfejsu: ciemny kamień, brąz, złoto
@@ -787,6 +788,7 @@ export function adminTabs({ myId, currentMap }) {
   return [
     { id: 'overview', icon: '🏠', label: 'Serwer',  sub: 'Status i informacje',        render: (ctx) => <AdminOverview ctx={ctx} /> },
     { id: 'players',  icon: '👥', label: 'Gracze',  sub: 'Zarządzanie graczami',       render: () => <PlayersTab myId={myId} />, fill: true, legacy: true },
+    { id: 'kreator',  icon: '🛠', label: 'Kreator', sub: 'Przedmioty, potwory, NPC',   render: () => <Kreator /> },
     { id: 'mobs',     icon: '👾', label: 'Moby',    sub: 'Respawn i podgląd',          render: () => <MobsTab currentMap={currentMap} />, legacy: true },
     { id: 'maps',     icon: '🗺', label: 'Mapy',    sub: 'Zarządzanie mapami',         render: () => <MapsTab />, legacy: true },
     { id: 'config',   icon: '⚙️', label: 'Config',  sub: 'Ustawienia serwera',         render: () => <ServerTab />, legacy: true },
