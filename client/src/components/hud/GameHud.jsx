@@ -433,11 +433,12 @@ function Orb({ value, max, from, to, label, size = 104 }) {
 }
 
 // Pojedyncze pole paska (kwadratowe lub okrągłe) z klawiszem pod spodem
-function BarSlot({ k, title, onClick, children, count, round, active, dim, badge, sep }) {
+function BarSlot({ k, title, onClick, onContext, children, count, round, active, dim, badge, sep }) {
   const [hov, setHov] = useState(false);
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, marginLeft: sep ? 12 : 0 }}>
-      <button onClick={onClick} title={title} onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)} style={{
+      <button onClick={onClick} title={title} onContextMenu={onContext ? (e => { e.preventDefault(); onContext(); }) : undefined}
+        onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)} style={{
         width: 48, height: 48, borderRadius: round ? '50%' : 3, cursor: 'pointer', position: 'relative', padding: 0,
         background: active ? 'radial-gradient(circle at 50% 35%, #5a4520, #1d160b)' : 'linear-gradient(180deg,#221c14,#0a0907)',
         border: `1px solid ${active || hov ? G.gold : G.bronze}`,
@@ -456,25 +457,92 @@ function BarSlot({ k, title, onClick, children, count, round, active, dim, badge
   );
 }
 
+// ── Wybór zawartości pola paska ─────────────────────────────────────────────
+function SlotPicker({ slotKey, skills, potions, panels, onPick, onClear, onClose }) {
+  const sekcja = (title, items) => items.length > 0 && (
+    <div key={title} style={{ marginBottom: 12 }}>
+      <div style={{ fontFamily: G.serif, fontSize: 12, letterSpacing: 2, color: G.goldDim, marginBottom: 7 }}>{title}</div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: 6 }}>
+        {items.map(it => (
+          <button key={it.key} onClick={() => { onPick(it.wpis); onClose(); }} title={it.opis || it.label} style={{
+            display: 'flex', alignItems: 'center', gap: 9, padding: '8px 10px', borderRadius: 3, cursor: 'pointer', textAlign: 'left',
+            background: 'linear-gradient(180deg,#1b1712,#0d0b08)', border: `1px solid ${G.bronze}`, color: G.text, fontSize: 12.5,
+          }}
+            onMouseEnter={e => { e.currentTarget.style.borderColor = G.gold; }}
+            onMouseLeave={e => { e.currentTarget.style.borderColor = G.bronze; }}>
+            <span style={{ width: 24, textAlign: 'center', fontSize: 17 }}>{it.icon}</span>
+            <span style={{ minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{it.label}</span>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+
+  return (
+    <div onClick={e => e.target === e.currentTarget && onClose()} style={{
+      position: 'fixed', inset: 0, zIndex: 660, background: 'rgba(0,0,0,0.7)',
+      display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20, fontFamily: C.font,
+    }}>
+      <div style={{
+        width: 620, maxWidth: '100%', maxHeight: '80vh', overflowY: 'auto', padding: 18, borderRadius: 5,
+        background: 'linear-gradient(180deg,#15120e,#0b0907)', border: `1px solid ${G.gold}`,
+        boxShadow: '0 0 0 1px #000, 0 24px 60px rgba(0,0,0,0.85)', color: G.text,
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
+          <span style={{ fontFamily: G.serif, fontSize: 18, color: G.goldHi }}>Pole {slotKey} — wybierz zawartość</span>
+          <button onClick={onClose} style={{ marginLeft: 'auto', width: 34, height: 34, borderRadius: 3, cursor: 'pointer', background: 'rgba(0,0,0,0.35)', border: `1px solid ${G.bronze}`, color: G.goldHi, fontSize: 16 }}>✕</button>
+        </div>
+        {sekcja('UMIEJĘTNOŚCI', skills.map(sk => ({ key: `s${sk.id}`, icon: sk.icon, label: sk.name, opis: sk.desc, wpis: { t: 'skill', id: sk.id } })))}
+        {sekcja('MIKSTURY', potions.map(p => ({ key: `p${p.id}`, icon: '🧪', label: `${p.nazwa}${p.ilosc > 1 ? ` ×${p.ilosc}` : ''}`, wpis: { t: 'potion', nazwa: p.nazwa } })))}
+        {sekcja('OKNA I TRYBY', panels.map(a => ({ key: `a${a.id}`, icon: a.icon, label: a.label, wpis: { t: 'panel', id: a.id } })))}
+        <button onClick={() => { onClear(); onClose(); }} style={{
+          width: '100%', padding: '10px', borderRadius: 3, cursor: 'pointer', marginTop: 4,
+          background: 'linear-gradient(180deg,#221c14,#0d0b08)', border: `1px solid ${G.bronze}`, color: G.muted, fontFamily: G.serif, fontSize: 13,
+        }}>Wyczyść pole</button>
+        <div style={{ color: G.dim, fontSize: 11.5, marginTop: 10, textAlign: 'center' }}>
+          Prawy przycisk myszy na polu paska otwiera to okno ponownie.
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ── Dolny pasek: kule HP/EN i dziesięć pól akcji (1–9, 0) ───────────────────
-export function BottomBar({ postac, potions = [], onUsePotion, skills = [], onSkill }) {
-  // Pola 1–8 to umiejętności klasy, 9 i 0 to dwie pierwsze mikstury z plecaka
-  const slots = Array.from({ length: 10 }, (_, i) => {
-    const key = i === 9 ? '0' : String(i + 1);
-    if (i >= 8) {
-      const p = potions[i - 8];
-      return p
-        ? { key, title: `${p.nazwa} — kliknij, aby wypić (${key})`, count: p.ilosc || 1, onClick: () => onUsePotion?.(p),
-            content: <span style={{ width: 30, height: 30, display: 'block', imageRendering: 'pixelated', backgroundImage: `url(/assets/${p.obrazek})`, backgroundSize: 'contain', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }} /> }
-        : { key, title: 'Puste pole na miksturę' };
+// Zawartość pól ustala gracz; układ zapisuje się w przeglądarce dla każdej postaci.
+export function BottomBar({ postac, potions = [], onUsePotion, skills = [], onSkill, panels = [], layout, onLayout }) {
+  const [picker, setPicker] = useState(null);   // indeks edytowanego pola
+
+  const resolve = (wpis, i) => {
+    if (!wpis) return { empty: true, title: `Puste pole ${i === 9 ? '0' : i + 1} — kliknij, aby przypisać akcję` };
+    if (wpis.t === 'skill') {
+      const sk = skills.find(x => x.id === wpis.id);
+      if (!sk) return { empty: true, title: 'Ta umiejętność nie jest dostępna' };
+      return {
+        title: `${sk.name} — ${sk.desc} (EN ${sk.cost})`, onClick: () => onSkill?.(sk),
+        content: <span style={{ fontSize: 22, color: '#f7c77a', filter: 'drop-shadow(0 0 6px rgba(247,160,90,0.65))', fontFamily: G.serif }}>{sk.icon}</span>,
+      };
     }
-    const sk = skills[i];
-    return sk
-      ? { key, title: `${sk.name} — ${sk.desc} (EN ${sk.cost}). Kliknij, aby zaatakować; w walce klawisz ${key} użyje umiejętności.`,
-          onClick: () => onSkill?.(i),
-          content: <span style={{ fontSize: 22, color: '#f7c77a', filter: 'drop-shadow(0 0 6px rgba(247,160,90,0.65))', fontFamily: G.serif }}>{sk.icon}</span> }
-      : { key, title: 'Puste pole' };
-  });
+    if (wpis.t === 'potion') {
+      const p = potions.find(x => x.nazwa === wpis.nazwa);
+      if (!p) return { empty: true, title: `${wpis.nazwa} — brak w plecaku` };
+      return {
+        title: `${p.nazwa} — wypij`, count: p.ilosc || 1, onClick: () => onUsePotion?.(p),
+        content: <span style={{ width: 30, height: 30, display: 'block', imageRendering: 'pixelated', backgroundImage: `url(/assets/${p.obrazek})`, backgroundSize: 'contain', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }} />,
+      };
+    }
+    const a = panels.find(x => x.id === wpis.id);
+    if (!a) return { empty: true, title: 'Ta akcja nie jest dostępna' };
+    return {
+      title: a.label, onClick: a.onClick, active: a.active,
+      content: <span style={{ fontSize: 21, filter: 'drop-shadow(0 1px 2px #000)' }}>{a.icon}</span>,
+    };
+  };
+
+  const setSlot = (i, wpis) => {
+    const next = [...(layout || Array(10).fill(null))];
+    next[i] = wpis;
+    onLayout?.(next);
+  };
 
   return (
     <div style={{ display: 'flex', alignItems: 'center', fontFamily: C.font }}>
@@ -486,42 +554,27 @@ export function BottomBar({ postac, potions = [], onUsePotion, skills = [], onSk
         borderTop: `2px solid ${G.goldDim}`, borderBottom: `2px solid ${G.goldDim}`,
         boxShadow: '0 10px 24px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.08), 0 0 0 1px #000',
       }}>
-        {slots.map((s, i) => (
-          <BarSlot key={s.key} k={s.key} title={s.title} onClick={s.onClick} count={s.count} dim={!s.content}
-            sep={i === 8}>
-            {s.content || <span style={{ color: G.dim, fontSize: 13 }}>—</span>}
-          </BarSlot>
-        ))}
+        {Array.from({ length: 10 }, (_, i) => {
+          const key = i === 9 ? '0' : String(i + 1);
+          const s = resolve((layout || [])[i], i);
+          return (
+            <BarSlot key={key} k={key} title={s.title} count={s.count} dim={s.empty} active={s.active}
+              onClick={() => (s.empty ? setPicker(i) : s.onClick?.())}
+              onContext={() => setPicker(i)}>
+              {s.content || <span style={{ color: G.dim, fontSize: 13 }}>—</span>}
+            </BarSlot>
+          );
+        })}
       </div>
 
       <Orb value={postac.energia ?? 0} max={postac.energia_max ?? 100} from={G.en} to={G.enHi} label="Energia" />
-    </div>
-  );
-}
 
-// ── Pionowy pasek skrótów przy prawej krawędzi ──────────────────────────────
-export function QuickRail({ items = [] }) {
-  const [hov, setHov] = useState(null);
-  return (
-    <Ornate pad={6} style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-      {items.map(it => (
-        <button key={it.label} onClick={it.onClick}
-          onMouseEnter={() => setHov(it.label)} onMouseLeave={() => setHov(null)}
-          title={it.skrot ? `${it.label} (${it.skrot})` : it.label}
-          style={{
-            position: 'relative', width: 46, height: 48, borderRadius: 3, cursor: 'pointer',
-            display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 2,
-            background: hov === it.label ? 'linear-gradient(180deg,#2c2418,#171208)' : G.stone,
-            border: `1px solid ${hov === it.label ? G.gold : G.bronze}`,
-            boxShadow: hov === it.label ? '0 0 12px rgba(231,193,88,0.25)' : 'inset 0 1px 0 rgba(255,255,255,0.05)',
-            color: hov === it.label ? G.goldHi : G.text, transition: 'all .12s',
-          }}>
-          <span style={{ fontSize: 19, lineHeight: 1 }}>{it.icon}</span>
-          <span style={{ fontSize: 9, color: hov === it.label ? G.goldHi : G.dim, fontFamily: G.serif }}>{it.skrot}</span>
-          {it.uwaga && <span style={{ position: 'absolute', top: 3, right: 4, width: 7, height: 7, borderRadius: '50%', background: G.gold, boxShadow: `0 0 7px ${G.gold}` }} />}
-        </button>
-      ))}
-    </Ornate>
+      {picker !== null && (
+        <SlotPicker slotKey={picker === 9 ? '0' : picker + 1}
+          skills={skills} potions={potions} panels={panels}
+          onPick={w => setSlot(picker, w)} onClear={() => setSlot(picker, null)} onClose={() => setPicker(null)} />
+      )}
+    </div>
   );
 }
 

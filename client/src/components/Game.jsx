@@ -6,7 +6,7 @@ import { usePathfinding, buildBlockSet } from '../hooks/usePathfinding';
 import GameMap              from './GameMap';
 import IsoGameMap           from './IsoGameMap';
 import { applyTilePatch }   from '../ui/iso';
-import { TopBar, HeroPanel, QuestTracker, BottomBar, LocationBox, QuickRail, AdminAnnounce } from './hud/GameHud';
+import { TopBar, HeroPanel, QuestTracker, BottomBar, LocationBox, AdminAnnounce } from './hud/GameHud';
 
 // Widok świata: izometryczny dla map z iso=1, inaczej klasyczny z góry.
 // Gdy mapa ma włączoną izometrię, ale nie została jeszcze pomalowana, pokazujemy
@@ -33,7 +33,6 @@ import SocialPanel         from './SocialPanel';
 import GuildPanel          from './GuildPanel';
 import PlayerProfile       from './PlayerProfile';
 import Minimap             from './Minimap';
-import RightPanel          from './RightPanel';
 import OutfitSelector      from './OutfitSelector';
 import TradeModal          from './TradeModal';
 
@@ -289,7 +288,8 @@ export default function Game({ onLogout, onDisconnect }) {
   const toggleChat = useCallback(() => setChatOpen(o => { try { localStorage.setItem('veldoria_chat', o ? '0' : '1'); } catch { /* bez pamięci */ } return !o; }), []);
   // Ruch innych graczy na żywo (socket) — { [id]: { x, y, kier, step, t } | { gone, t } }
   const [liveMoves,     setLiveMoves]    = useState({});
-  const [skillBar,      setSkillBar]     = useState([]);   // umiejętności klasy na pasek 1–4
+  const [skillBar,      setSkillBar]     = useState([]);   // umiejętności klasy dostępne na pasku
+  const [barLayout,     setBarLayout]    = useState(null); // zawartość pól 1–9, 0 (ustawia gracz)
   const hotkeys = useRef({});                             // akcje dla klawiszy 1–4 / F1–F3
   const isMobile    = useIsMobile();
   const isLandscape = useIsLandscape();
@@ -410,6 +410,31 @@ export default function Game({ onLogout, onDisconnect }) {
     if (!state?.postac?.profesja) return;
     api.combat.skills().then(r => Array.isArray(r) && setSkillBar(r)).catch(() => {});
   }, [state?.postac?.profesja, state?.postac?.poziom]);
+
+  // Układ paska akcji: wczytanie zapisanego albo domyślny (umiejętności + dwie mikstury)
+  const barKey = state?.postac?.id ? `veldoria_pasek_${state.postac.id}` : null;
+  useEffect(() => {
+    if (!barKey) return;
+    try {
+      const zapis = JSON.parse(localStorage.getItem(barKey) || 'null');
+      if (Array.isArray(zapis) && zapis.length === 10) { setBarLayout(zapis); return; }
+    } catch { /* brak zapisu — zbudujemy domyślny */ }
+    setBarLayout(null);
+  }, [barKey]);
+
+  useEffect(() => {
+    if (barLayout || !barKey) return;
+    if (!skillBar.length && !potions.length) return;
+    const domyslny = Array(10).fill(null);
+    skillBar.slice(0, 8).forEach((sk, i) => { domyslny[i] = { t: 'skill', id: sk.id }; });
+    potions.slice(0, 2).forEach((p, i) => { domyslny[8 + i] = { t: 'potion', nazwa: p.nazwa }; });
+    setBarLayout(domyslny);
+  }, [barLayout, barKey, skillBar, potions]);
+
+  const saveBarLayout = useCallback((next) => {
+    setBarLayout(next);
+    try { if (barKey) localStorage.setItem(barKey, JSON.stringify(next)); } catch { /* prywatne okno */ }
+  }, [barKey]);
 
   // Po zmianie mapy stare pozycje są bez znaczenia
   useEffect(() => { setLiveMoves({}); }, [state?.mapa?.id]);
@@ -594,9 +619,9 @@ export default function Game({ onLogout, onDisconnect }) {
       if (e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA'||e.target.tagName==='SELECT') return;
       // W trakcie walki klawisze należą do okna walki (A/S/B/F/I, 1–9)
       if (hotkeys.current.inBattle) return;
-      if (/^[1-8]$/.test(e.key)) { e.preventDefault(); hotkeys.current.attack?.(); return; }
-      const pk = { '9': 0, '0': 1, F1: 0, F2: 1, F3: 2 }[e.key];
-      if (pk !== undefined) { e.preventDefault(); const p = hotkeys.current.potions?.[pk]; if (p) hotkeys.current.usePotion?.(p); return; }
+      if (/^[0-9]$/.test(e.key)) { e.preventDefault(); hotkeys.current.slot?.(e.key === '0' ? 9 : Number(e.key) - 1); return; }
+      const fk = { F1: 0, F2: 1, F3: 2 }[e.key];
+      if (fk !== undefined) { e.preventDefault(); const p = hotkeys.current.potions?.[fk]; if (p) hotkeys.current.usePotion?.(p); return; }
       if (e.key.toLowerCase()==='r') { e.preventDefault(); hotkeys.current.auto?.(); return; }
       const dir = KEY[e.key];
       if (dir) {
@@ -711,6 +736,23 @@ export default function Game({ onLogout, onDisconnect }) {
     else walkAdjacentTo(target.x, target.y, cur, () => openBattle(target));
   }, [target, engageNearest, openBattle, walkAdjacentTo]);
 
+  const barPanels = [
+    { id: 'ekwipunek', icon: '🎒', label: 'Ekwipunek', onClick: () => setShowInv(v => !v) },
+    { id: 'postac',    icon: '🧍', label: 'Wygląd postaci', onClick: () => setShowOutfit(true) },
+    { id: 'talenty',   icon: '⭐', label: 'Talenty', onClick: () => setShowTalents(v => !v) },
+    { id: 'zadania',   icon: '📜', label: 'Zadania', onClick: () => setShowQuests(v => !v) },
+    { id: 'gildia',    icon: '⚜', label: 'Gildia', onClick: () => setShowGuild(v => !v) },
+    { id: 'znajomi',   icon: '👥', label: 'Przyjaciele i poczta', onClick: () => setShowSocial(v => !v) },
+    { id: 'aukcja',    icon: '🏪', label: 'Dom aukcyjny', onClick: () => setShowAuction(v => !v) },
+    { id: 'rzemioslo', icon: '⚒', label: 'Rzemiosło', onClick: () => setShowCraft(v => !v) },
+    { id: 'wedka',     icon: '🎣', label: 'Wędkarstwo', onClick: () => setShowFishing(v => !v) },
+    { id: 'lochy',     icon: '🏰', label: 'Lochy', onClick: () => setShowDungeon(v => !v) },
+    { id: 'pvp',       icon: '🗡', label: 'Przełącz tryb PvP', onClick: () => api.character.pvpToggle().then(loadState), active: !!state?.postac?.pvp },
+    { id: 'auto',      icon: 'Ⓜ', label: 'Auto-polowanie', onClick: () => toggleAutoRef.current?.(), active: autoHunt },
+    ...(state?.postac?.ranga === 'GameAdmin' ? [{ id: 'admin', icon: '★', label: 'Panel administratora', onClick: () => setShowAdmin(true) }] : []),
+  ];
+  const toggleAutoRef = useRef(null);
+
   const toggleAuto = useCallback(() => {
     setAutoHunt(v => { addToast(v ? 'Auto-polowanie wyłączone' : 'Auto-polowanie włączone', 'info'); return !v; });
   }, [addToast]);
@@ -723,7 +765,17 @@ export default function Game({ onLogout, onDisconnect }) {
     if (autoRef.current) setTimeout(() => { setBattle(null); setTarget(null); }, 1500);
   }, [loadState]);
 
-  hotkeys.current = { inBattle: !!battle, attack: attackOrEngage, potions, usePotion, auto: toggleAuto };
+  // Uruchomienie pola paska z klawiatury — ta sama logika co kliknięcie
+  const runSlot = useCallback((i) => {
+    const wpis = (barLayout || [])[i];
+    if (!wpis) return;
+    if (wpis.t === 'skill') { attackOrEngage(); return; }
+    if (wpis.t === 'potion') { const p = potions.find(x => x.nazwa === wpis.nazwa); if (p) usePotion(p); return; }
+    barPanels.find(a => a.id === wpis.id)?.onClick?.();
+  }, [barLayout, potions, attackOrEngage, usePotion, barPanels]);
+
+  toggleAutoRef.current = toggleAuto;
+  hotkeys.current = { inBattle: !!battle, attack: attackOrEngage, potions, usePotion, auto: toggleAuto, slot: runSlot };
 
   // Auto: po każdej walce sam wybiera najbliższego potwora; wyłącza się przy niskim HP
   useEffect(() => {
@@ -959,7 +1011,7 @@ export default function Game({ onLogout, onDisconnect }) {
       <div style={{ flex:1, minHeight:0, display:'flex', overflow:'hidden' }}>
 
       {/* Czat — pod przyciskami panelu bohatera, szerokość 2× wysokość */}
-      <div style={{ position:'absolute', left:10, bottom:10, width:440, height: chatOpen ? 220 : 'auto', zIndex:80 }}>
+      <div style={{ position:'absolute', left:0, bottom:0, width:470, height: chatOpen ? 236 : 'auto', zIndex:80 }}>
         <Chat socket={socket} isMobile={false} onMessage={handleChatMessage} mode="overlay" fill={chatOpen} playerName={state.postac.nazwa} open={chatOpen} onToggle={toggleChat} />
       </div>
 
@@ -1043,21 +1095,8 @@ export default function Game({ onLogout, onDisconnect }) {
             {state.players?.length > 0 && <PlayersOnMap players={state.players} />}
           </div>
 
-          {/* Pasek skrótów przy prawej krawędzi */}
-          <div style={{ position:'absolute', right:10, top:'50%', transform:'translateY(-50%)', zIndex:56 }}>
-            <QuickRail items={[
-              { icon:'🏪', skrot:'B', label:'Aukcja',    onClick:()=>setShowAuction(v=>!v) },
-              { icon:'⚒', skrot:'C', label:'Rzemiosło', onClick:()=>setShowCraft(v=>!v) },
-              { icon:'🐟', skrot:'F', label:'Wędka',     onClick:()=>setShowFishing(v=>!v) },
-              { icon:'🏰', skrot:'D', label:'Lochy',     onClick:()=>setShowDungeon(v=>!v) },
-              { icon:'Ⓜ', skrot:'R', label:'Auto-polowanie', onClick:toggleAuto, uwaga:autoHunt },
-              { icon:'🗡', skrot:'P', label:'PvP',       onClick:()=>api.character.pvpToggle().then(loadState), uwaga: !!state.postac.pvp },
-              ...(isAdmin ? [{ icon:'★', skrot:'', label:'Panel admina', onClick:()=>setShowAdmin(true) }] : []),
-            ]} />
-          </div>
-
           {/* Dół mapy: pasek z kulami HP/EN — przesunięty w prawo, by nie wchodzić na czat */}
-          <div style={{ position:'absolute', left:222, right:10, bottom:8, zIndex:60, display:'flex', alignItems:'flex-end', pointerEvents:'none' }}>
+          <div style={{ position:'absolute', left:10, right:10, bottom:8, zIndex:60, display:'flex', alignItems:'flex-end', pointerEvents:'none' }}>
             <div style={{ flex:1, minWidth:0, display:'flex', justifyContent:'center' }}>
               <div style={{ pointerEvents:'auto' }}>
                 <BottomBar
@@ -1066,6 +1105,9 @@ export default function Game({ onLogout, onDisconnect }) {
                   onUsePotion={usePotion}
                   skills={skillBar}
                   onSkill={attackOrEngage}
+                  panels={barPanels}
+                  layout={barLayout}
+                  onLayout={saveBarLayout}
                 />
               </div>
             </div>
@@ -1073,14 +1115,6 @@ export default function Game({ onLogout, onDisconnect }) {
         </div>
       </div>
 
-      {/* RIGHT: Collapsible social panel */}
-      <RightPanel
-        socket={socket}
-        postacId={state.postac.id}
-        onViewProfile={id => setViewProfile(id)}
-        onTurnInReward={msg => { addToast(msg, 'info'); loadState(); }}
-        onGuild={() => setShowGuild(v=>!v)}
-      />
       </div>
       </div>
     </div>{/* end scaled layout */}

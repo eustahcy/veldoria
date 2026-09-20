@@ -147,13 +147,25 @@ export default function Chat({ socket, isMobile, onMessage, mode='floating', pla
     const OT = TABS.filter(t => t.id !== 'lokalny');
     return (
       <div style={{
+        position: 'relative',
         width: '100%', height: fill ? '100%' : undefined, display: 'flex', flexDirection: 'column', overflow: 'hidden',
-        background: 'linear-gradient(180deg, rgba(14,11,8,0.86), rgba(8,6,5,0.9))',
-        border: '1px solid #7a5f2a', borderRadius: 4,
-        boxShadow: '0 0 0 1px rgba(0,0,0,0.8), 0 10px 26px rgba(0,0,0,0.6)',
-        fontFamily: "'Trebuchet MS', Verdana, sans-serif", backdropFilter: 'blur(2px)',
+        background: 'linear-gradient(180deg,#1d1914 0%,#120f0c 60%,#0b0907 100%)',
+        borderTop: '2px solid #7a5f2a', borderRight: '2px solid #7a5f2a', borderRadius: '0 6px 0 0',
+        boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.05), 0 -6px 22px rgba(0,0,0,0.55)',
+        fontFamily: "'Trebuchet MS', Verdana, sans-serif",
       }}>
-        <div style={{ display: 'flex', alignItems: 'stretch', borderBottom: '1px solid rgba(122,95,42,0.7)', flexShrink: 0 }}>
+        {/* złote romby w narożnikach — jak w pozostałych panelach HUD */}
+        {[['top', 'left'], ['top', 'right']].map(([v, h]) => (
+          <span key={v + h} style={{
+            position: 'absolute', [v]: -3, [h]: -3, width: 6, height: 6, transform: 'rotate(45deg)',
+            background: '#e7c158', boxShadow: '0 0 6px #e7c158aa', pointerEvents: 'none', zIndex: 2,
+          }} />
+        ))}
+        <div style={{
+          display: 'flex', alignItems: 'stretch', flexShrink: 0,
+          borderBottom: '1px solid rgba(122,95,42,0.7)',
+          background: 'linear-gradient(180deg,rgba(231,193,88,0.09),transparent)',
+        }}>
           {OT.map(t => {
             const on = tab === t.id;
             return (
@@ -181,7 +193,7 @@ export default function Chat({ socket, isMobile, onMessage, mode='floating', pla
             <div ref={bottomRef} />
           </div>
           {tab !== 'system' && (
-            <form onSubmit={send} style={{ display: 'flex', gap: 6, padding: '6px 8px', borderTop: '1px solid rgba(122,95,42,0.45)', flexShrink: 0 }}>
+            <form onSubmit={send} style={{ display: 'flex', gap: 6, padding: '7px 9px', borderTop: '1px solid rgba(122,95,42,0.45)', flexShrink: 0, background: 'rgba(0,0,0,0.25)' }}>
               <input ref={inputRef} value={input} onChange={e => setInput(e.target.value)} maxLength={250}
                 placeholder={tab === 'wszystkie' ? 'Napisz wiadomość… [Enter]' : PLACEHOLDER[tab]}
                 style={{ flex: 1, minWidth: 0, background: 'rgba(0,0,0,0.55)', color: '#e8e2d4', border: '1px solid rgba(122,95,42,0.55)', borderRadius: 3, padding: '7px 10px', fontSize: 12.5, outline: 'none', fontFamily: 'inherit' }} />
