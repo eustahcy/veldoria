@@ -324,7 +324,7 @@ export default function GameMap({
       {/* Vignette */}
       <div style={{
         position:'absolute', inset:0, pointerEvents:'none', zIndex:29,
-        background:'radial-gradient(ellipse at center, transparent 50%, rgba(4,3,1,0.55) 100%)',
+        background:'radial-gradient(ellipse at center, transparent 58%, rgba(4,3,1,0.40) 100%)',
       }} />
 
       {/* Weather / time of day */}

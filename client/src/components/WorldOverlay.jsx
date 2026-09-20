@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 
 const RAIN_CSS = `
+@keyframes mglaDryf { from { transform: translateX(-6%); } to { transform: translateX(6%); } }
+
 @keyframes rainFall {
   0%   { transform: translateY(-10px); opacity: 0; }
   10%  { opacity: 0.7; }
@@ -61,15 +63,17 @@ export default function WorldOverlay({ pora, pogoda }) {
 
   // Base overlay by pora
   let poraBg = null;
-  if (pora === 'noc')               poraBg = 'rgba(0,0,30,0.38)';
-  else if (pora === 'swit' || pora === 'zmierzch') poraBg = 'rgba(80,40,0,0.22)';
+  if (pora === 'noc')               poraBg = 'rgba(8,14,46,0.28)';
+  else if (pora === 'swit' || pora === 'zmierzch') poraBg = 'rgba(110,58,8,0.17)';
   // dzien = no overlay
 
   // Weather overlay
   let weatherBg = null;
   let weatherFilter = undefined;
   if (pogoda === 'deszcz' || pogoda === 'burza') weatherBg = 'rgba(30,60,100,0.18)';
-  if (pogoda === 'mgla')  { weatherBg = 'rgba(200,210,230,0.18)'; weatherFilter = 'blur(1.5px)'; }
+  // Mgła bez rozmywania obrazu: rozmycie całego ekranu zjadało detale kafli
+  // i sprite'ów, zwłaszcza na telefonach (3 piksele na punkt).
+  if (pogoda === 'mgla') weatherBg = 'rgba(206,214,230,0.16)';
 
   const hasOverlay = poraBg || weatherBg || pora === 'noc' || pogoda === 'burza' || pogoda === 'mgla';
   if (!hasOverlay) return null;
@@ -114,15 +118,23 @@ export default function WorldOverlay({ pora, pogoda }) {
         </div>
       )}
 
-      {/* Fog */}
+      {/* Mgła — welon i dwie przesuwające się smugi zamiast rozmycia */}
       {pogoda === 'mgla' && (
-        <div style={{
-          position: 'absolute', inset: 0,
-          background: weatherBg,
-          backdropFilter: weatherFilter,
-          filter: weatherFilter,
-          pointerEvents: 'none', zIndex: 30,
-        }} />
+        <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 30, overflow: 'hidden' }}>
+          <div style={{ position: 'absolute', inset: 0, background: weatherBg }} />
+          <div style={{
+            position: 'absolute', left: '-50%', top: '10%', width: '200%', height: '45%',
+            background: 'radial-gradient(ellipse at 30% 50%, rgba(226,233,244,0.30), transparent 62%),' +
+                        'radial-gradient(ellipse at 72% 40%, rgba(226,233,244,0.24), transparent 58%)',
+            animation: 'mglaDryf 46s linear infinite',
+          }} />
+          <div style={{
+            position: 'absolute', left: '-50%', top: '48%', width: '200%', height: '50%',
+            background: 'radial-gradient(ellipse at 55% 50%, rgba(214,224,240,0.26), transparent 60%),' +
+                        'radial-gradient(ellipse at 18% 60%, rgba(214,224,240,0.20), transparent 55%)',
+            animation: 'mglaDryf 68s linear infinite reverse',
+          }} />
+        </div>
       )}
 
       {/* Lightning flash */}
