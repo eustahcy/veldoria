@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, memo } from 'react';
 import { T } from '../theme';
 import WorldOverlay from './WorldOverlay';
-import { czyMapaKaflowa, rysujKafelTerenu, rysujKafelObiektu, TILE as KAFEL } from '../engine/tiles2d';
+import { czyMapaKaflowa, rysujKafelTerenu, rysujKafelObiektu, TILE as KAFEL, ZAPAS_KAFLI } from '../engine/tiles2d';
 
 const TILE   = KAFEL;
 const HERO_W = 32;
@@ -244,8 +244,11 @@ export default function GameMap({
         for (let y = y0; y <= y1; y++)
           for (let x = x0; x <= x1; x++)
             rysujKafelTerenu(ctx, Math.round(x * TILE + vx), Math.round(y * TILE + vy), tiles, x, y, anim);
-        for (let y = y0; y <= y1; y++)
-          for (let x = x0; x <= x1; x++)
+        // obiekty z zapasem: wysoki sprite (drzewo, dom) stoi nizej, a widac go wyzej
+        const ox0 = Math.max(0, x0 - 2), ox1 = Math.min(mapa.maks_x, x1 + 2);
+        const oy1 = Math.min(mapa.maks_y, y1 + ZAPAS_KAFLI);
+        for (let y = y0; y <= oy1; y++)
+          for (let x = ox0; x <= ox1; x++)
             rysujKafelObiektu(ctx, Math.round(x * TILE + vx), Math.round(y * TILE + vy), tiles, x, y, anim);
       }
       id = requestAnimationFrame(rysuj);

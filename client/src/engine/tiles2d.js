@@ -16,7 +16,25 @@
 //   { "x,y": { t: 'trawa', o: 'drzewo' } }
 // więc zapis różnicowy, edytor i kolizje na serwerze działają bez zmian.
 
+import ATLAS from './atlas.js';
+
 export const TILE = 32;
+
+// ── Atlas graficzny ──────────────────────────────────────────────────────────
+// Kafle i obiekty, dla których mamy gotową grafikę, rysujemy z atlasu; reszta
+// leci dalej kodem. Po wczytaniu obrazka czyścimy pamięć podręczną kafli, żeby
+// przerysowały się już z grafiki.
+let atlasObraz = null, atlasOk = false;
+export const czyAtlas = () => atlasOk;
+export const sprite = (id) => (atlasOk && id ? ATLAS.sprity[id] : null);
+export function wczytajAtlas(url) {
+  if (atlasObraz || typeof document === 'undefined') return;
+  atlasObraz = new Image();
+  atlasObraz.onload = () => { atlasOk = true; pamiec.clear(); };
+  atlasObraz.onerror = () => { atlasObraz = null; };
+  atlasObraz.src = url || ATLAS.plik;
+}
+
 
 // ── Palety materiałów (od najciemniejszego do najjaśniejszego) ───────────────
 const P_TRAWA   = ['#1d3a1b', '#254a20', '#2f5f27', '#3a7530', '#478b3a', '#57a446'];
@@ -37,18 +55,25 @@ const P_ZWIR    = ['#3e4144', '#4e5255', '#5e6367', '#6e7479', '#7f858b', '#9197
 // war      = warstwa (wyższa „wygrywa" na styku i przyjmuje obrzeże niższej)
 // kontrast = jak mocno szum rozjeżdża odcienie, srodek = jasność bazowa
 export const TERENY = [
-  { id: 'trawa',  nazwa: 'Trawa',       war: 1, ramp: P_TRAWA,  wzor: 'trawa',  kontrast: 1.5, srodek: 0.52 },
-  { id: 'trawa2', nazwa: 'Trawa sucha', war: 1, ramp: P_TRAWA2, wzor: 'trawa',  kontrast: 1.4, srodek: 0.54 },
-  { id: 'ziemia', nazwa: 'Ziemia',      war: 2, ramp: P_ZIEMIA, wzor: 'ziemia', kontrast: 1.3, srodek: 0.50 },
+  { id: 'trawa',  nazwa: 'Trawa',       war: 1, ramp: P_TRAWA,  wzor: 'trawa',  kontrast: 1.5, srodek: 0.52,
+    obrazy: ['t_trawa1', 't_trawa2', 't_trawa3', 't_trawa4', 't_trawa1', 't_trawa2', 't_trawa3', 't_trawa4',
+             't_trawa1', 't_trawa2', 't_trawa3', 't_trawa4', 't_trawa_kw1', 't_trawa_kw3'] },
+  { id: 'trawa2', nazwa: 'Trawa sucha', war: 1, ramp: P_TRAWA2, wzor: 'trawa',  kontrast: 1.4, srodek: 0.54,
+    obrazy: ['t_trawa2', 't_trawa3', 't_trawa4'], tint: 'rgba(196,170,72,0.30)' },
+  { id: 'ziemia', nazwa: 'Ziemia',      war: 2, ramp: P_ZIEMIA, wzor: 'ziemia', kontrast: 1.3, srodek: 0.50,
+    obrazy: ['t_ziemia1'] },
   { id: 'pole',   nazwa: 'Pole uprawne',war: 2, ramp: P_POLE,   wzor: 'pole',   kontrast: 1.1, srodek: 0.50 },
-  { id: 'droga',  nazwa: 'Droga',       war: 3, ramp: P_DROGA,  wzor: 'droga',  kontrast: 1.2, srodek: 0.52 },
+  { id: 'droga',  nazwa: 'Droga',       war: 3, ramp: P_DROGA,  wzor: 'droga',  kontrast: 1.2, srodek: 0.52,
+    obrazy: ['t_droga1'] },
   { id: 'zwir',   nazwa: 'Żwir',        war: 3, ramp: P_ZWIR,   wzor: 'zwir',   kontrast: 1.4, srodek: 0.50 },
-  { id: 'bruk',   nazwa: 'Bruk',        war: 4, ramp: P_BRUK,   wzor: 'bruk',   kontrast: 0.8, srodek: 0.48 },
+  { id: 'bruk',   nazwa: 'Bruk',        war: 4, ramp: P_BRUK,   wzor: 'bruk',   kontrast: 0.8, srodek: 0.48,
+    obrazy: ['t_bruk1', 't_bruk2', 't_bruk3', 't_bruk4', 't_bruk5', 't_bruk6'] },
   { id: 'piasek', nazwa: 'Piasek',      war: 2, ramp: P_PIASEK, wzor: 'piasek', kontrast: 1.1, srodek: 0.54 },
   { id: 'deski',  nazwa: 'Deski',       war: 4, ramp: P_DESKI,  wzor: 'deski',  kontrast: 0.9, srodek: 0.52 },
   { id: 'kamien', nazwa: 'Skała',       war: 3, ramp: P_SKALA,  wzor: 'skala',  kontrast: 1.5, srodek: 0.50 },
   { id: 'snieg',  nazwa: 'Śnieg',       war: 3, ramp: P_SNIEG,  wzor: 'snieg',  kontrast: 0.9, srodek: 0.60 },
-  { id: 'woda',   nazwa: 'Woda',        war: 0, ramp: P_WODA,   wzor: 'woda',   kontrast: 1.2, srodek: 0.48, woda: true, blok: true },
+  { id: 'woda',   nazwa: 'Woda',        war: 0, ramp: P_WODA,   wzor: 'woda',   kontrast: 1.2, srodek: 0.48, woda: true, blok: true,
+    obrazy: ['t_woda1', 't_woda2', 't_woda3'] },
   { id: 'lawa',   nazwa: 'Lawa',        war: 0, ramp: P_LAWA,   wzor: 'lawa',   kontrast: 1.6, srodek: 0.46, woda: true, blok: true, swieci: true },
 ];
 // „kolory"/„plamy" zostawiamy dla zgodności ze starszym kodem (minimapa, podglądy)
@@ -57,6 +82,15 @@ for (const t of TERENY) {
   t.plamy  = t.ramp[1];
 }
 export const TEREN_PO_ID = Object.fromEntries(TERENY.map(t => [t.id, t]));
+
+// barwa, ktorej uzywamy na styku dwoch terenow (dla grafik - ich srednia)
+function barwaTerenu(t, jasnosc = 3) {
+  if (atlasOk && t.obrazy) {
+    const b = ATLAS.barwy?.[t.obrazy[0]];
+    if (b) return jasnosc > 3 ? jasniej(b, 0.12) : jasnosc < 3 ? ciemniej(b, 0.18) : b;
+  }
+  return t.ramp[jasnosc];
+}
 export const TEREN_DOMYSLNY = 'trawa';
 
 // ── Obiekty ──────────────────────────────────────────────────────────────────
@@ -98,14 +132,106 @@ export const OBIEKTY = [
   { id: 'siano',    nazwa: 'Bela siana',rys: 'siano',   blok: true,  grupa: 'Dekoracje' },
   { id: 'woz',      nazwa: 'Wóz',       rys: 'woz',     blok: true,  grupa: 'Dekoracje' },
 ];
+// Grafika z atlasu dla obiektów, które już stoją w świecie — stare mapy od razu
+// wyglądają lepiej, a gdy atlas się nie wczyta, zostaje rysowanie kodem.
+const PODMIANY = {
+  drzewo: 'o_swierk', drzewo2: 'o_dab', krzak: 'o_krzak1', kwiaty: 'o_kwiaty1',
+  paproc: 'o_paproc', grzyby: 'o_grzyby', trzcina: 'o_trawa_wys4', kamyki: 'o_glaz2',
+  glaz: 'o_glaz', pniak: 'o_pniak', mur: 'o_mur_k', plot: 'o_plot_poz',
+  brama: 'o_plot_brama', studnia: 'o_studnia_k', beczka: 'o_beczka_k',
+  skrzynia: 'o_skrzynka', ognisko: 'o_ognisko_k', latarnia: 'o_latarnia_k',
+  stragan: 'o_stragan1', tablica: 'o_tablica_k', posag: 'o_posag1',
+};
+for (const o of OBIEKTY) if (PODMIANY[o.id]) o.spr = PODMIANY[o.id];
+
+// Nowe obiekty rysowane wyłącznie z atlasu.
+// [id, nazwa, sprite, kafle w poziomie, kafle w pionie, blokuje, grupa]
+const Z_ATLASU = [
+  ['dom_maly',      'Dom mały',         'o_dom_maly',      2, 2, 1, 'Budynki'],
+  ['dom_sredni',    'Dom średni',       'o_dom_sredni',    2, 2, 1, 'Budynki'],
+  ['dom_duzy',      'Dom duży',         'o_dom_duzy',      2, 2, 1, 'Budynki'],
+  ['dom_pietrowy',  'Kamienica',        'o_dom_pietrowy',  2, 2, 1, 'Budynki'],
+  ['dom_kamienny',  'Dom kamienny',     'o_dom_kamienny',  2, 2, 1, 'Budynki'],
+  ['dom_wielki',    'Ratusz',           'o_dom_wielki',    3, 3, 1, 'Budynki'],
+  ['wiatrak',       'Wiatrak',          'o_wiatrak',       2, 2, 1, 'Budynki'],
+  ['wieza_dom',     'Wieżyczka',        'o_wieza',         1, 1, 1, 'Budynki'],
+  ['fontanna',      'Fontanna',         'o_fontanna',      2, 2, 1, 'Budynki'],
+  ['mur_bluszcz',   'Mur z bluszczem',  'o_mur_bluszcz',   2, 1, 1, 'Budynki'],
+  ['mur_brama',     'Brama w murze',    'o_mur_brama',     2, 1, 0, 'Budynki'],
+  ['mur_luk',       'Łuk muru',         'o_mur_luk',       2, 1, 0, 'Budynki'],
+  ['wieza_mur',     'Baszta',           'o_wieza_mur',     1, 1, 1, 'Budynki'],
+  ['brama_duza',    'Brama miejska',    'o_brama_duza',    3, 1, 0, 'Budynki'],
+  ['mur_rog',       'Narożnik muru',    'o_mur_rog',       1, 1, 1, 'Budynki'],
+
+  ['swierk_maly',   'Świerk mały',      'o_swierk_maly',   1, 1, 1, 'Natura'],
+  ['dab_wysoki',    'Dąb wysoki',       'o_dab_wysoki',    1, 1, 1, 'Natura'],
+  ['drzewo_jesien', 'Drzewo jesienne',  'o_drzewo_jesien', 1, 1, 1, 'Natura'],
+  ['drzewo_owoc',   'Drzewo owocowe',   'o_drzewo_owoc',   1, 1, 1, 'Natura'],
+  ['drzewo3',       'Buk',              'o_drzewo3',       1, 1, 1, 'Natura'],
+  ['drzewo4',       'Klon',             'o_drzewo4',       1, 1, 1, 'Natura'],
+  ['drzewo5',       'Lipa',             'o_drzewo5',       1, 1, 1, 'Natura'],
+  ['drzewo6',       'Brzoza',           'o_drzewo6',       1, 1, 1, 'Natura'],
+  ['krzak2',        'Krzew',            'o_krzak2',        1, 1, 0, 'Natura'],
+  ['krzak3',        'Krzew mały',       'o_krzak3',        1, 1, 0, 'Natura'],
+  ['krzak4',        'Krzew gęsty',      'o_krzak4',        1, 1, 0, 'Natura'],
+  ['krzak_kwiat',   'Krzew kwitnący',   'o_krzak_kwiat',   1, 1, 0, 'Natura'],
+  ['krzak_jagody',  'Krzew z jagodami', 'o_krzak_jagody',  1, 1, 0, 'Natura'],
+  ['trawa_wys1',    'Kępa trawy',       'o_trawa_wys1',    1, 1, 0, 'Natura'],
+  ['trawa_wys2',    'Trawa wysoka',     'o_trawa_wys2',    1, 1, 0, 'Natura'],
+  ['trawa_wys3',    'Turzyca',          'o_trawa_wys3',    1, 1, 0, 'Natura'],
+  ['trawa_wys5',    'Sitowie',          'o_trawa_wys5',    1, 1, 0, 'Natura'],
+  ['kwiaty2',       'Kwiaty polne',     'o_kwiaty2',       1, 1, 0, 'Natura'],
+  ['kwiaty3',       'Kwiaty białe',     'o_kwiaty3',       1, 1, 0, 'Natura'],
+  ['kwiaty4',       'Kwiaty drobne',    'o_kwiaty4',       1, 1, 0, 'Natura'],
+  ['kwiaty5',       'Kwiaty czerwone',  'o_kwiaty5',       1, 1, 0, 'Natura'],
+  ['liscie',        'Liście wodne',     'o_liscie',        1, 1, 0, 'Natura'],
+  ['sadzonka',      'Sadzonka',         'o_sadzonka',      1, 1, 0, 'Natura'],
+  ['krzew_suchy',   'Suchy krzew',      'o_krzew_suchy',   1, 1, 0, 'Natura'],
+  ['bluszcz',       'Bluszcz',          'o_bluszcz',       1, 1, 0, 'Natura'],
+
+  ['latarnia2',     'Latarnia mała',    'o_latarnia2',     1, 1, 1, 'Dekoracje'],
+  ['pochodnia',     'Pochodnia',        'o_pochodnia',     1, 1, 1, 'Dekoracje'],
+  ['beczka2',       'Beczka duża',      'o_beczka2',       1, 1, 1, 'Dekoracje'],
+  ['beczka_woda',   'Kadź z wodą',      'o_beczka_woda',   1, 1, 1, 'Dekoracje'],
+  ['dzban',         'Dzban',            'o_dzban',         1, 1, 1, 'Dekoracje'],
+  ['stol',          'Stół',             'o_stol',          1, 1, 1, 'Dekoracje'],
+  ['lawka',         'Ławka',            'o_lawka',         1, 1, 1, 'Dekoracje'],
+  ['lawka2',        'Ławka mała',       'o_lawka2',        1, 1, 1, 'Dekoracje'],
+  ['stragan2',      'Stragan długi',    'o_stragan2',      2, 1, 1, 'Dekoracje'],
+  ['stragan3',      'Stragan niebieski','o_stragan3',      1, 1, 1, 'Dekoracje'],
+  ['stragan4',      'Stragan czerwony', 'o_stragan4',      1, 1, 1, 'Dekoracje'],
+  ['stragan5',      'Kram',             'o_stragan5',      1, 1, 1, 'Dekoracje'],
+  ['drogowskaz',    'Drogowskaz',       'o_drogowskaz',    1, 1, 1, 'Dekoracje'],
+  ['posag2',        'Posąg kamienny',   'o_posag2',        1, 1, 1, 'Dekoracje'],
+  ['posag3',        'Obelisk',          'o_posag3',        1, 1, 1, 'Dekoracje'],
+  ['sztandar_n',    'Sztandar niebieski','o_sztandar_n',   1, 1, 1, 'Dekoracje'],
+  ['sztandar_c',    'Sztandar czerwony','o_sztandar_c',    1, 1, 1, 'Dekoracje'],
+  ['koryto',        'Koryto',           'o_koryto',        1, 1, 1, 'Dekoracje'],
+  ['kwietnik1',     'Skrzynka kwiatów', 'o_kwietnik1',     1, 1, 0, 'Dekoracje'],
+  ['kwietnik2',     'Kwietnik',         'o_kwietnik2',     1, 1, 0, 'Dekoracje'],
+  ['kwietnik3',     'Kwietnik duży',    'o_kwietnik3',     1, 1, 0, 'Dekoracje'],
+  ['kwietnik4',     'Rabatka',          'o_kwietnik4',     1, 1, 0, 'Dekoracje'],
+];
+for (const [id, nazwa, spr, kx, ky, blok, grupa] of Z_ATLASU)
+  OBIEKTY.push({ id, nazwa, spr, kx, ky, blok: !!blok, grupa, rys: 'atlas' });
+// świecące obiekty dostają migoczącą poświatę
+for (const o of OBIEKTY) if (['ognisko', 'latarnia', 'latarnia2', 'pochodnia'].includes(o.id)) o.swieci = true;
+
 export const OBIEKT_PO_ID = Object.fromEntries(OBIEKTY.map(o => [o.id, o]));
 export const GRUPY_OBIEKTOW = [...new Set(OBIEKTY.map(o => o.grupa))];
+
+// ile kafli zajmuje obiekt — do kolizji i do stawiania w edytorze
+export const poleObiektu = (oid) => {
+  const o = OBIEKT_PO_ID[oid];
+  return { kx: o?.kx || 1, ky: o?.ky || 1 };
+};
 
 export const blokujeKafel = (kafel) => {
   if (!kafel) return false;
   const t = TEREN_PO_ID[kafel.t];
   const o = OBIEKT_PO_ID[kafel.o];
-  return !!(t?.blok || o?.blok);
+  const pole = OBIEKT_PO_ID[kafel.p];      // kafel pod większym obiektem
+  return !!(t?.blok || o?.blok || pole?.blok);
 };
 
 // ── Szum ─────────────────────────────────────────────────────────────────────
@@ -169,6 +295,17 @@ const jasniej  = (hex, ile = 0.3) => zmieszaj(hex, '#ffffff', ile);
 const BAYER = [0.125, 0.625, 0.875, 0.375];
 
 // ── Baza terenu (ImageData — najszybsza droga na 1024 piksele) ───────────────
+// Kafel z atlasu: wariant wybieramy szumem, zeby laka nie byla jednostajna
+function rysujTerenZAtlasu(ctx, t, tx, ty) {
+  const lista = t.obrazy;
+  const id = lista[Math.floor(szum(tx, ty, 301) * lista.length) % lista.length];
+  const s = ATLAS.sprity[id];
+  if (!s) return false;
+  ctx.drawImage(atlasObraz, s[0], s[1], s[2], s[3], 0, 0, TILE, TILE);
+  if (t.tint) { ctx.fillStyle = t.tint; ctx.fillRect(0, 0, TILE, TILE); }
+  return true;
+}
+
 function rysujTerenBazowy(ctx, t, tx, ty) {
   const img = ctx.createImageData(TILE, TILE);
   const buf = new Uint32Array(img.data.buffer);
@@ -398,7 +535,7 @@ function rysujKrawedzie(ctx, t, sasiedzi, tx, ty) {
         // ostatni piksel rozsypujemy, żeby brzeg nie był linijkowy
         if (d === glebokosc - 1 && szum(os, d, 131) < 0.45) continue;
         const [px, py] = punkt(i, d);
-        pix(ctx, px, py, 1, 1, s.ramp[d === 0 ? 2 : 3]);
+        pix(ctx, px, py, 1, 1, barwaTerenu(s, d === 0 ? 2 : 3));
       }
       const [rx, ry] = punkt(i, glebokosc);
       pix(ctx, rx, ry, 1, 1, 'rgba(0,0,0,0.20)');                     // kreska styku
@@ -419,7 +556,7 @@ function rysujKrawedzie(ctx, t, sasiedzi, tx, ty) {
     const g = 2 + Math.floor(szum(tx + x0, ty + y0, 151) * 2);
     for (let a = 0; a < g; a++)
       for (let b = 0; b < g - a; b++)
-        pix(ctx, x0 + kx * a, y0 + ky * b, 1, 1, s.ramp[3]);
+        pix(ctx, x0 + kx * a, y0 + ky * b, 1, 1, barwaTerenu(s, 3));
   }
 }
 
@@ -427,6 +564,8 @@ function rysujKrawedzie(ctx, t, sasiedzi, tx, ty) {
 // Płótno obiektu: 48×56, kafel zaczyna się w (8,16) — sprite może wystawać
 // 16 px w górę, 8 px na boki i 8 px w dół (na cień).
 export const OBJ_W = 48, OBJ_H = 56, OBJ_OX = 8, OBJ_OY = 16;
+// najwyzszy sprite w atlasie (w kaflach) - o tyle trzeba poszerzyc zasieg rysowania
+export const ZAPAS_KAFLI = 7;
 
 const KORA    = ['#241608', '#3a2412', '#4e311b', '#623d22', '#75492a'];
 const LISCIE  = ['#132b16', '#1c3f20', '#26542a', '#316a34', '#3f8240', '#529c50'];
@@ -1053,10 +1192,13 @@ export function rysujKafelTerenu(ctx, px, py, kafle, x, y, anim = 0) {
     se: kafle[`${x + 1},${y + 1}`]?.t || TEREN_DOMYSLNY,
   };
   // tekstura powtarza się co 8 kafli, więc do klucza wystarczy reszta z 8
-  const klucz = `t|${tid}|${x & 7},${y & 7}|${sas.n},${sas.e},${sas.s},${sas.w}|${sas.nw},${sas.ne},${sas.sw},${sas.se}`;
+  const klucz = `t|${tid}|${atlasOk ? 'a' : 'p'}|${x & 7},${y & 7}|${sas.n},${sas.e},${sas.s},${sas.w}|${sas.nw},${sas.ne},${sas.sw},${sas.se}`;
   const canvas = zPamieci(klucz, TILE, TILE, (c) => {
-    rysujTerenBazowy(c, t, x, y);
-    rysujDetalTerenu(c, t, x, y);
+    const zAtlasu = atlasOk && t.obrazy && rysujTerenZAtlasu(c, t, x, y);
+    if (!zAtlasu) {
+      rysujTerenBazowy(c, t, x, y);
+      rysujDetalTerenu(c, t, x, y);
+    }
     rysujKrawedzie(c, t, sas, x, y);
   });
   ctx.drawImage(canvas, px, py);
@@ -1085,21 +1227,29 @@ export function rysujKafelObiektu(ctx, px, py, kafle, x, y, anim = 0) {
   if (!oid) return;
   const o = OBIEKT_PO_ID[oid];
   if (!o) return;
+
+  // Grafika z atlasu: sprite stoi dolna krawedzia na kafelku kotwiczacym,
+  // a wszerz jest wysrodkowany nad swoim polem (kx kafli).
+  const spr = sprite(o.spr);
+  if (spr) {
+    const [sx, sy, sw, sh] = spr;
+    const dx = Math.round(px + ((o.kx || 1) * TILE - sw) / 2);
+    const dy = Math.round(py + TILE - sh);
+    ctx.drawImage(atlasObraz, sx, sy, sw, sh, dx, dy, sw, sh);
+    if (o.swieci) poswiata(ctx, px, py + TILE - sh + (o.swiecY || 8), anim, x, y);
+    return;
+  }
+
   const maska = o.laczy ? maskaSasiadow(kafle, x, y, oid) : 0;
   const klucz = `o|${oid}|${maska}|${x & 3},${y & 3}`;
   const canvas = zPamieci(klucz, OBJ_W, OBJ_H, (c) => rysujObiekt(c, o, x, y, maska));
   ctx.drawImage(canvas, px - OBJ_OX, py - OBJ_OY);
 
   if (o.rys === 'ognisko' || o.rys === 'latarnia') {   // migotanie światła
-    const f = Math.sin(anim / 180 + x * 3 + y) * 0.5 + 0.5;
     const cy = o.rys === 'latarnia' ? py + 4 : py + 16;
-    const g = ctx.createRadialGradient(px + 16, cy, 2, px + 16, cy, 30);
-    g.addColorStop(0, `rgba(255,190,95,${0.20 + f * 0.14})`);
-    g.addColorStop(0.5, `rgba(255,160,60,${0.07 + f * 0.06})`);
-    g.addColorStop(1, 'rgba(255,160,60,0)');
-    ctx.fillStyle = g;
-    ctx.fillRect(px - 14, cy - 30, TILE + 28, 60);
+    poswiata(ctx, px, cy, anim, x, y);
     if (o.rys === 'ognisko') {                          // drgający rdzeń płomienia
+      const f = Math.sin(anim / 180 + x * 3 + y) * 0.5 + 0.5;
       const h = 4 + Math.round(f * 4);
       ctx.fillStyle = `rgba(255,236,170,${0.5 + f * 0.3})`;
       ctx.fillRect(px + 14, py + 20 - h, 3, h);
@@ -1107,9 +1257,36 @@ export function rysujKafelObiektu(ctx, px, py, kafle, x, y, anim = 0) {
   }
 }
 
+// migoczaca poswiata ognia / latarni
+function poswiata(ctx, px, cy, anim, x, y) {
+  const f = Math.sin(anim / 180 + x * 3 + y) * 0.5 + 0.5;
+  const g = ctx.createRadialGradient(px + 16, cy, 2, px + 16, cy, 30);
+  g.addColorStop(0, `rgba(255,190,95,${0.20 + f * 0.14})`);
+  g.addColorStop(0.5, `rgba(255,160,60,${0.07 + f * 0.06})`);
+  g.addColorStop(1, 'rgba(255,160,60,0)');
+  ctx.fillStyle = g;
+  ctx.fillRect(px - 14, cy - 30, TILE + 28, 60);
+}
+
 // Podgląd obiektu do palety w edytorze (rysuje cały sprite, także to, co wystaje)
 export function rysujPodgladObiektu(ctx, oid, tid = TEREN_DOMYSLNY) {
   const kafle = { '0,0': { t: tid, o: oid } };
+  const o = OBIEKT_PO_ID[oid];
+  const spr = sprite(o?.spr);
+  if (spr) {
+    // tło z kafli terenu + sprite przeskalowany tak, żeby zmieścił się w podglądzie
+    const tlo = {};
+    for (let j = 0; j < Math.ceil(OBJ_H / TILE); j++)
+      for (let i = 0; i < Math.ceil(OBJ_W / TILE); i++) tlo[`${i},${j}`] = { t: tid };
+    for (let j = 0; j < Math.ceil(OBJ_H / TILE); j++)
+      for (let i = 0; i < Math.ceil(OBJ_W / TILE); i++)
+        rysujKafelTerenu(ctx, i * TILE, j * TILE, tlo, i, j, 0);
+    const [sx, sy, sw, sh] = spr;
+    const sk = Math.min(1, (OBJ_W - 4) / sw, (OBJ_H - 4) / sh);
+    const w = Math.round(sw * sk), h = Math.round(sh * sk);
+    ctx.drawImage(atlasObraz, sx, sy, sw, sh, Math.round((OBJ_W - w) / 2), OBJ_H - h - 2, w, h);
+    return;
+  }
   rysujKafelTerenu(ctx, OBJ_OX, OBJ_OY, kafle, 0, 0, 0);
   rysujKafelObiektu(ctx, OBJ_OX, OBJ_OY, kafle, 0, 0, 0);
 }
@@ -1120,3 +1297,6 @@ export const czyMapaKaflowa = (kafle, mapa) => {
   const pol = ((mapa?.maks_x || 0) + 1) * ((mapa?.maks_y || 0) + 1);
   return ile >= Math.max(64, pol * 0.2);
 };
+
+// Atlas ładujemy od razu — do czasu wczytania mapa rysuje się kodem
+wczytajAtlas();

@@ -31,12 +31,16 @@ function applyTilePatch(kafle, patch, { maks_x = 1e6, maks_y = 1e6 } = {}) {
     const cur = kafle[k] || {};
     const t = p.t === null ? undefined : (p.t ?? cur.t);
     const o = p.o === null ? undefined : (p.o ?? cur.o);
+    // "p" = kafel zajęty przez obiekt większy niż jeden kafel (dom, brama).
+    // Grafikę rysuje kafel z "o", a te wokół trzymają tylko informację o zajęciu.
+    const pole = p.p === null ? undefined : (p.p ?? cur.p);
 
     const next = {};
     if (t) next.t = String(t).slice(0, 32);
     if (o) next.o = String(o).slice(0, 32);
+    if (pole) next.p = String(pole).slice(0, 32);
 
-    if (next.t || next.o) kafle[k] = next;
+    if (next.t || next.o || next.p) kafle[k] = next;
     else delete kafle[k];
     applied++;
   }

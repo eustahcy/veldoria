@@ -7,8 +7,8 @@ import { api } from '../api';
 import { hudColors as G } from './hud/GameHud';
 import {
   TILE, TERENY, OBIEKTY, GRUPY_OBIEKTOW, TEREN_PO_ID, OBIEKT_PO_ID, TEREN_DOMYSLNY,
-  rysujKafelTerenu, rysujKafelObiektu, rysujPodgladObiektu, blokujeKafel,
-  OBJ_W, OBJ_H, OBJ_OX, OBJ_OY,
+  rysujKafelTerenu, rysujKafelObiektu, rysujPodgladObiektu, blokujeKafel, poleObiektu,
+  OBJ_W, OBJ_H, OBJ_OX, OBJ_OY, ZAPAS_KAFLI,
 } from '../engine/tiles2d';
 
 const FONT = "'Trebuchet MS', Verdana, sans-serif";
@@ -116,8 +116,9 @@ export default function MapEditor2D() {
         for (let y = y0; y <= y1; y++)
           for (let x = x0; x <= x1; x++)
             rysujKafelTerenu(ctx, x * TILE - kam.x, y * TILE - kam.y, kf, x, y, anim);
-        for (let y = y0; y <= y1; y++)
-          for (let x = x0; x <= x1; x++)
+        // obiekty z zapasem — wysoki sprite stoi niżej, a widać go ponad swoim kaflem
+        for (let y = y0; y <= Math.min(m.maks_y, y1 + ZAPAS_KAFLI); y++)
+          for (let x = Math.max(0, x0 - 2); x <= Math.min(m.maks_x, x1 + 2); x++)
             rysujKafelObiektu(ctx, x * TILE - kam.x, y * TILE - kam.y, kf, x, y, anim);
 
         if (pokazKolizje) {
@@ -159,13 +160,40 @@ export default function MapEditor2D() {
       x, y,
       t: nowy?.t ?? null,
       o: nowy?.o ?? null,
+      p: nowy?.p ?? null,
       blok: blokujeKafel(nowy),
     });
   };
 
+  // Obiekt większy niż kafel stawiamy kotwicą na klikniętym polu; sprite rośnie
+  // w górę, więc zajmuje ky kafli nad nim i kx kafli w prawo.
+  const stawWielki = useCallback((x, y, oid, cofka) => {
+    const m = stanRef.current.mapa;
+    const { kx, ky } = poleObiektu(oid);
+    setKafle(prev => {
+      const nast = { ...prev };
+      for (let dy = 0; dy < ky; dy++) for (let dx = 0; dx < kx; dx++) {
+        const px = x + dx, py = y - dy;
+        if (px < 0 || py < 0 || px > m.maks_x || py > m.maks_y) continue;
+        const k = `${px},${py}`;
+        const stary = nast[k];
+        const nowy = dx === 0 && dy === 0
+          ? { t: stary?.t || TEREN_DOMYSLNY, o: oid }
+          : { t: stary?.t || TEREN_DOMYSLNY, p: oid };
+        nast[k] = nowy;
+        zapiszZmiane(px, py, nowy, stary, cofka);
+      }
+      return nast;
+    });
+  }, []);
+
   const maluj = useCallback((x, y, cofka) => {
     const m = stanRef.current.mapa;
     if (!m || x < 0 || y < 0 || x > m.maks_x || y > m.maks_y) return;
+    if (narzedzie === 'pedzel' && zakladka === 'obiekt') {
+      const { kx, ky } = poleObiektu(obiektSel);
+      if (kx > 1 || ky > 1) { stawWielki(x, y, obiektSel, cofka); return; }
+    }
     setKafle(prev => {
       const nast = { ...prev };
       const r = Math.floor(rozmiar / 2);
@@ -175,7 +203,7 @@ export default function MapEditor2D() {
         const k = `${px},${py}`;
         const stary = nast[k];
         let nowy;
-        if (narzedzie === 'gumka') nowy = { t: stary?.t || TEREN_DOMYSLNY };
+        if (narzedzie === 'gumka') nowy = { t: stary?.t || TEREN_DOMYSLNY };   // czyści też pole dużego obiektu
         else if (zakladka === 'teren') nowy = { ...(stary || {}), t: terenSel };
         else nowy = { t: stary?.t || TEREN_DOMYSLNY, o: obiektSel };
         if (stary && stary.t === nowy.t && stary.o === nowy.o) continue;
@@ -184,7 +212,7 @@ export default function MapEditor2D() {
       }
       return nast;
     });
-  }, [narzedzie, zakladka, terenSel, obiektSel, rozmiar]);
+  }, [narzedzie, zakladka, terenSel, obiektSel, rozmiar, stawWielki]);
 
   const wypelnij = useCallback((x, y) => {
     const { kafle: kf, mapa: m } = stanRef.current;
