@@ -760,6 +760,7 @@ export default function Game({ onLogout, onDisconnect }) {
     });
   const stateForMap = { ...state, players: livePlayers, ...(walkTarget ? { _walkTarget: walkTarget } : {}) };
   const liveMob    = target ? state.mobs?.find(m => m.id === target.id) : null;
+  const targetDist = target ? Math.max(Math.abs(target.x - state.postac.x), Math.abs(target.y - state.postac.y)) : null;
 
   // ── MOBILE LAYOUT (portrait only — landscape uses desktop layout) ────────────
   // Telefon (pionowo i poziomo) — mapa na cały ekran i pływający HUD
@@ -784,7 +785,7 @@ export default function Game({ onLogout, onDisconnect }) {
         />
         {/* Overlays */}
         {target && (
-          <TargetFrame mob={target} liveMob={liveMob}
+          <TargetFrame mob={target} liveMob={liveMob} dist={targetDist}
             onAttack={()=>{ const pos=posRef.current; const cur=stateRef.current; if(!cur)return; if(Math.abs(target.x-pos.x)<=1&&Math.abs(target.y-pos.y)<=1)openBattle(target); else walkAdjacentTo(target.x,target.y,cur,()=>openBattle(target)); }}
             onClose={()=>setTarget(null)}
           />
@@ -1014,6 +1015,7 @@ export default function Game({ onLogout, onDisconnect }) {
             <TargetFrame
               mob={target}
               liveMob={liveMob}
+              dist={targetDist}
               onAttack={() => {
                 const pos = posRef.current;
                 const cur = stateRef.current;

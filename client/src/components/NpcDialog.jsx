@@ -29,6 +29,13 @@ const SLOT_TYPES = {
   Helm: 'helm', Zbroja: 'armor', Tarcza: 'shield', Rekawice: 'gloves',
   Buty: 'boots', Pierscien: 'ring', Naszyjnik: 'neck', Talizman: 'tali',
 };
+// ikonka kategorii towaru w sklepie
+const CAT_ICON = (typ) => (
+  /Bron|Laska|Rozdzka/.test(typ) ? '⚔'
+    : /Zbroja|Helm|Tarcza|Rekawice|Buty/.test(typ) ? '🛡'
+      : /Pierscien|Naszyjnik|Talizman/.test(typ) ? '💍'
+        : typ === 'Konsupcyjne' ? '🧪' : '📦');
+
 const getStats = (item) => STAT_KEYS.map(([k, label, fmt]) => (item[k] ? { label, val: fmt(item) } : null)).filter(Boolean);
 
 // ── Ozdobniki ────────────────────────────────────────────────────────────────
@@ -102,6 +109,11 @@ function MenuCard({ icon, label, sub, desc, onClick }) {
   );
 }
 
+const qtyBtn = {
+  width: 30, height: 30, cursor: 'pointer', background: 'linear-gradient(180deg,#221c14,#0d0b08)',
+  border: 'none', color: '#f7e3a4', fontSize: 16, lineHeight: 1,
+};
+
 // ── Kafelek towaru ───────────────────────────────────────────────────────────
 function ShopCard({ item, selected, canAfford, onClick }) {
   const r = rarityOf(item);
@@ -122,7 +134,7 @@ function ShopCard({ item, selected, canAfford, onClick }) {
 }
 
 // ── Szczegóły towaru ─────────────────────────────────────────────────────────
-function ShopDetail({ item, equippedItem, gold, onBuy, buying, msg, msgType, narrow }) {
+function ShopDetail({ item, equippedItem, gold, onBuy, buying, msg, msgType, narrow, qty, setQty }) {
   if (!item) return (
     <div style={{ flex: 1, display: 'grid', placeItems: 'center', color: G.dim, fontSize: 13, padding: 20, textAlign: 'center' }}>
       Wybierz towar z lewej strony
@@ -131,6 +143,7 @@ function ShopDetail({ item, equippedItem, gold, onBuy, buying, msg, msgType, nar
   const r = rarityOf(item);
   const price = item.wartosc_kupna || 0;
   const canAfford = gold >= price;
+  const canAll = gold >= price * qty;
   const stats = getStats(item);
   const cmp = equippedItem ? getStats(equippedItem) : [];
 
@@ -183,8 +196,23 @@ function ShopDetail({ item, equippedItem, gold, onBuy, buying, msg, msgType, nar
       )}
 
       <div style={{ padding: narrow ? 10 : 14, borderTop: `1px solid ${G.bronze}55`, flexShrink: 0 }}>
-        <Gold onClick={onBuy} disabled={!canAfford || buying} style={{ width: '100%' }}>
-          🛒 {buying ? 'Kupuję…' : canAfford ? `Kup za ${fmtNum(price)} złota` : `Brakuje ${fmtNum(price - gold)} złota`}
+        {[['Cena', `🪙 ${fmtNum(price)}`], ['Razem', `🪙 ${fmtNum(price * qty)}`]].map(([k, v]) => (
+          <div key={k} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '5px 0', fontSize: 13 }}>
+            <span style={{ color: G.muted, width: 62 }}>{k}:</span>
+            <span style={{ flex: 1, height: 1, background: 'repeating-linear-gradient(90deg, rgba(231,193,88,0.14) 0 2px, transparent 2px 5px)' }} />
+            <span style={{ color: k === 'Razem' && !canAll ? '#ff8b78' : G.goldHi, fontFamily: G.serif }}>{v}</span>
+          </div>
+        ))}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '5px 0 10px', fontSize: 13 }}>
+          <span style={{ color: G.muted, width: 62 }}>Ilość:</span>
+          <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', border: `1px solid ${G.bronze}`, borderRadius: 3, overflow: 'hidden' }}>
+            <button onClick={() => setQty(q => Math.max(1, q - 1))} style={qtyBtn}>‹</button>
+            <span style={{ minWidth: 46, textAlign: 'center', color: G.text, fontFamily: G.serif, fontSize: 14 }}>{qty}</span>
+            <button onClick={() => setQty(q => Math.min(99, q + 1))} style={qtyBtn}>›</button>
+          </div>
+        </div>
+        <Gold onClick={onBuy} disabled={!canAll || buying} style={{ width: '100%', padding: '12px 18px', fontSize: 15 }}>
+          🛒 {buying ? 'Kupuję…' : canAll ? (qty > 1 ? `Kup ${qty} szt.` : 'Kup') : `Brakuje ${fmtNum(price * qty - gold)} złota`}
         </Gold>
       </div>
     </div>
@@ -201,6 +229,8 @@ export default function NpcDialog({ npc, postac, mapa, onClose, onBought, onQues
   const [gold, setGold] = useState(Number(postac.zloto));
   const [filter, setFilter] = useState('');
   const [catFilter, setCatFilter] = useState('all');
+  const [sort, setSort] = useState('domyslnie');
+  const [qty, setQty] = useState(1);
   const [msg, setMsg] = useState('');
   const [msgType, setMsgType] = useState('ok');
   const [buying, setBuying] = useState(false);
@@ -261,19 +291,26 @@ export default function NpcDialog({ npc, postac, mapa, onClose, onBought, onQues
       api.quests.forNpc(npc.id).then(x => x && !x.error && setNpcQuests(x));
     } else flash(r.error || 'Błąd', 'err');
   };
+  // Serwer sprzedaje po jednej sztuce, więc przy większej liczbie powtarzamy zakup
   const buy = async () => {
     if (!selItem || buying) return;
     setBuying(true);
+    let kupione = 0, blad = null, zloto = gold;
     try {
-      const res = await api.items.buy(selItem.id, npc.shop);
-      if (res.ok) {
-        setGold(res.zloto ?? (gold - (selItem.wartosc_kupna || 0)));
-        flash(`Kupiono: ${selItem.nazwa}`);
-        onBought?.();
-        api.items.inventory().then(inv => Array.isArray(inv) && setInventory(inv));
-      } else flash(res.error || 'Błąd zakupu', 'err');
-    } catch { flash('Błąd połączenia', 'err'); }
-    finally { setBuying(false); }
+      for (let i = 0; i < qty; i++) {
+        const res = await api.items.buy(selItem.id, npc.shop);
+        if (res?.ok) { kupione++; zloto = res.zloto ?? (zloto - (selItem.wartosc_kupna || 0)); }
+        else { blad = res?.error || 'Błąd zakupu'; break; }
+      }
+    } catch { blad = 'Błąd połączenia'; }
+    setGold(zloto);
+    if (kupione > 0) {
+      flash(kupione > 1 ? `Kupiono ${kupione}× ${selItem.nazwa}` : `Kupiono: ${selItem.nazwa}`);
+      onBought?.();
+      api.items.inventory().then(inv => Array.isArray(inv) && setInventory(inv));
+    }
+    if (blad) flash(kupione > 0 ? `${blad} (kupiono ${kupione})` : blad, 'err');
+    setBuying(false);
   };
   const templeHeal = async () => {
     const r = await api.items.templeHeal();
@@ -284,8 +321,13 @@ export default function NpcDialog({ npc, postac, mapa, onClose, onBought, onQues
   const hasQuests = npcQuests.give.length + npcQuests.turnin.length + npcQuests.active.length > 0;
   const equippedForItem = selItem ? inventory.find(i => i.zalozony === 1 && SLOT_TYPES[i.typ] === SLOT_TYPES[selItem.typ]) : null;
   const allCats = shopItems ? [...new Set(shopItems.map(i => i.typ))].sort() : [];
-  const filtered = (shopItems || []).filter(i =>
-    (catFilter === 'all' || i.typ === catFilter) && (!filter || i.nazwa.toLowerCase().includes(filter.toLowerCase())));
+  const filtered = (shopItems || [])
+    .filter(i => (catFilter === 'all' || i.typ === catFilter) && (!filter || i.nazwa.toLowerCase().includes(filter.toLowerCase())))
+    .sort((a, b) => (
+      sort === 'cena_rosnaco' ? (a.wartosc_kupna || 0) - (b.wartosc_kupna || 0)
+        : sort === 'cena_malejaco' ? (b.wartosc_kupna || 0) - (a.wartosc_kupna || 0)
+          : sort === 'poziom' ? (a.wym_poziom || 0) - (b.wym_poziom || 0)
+            : sort === 'nazwa' ? a.nazwa.localeCompare(b.nazwa, 'pl') : 0));
 
   const rola = npc.shop > 0 ? `Kupiec · Sklep #${npc.shop}` : isTemple ? 'Kapłanka Światła' : isGuildBoard ? 'Tablica gildii' : 'Mieszkaniec Veldorii';
   const motto = npc.shop > 0 ? 'Dobre towary, lepsze podróże'
@@ -438,28 +480,51 @@ export default function NpcDialog({ npc, postac, mapa, onClose, onBought, onQues
 
           {/* ── SKLEP ── */}
           {view === 'shop' && (
-            <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: narrow ? 'column' : 'row' }}>
-              <div style={{ flex: 1, minWidth: 0, minHeight: 0, display: 'flex', flexDirection: 'column', borderRight: narrow ? 'none' : `1px solid ${G.bronze}55` }}>
-                <div style={{ display: 'flex', gap: 8, padding: 12, flexShrink: 0, alignItems: 'center' }}>
-                  <input value={filter} onChange={e => setFilter(e.target.value)} placeholder="Szukaj towaru…" style={{
-                    flex: 1, minWidth: 0, padding: '9px 12px', borderRadius: 3, background: '#0b0907', color: G.text,
-                    border: `1px solid ${G.bronze}`, fontSize: 13, outline: 'none', fontFamily: FONT,
-                  }} />
+            <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: narrow ? 'column' : 'row', gap: narrow ? 0 : 14, padding: narrow ? 0 : '14px 16px' }}>
+              {/* Lewa strona: wyszukiwanie, kategorie, siatka towarów */}
+              <div style={{
+                flex: 1, minWidth: 0, minHeight: 0, display: 'flex', flexDirection: 'column', position: 'relative',
+                background: narrow ? 'none' : 'linear-gradient(180deg,#141109,#0c0a08)',
+                border: narrow ? 'none' : `1px solid ${G.bronze}`, borderRadius: narrow ? 0 : 5,
+              }}>
+                {!narrow && <><Corner v="top" h="left" /><Corner v="top" h="right" /><Corner v="bottom" h="left" /><Corner v="bottom" h="right" /></>}
+
+                <div style={{ display: 'flex', gap: 8, padding: narrow ? 12 : '14px 16px 8px', flexShrink: 0, alignItems: 'center' }}>
+                  <div style={{ flex: 1, minWidth: 0, position: 'relative' }}>
+                    <span style={{ position: 'absolute', left: 11, top: '50%', transform: 'translateY(-50%)', color: G.goldDim, fontSize: 13 }}>🔍</span>
+                    <input value={filter} onChange={e => setFilter(e.target.value)} placeholder="Szukaj przedmiotu…" style={{
+                      width: '100%', boxSizing: 'border-box', padding: '10px 12px 10px 32px', borderRadius: 4, background: '#0b0907',
+                      color: G.text, border: `1px solid ${G.bronze}`, fontSize: 13, outline: 'none', fontFamily: FONT,
+                    }} />
+                  </div>
+                  <select value={sort} onChange={e => setSort(e.target.value)} style={{
+                    padding: '10px 10px', borderRadius: 4, background: '#0b0907', color: G.text,
+                    border: `1px solid ${G.bronze}`, fontSize: 13, outline: 'none', fontFamily: FONT, flexShrink: 0,
+                  }}>
+                    <option value="domyslnie">Wszystkie</option>
+                    <option value="cena_rosnaco">Cena: od najniższej</option>
+                    <option value="cena_malejaco">Cena: od najwyższej</option>
+                    <option value="poziom">Wymagany poziom</option>
+                    <option value="nazwa">Nazwa A–Z</option>
+                  </select>
                   {narrow && <span style={{ color: G.goldHi, fontSize: 13, whiteSpace: 'nowrap' }}>🪙 {fmtNum(gold)}</span>}
                 </div>
+
                 {allCats.length > 1 && (
-                  <div style={{ display: 'flex', gap: 6, padding: '0 12px 10px', overflowX: 'auto', flexShrink: 0, scrollbarWidth: 'none' }}>
-                    {[['all', `Wszystko (${shopItems?.length || 0})`], ...allCats.map(c => [c, `${typeLabel(c)} (${shopItems.filter(i => i.typ === c).length})`])].map(([k, l]) => (
+                  <div style={{ display: 'flex', gap: 8, padding: narrow ? '0 12px 10px' : '4px 16px 10px', overflowX: 'auto', flexShrink: 0, scrollbarWidth: 'none' }}>
+                    {[['all', '▦', `Wszystkie (${shopItems?.length || 0})`], ...allCats.map(c => [c, CAT_ICON(c), `${typeLabel(c)} (${shopItems.filter(i => i.typ === c).length})`])].map(([k, ic, l]) => (
                       <button key={k} onClick={() => { setCatFilter(k); setSelItem(null); }} style={{
-                        padding: '6px 12px', borderRadius: 3, cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0,
+                        display: 'inline-flex', alignItems: 'center', gap: 7, padding: '8px 14px', borderRadius: 4,
+                        cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0,
                         background: catFilter === k ? 'linear-gradient(180deg,#4a3818,#241a0b)' : 'linear-gradient(180deg,#17130f,#0c0a08)',
                         border: `1px solid ${catFilter === k ? G.gold : G.bronze}`, color: catFilter === k ? G.goldHi : G.muted,
                         fontFamily: G.serif, fontSize: 12.5,
-                      }}>{l}</button>
+                      }}><span style={{ fontSize: 14 }}>{ic}</span>{l}</button>
                     ))}
                   </div>
                 )}
-                <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', padding: '0 12px 12px' }}>
+
+                <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', padding: narrow ? '0 12px 12px' : '0 16px 16px' }}>
                   {shopItems === null && <div style={{ color: G.dim, textAlign: 'center', padding: 30 }}>Wczytywanie towarów…</div>}
                   {shopErr && (
                     <div style={{ textAlign: 'center', padding: 24 }}>
@@ -469,17 +534,58 @@ export default function NpcDialog({ npc, postac, mapa, onClose, onBought, onQues
                   )}
                   {shopItems?.length === 0 && !shopErr && <div style={{ color: G.dim, textAlign: 'center', padding: 30 }}>Sklep jest pusty.</div>}
                   {shopItems?.length > 0 && filtered.length === 0 && <div style={{ color: G.dim, textAlign: 'center', padding: 30 }}>Brak wyników.</div>}
-                  <div style={{ display: 'grid', gridTemplateColumns: `repeat(auto-fill, minmax(${narrow ? 92 : 104}px, 1fr))`, gap: 8 }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: `repeat(auto-fill, minmax(${narrow ? 96 : 118}px, 1fr))`, gap: 10 }}>
                     {filtered.map(item => (
                       <ShopCard key={item.id} item={item} selected={selItem?.id === item.id}
                         canAfford={gold >= (item.wartosc_kupna || 0)}
-                        onClick={() => setSelItem(selItem?.id === item.id ? null : item)} />
+                        onClick={() => { setSelItem(selItem?.id === item.id ? null : item); setQty(1); }} />
+                    ))}
+                    {/* puste gniazda, żeby siatka miała równy rytm jak na makiecie */}
+                    {filtered.length > 0 && Array.from({ length: Math.max(0, Math.ceil(filtered.length / 4) * 4 + 4 - filtered.length) }, (_, i) => (
+                      <div key={`e${i}`} style={{ aspectRatio: '1', borderRadius: 4, border: `1px solid ${G.bronze}55`, background: 'rgba(0,0,0,0.25)' }} />
                     ))}
                   </div>
                 </div>
               </div>
-              <div style={{ width: narrow ? 'auto' : 320, flexShrink: 0, display: 'flex', flexDirection: 'column', minHeight: narrow ? 220 : 0, borderTop: narrow ? `1px solid ${G.bronze}55` : 'none' }}>
-                <ShopDetail item={selItem} equippedItem={equippedForItem} gold={gold} onBuy={buy} buying={buying} msg={msg} msgType={msgType} narrow={narrow} />
+
+              {/* Prawa strona: scena kupca + szczegóły towaru */}
+              <div style={{ width: narrow ? 'auto' : 360, flexShrink: 0, display: 'flex', flexDirection: 'column', gap: narrow ? 0 : 14, minHeight: narrow ? 240 : 0 }}>
+                {!narrow && (
+                  <div style={{
+                    height: 210, flexShrink: 0, position: 'relative', overflow: 'hidden', borderRadius: 5,
+                    border: `1px solid ${G.bronze}`, background: 'linear-gradient(180deg,#241b12,#120d09)',
+                  }}>
+                    {mapa?.obrazek && (
+                      <div style={{
+                        position: 'absolute', left: '50%', top: '55%', width: W * TILE_BG, height: H * TILE_BG,
+                        transform: `translate(${-((npc.x ?? 0) + 0.5) * TILE_BG}px, ${-((npc.y ?? 0) + 0.5) * TILE_BG}px)`,
+                        backgroundImage: `url(/assets/${mapa.obrazek})`, backgroundSize: '100% 100%',
+                        imageRendering: 'pixelated', filter: 'brightness(0.5) saturate(0.85) blur(1px)',
+                      }} />
+                    )}
+                    <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at 50% 70%, transparent 25%, rgba(0,0,0,0.75) 100%)' }} />
+                    <div style={{ position: 'absolute', left: '50%', bottom: 16, transform: 'translateX(-50%)', display: 'grid', placeItems: 'center' }}>
+                      <span style={{
+                        position: 'absolute', bottom: -6, width: 76, height: 20, borderRadius: '50%',
+                        background: `radial-gradient(ellipse, ${G.gold}33, transparent 70%)`, border: `1px solid ${G.gold}55`,
+                      }} />
+                      <span style={{
+                        width: npc.szerokosc || 32, height: npc.dlugosc || 48, transform: 'scale(2.6)', transformOrigin: 'bottom center',
+                        imageRendering: 'pixelated', backgroundImage: `url(/assets/${npc.obrazek})`, backgroundPosition: '0 0', backgroundRepeat: 'no-repeat',
+                        filter: 'drop-shadow(0 6px 10px rgba(0,0,0,0.8))', display: 'block',
+                      }} />
+                    </div>
+                  </div>
+                )}
+
+                <div style={{
+                  flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', position: 'relative',
+                  background: narrow ? 'none' : 'linear-gradient(180deg,#141109,#0c0a08)',
+                  border: narrow ? 'none' : `1px solid ${G.bronze}`, borderTop: narrow ? `1px solid ${G.bronze}55` : undefined, borderRadius: narrow ? 0 : 5,
+                }}>
+                  <ShopDetail item={selItem} equippedItem={equippedForItem} gold={gold} onBuy={buy} buying={buying}
+                    msg={msg} msgType={msgType} narrow={narrow} qty={qty} setQty={setQty} />
+                </div>
               </div>
             </div>
           )}
