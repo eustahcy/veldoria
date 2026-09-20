@@ -4,6 +4,7 @@ const router  = express.Router();
 const db      = require('../db');
 const { createLimiter } = require('../middleware/rateLimiter');
 const { computeStats } = require('../game/stats');
+const serverConfig = require('../game/serverConfig');
 
 // Ochrona przed zgadywaniem haseł / masową rejestracją — liczone po IP
 const loginLimit    = createLimiter(10, 15 * 60 * 1000, { byIp: true }); // 10 prób / 15 min
@@ -139,12 +140,30 @@ router.post('/create-character', async (req, res, next) => {
     const { sila, zrecznosc, intelekt, obrazek } = classData;
     const hpMax = 20 + sila * 5;
 
+    // Miejsce startu bierzemy z ustawień serwera, a gdy wskazana mapa nie istnieje —
+    // z pierwszej mapy w świecie. Dzięki temu skasowanie map nie psuje tworzenia postaci.
+    let startMapa = Number(serverConfig.get('starting_map')) || 1;
+    let startX = Number(serverConfig.get('starting_x'));
+    let startY = Number(serverConfig.get('starting_y'));
+    const [[istnieje]] = await db.query('SELECT id, maks_x, maks_y FROM mapa WHERE id=?', [startMapa]);
+    let mapaStartowa = istnieje;
+    if (!mapaStartowa) {
+      const [[pierwsza]] = await db.query('SELECT id, maks_x, maks_y FROM mapa ORDER BY id LIMIT 1');
+      if (!pierwsza) return res.status(500).json({ error: 'Świat nie ma żadnej mapy' });
+      mapaStartowa = pierwsza;
+      startMapa = pierwsza.id;
+      startX = NaN; startY = NaN;
+    }
+    if (!Number.isFinite(startX)) startX = Math.floor(mapaStartowa.maks_x / 2);
+    if (!Number.isFinite(startY)) startY = Math.floor(mapaStartowa.maks_y / 2);
+
     const [result] = await db.query(
       `INSERT INTO postac (account_id,nazwa,haslo,poziom,zycie,zycie_max,exp,zloto,
         sila,zrecznosc,intelekt,obrazenia_min,obrazenia_max,
         mapa,x,y,sa,ac,acm,profesja,obrazek,zalogowany,ban,pvp,um,grupa,ranga)
-       VALUES (?,?,?,1,?,?,0,0, ?,?,?,0,2, 1,31,47,100,0,0,?,?, 0,0,0,0,0,'Gracz')`,
-      [req.session.accountId, trimmed, acc.haslo, hpMax, hpMax, sila, zrecznosc, intelekt, profesja, obrazek]
+       VALUES (?,?,?,1,?,?,0,0, ?,?,?,0,2, ?,?,?,100,0,0,?,?, 0,0,0,0,0,'Gracz')`,
+      [req.session.accountId, trimmed, acc.haslo, hpMax, hpMax, sila, zrecznosc, intelekt,
+       startMapa, startX, startY, profesja, obrazek]
     );
 
     res.status(201).json({ ok: true, id: result.insertId, nazwa: trimmed });

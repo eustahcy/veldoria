@@ -6,6 +6,7 @@ const { requireSession } = require('../middleware/auth');
 const { computeStats } = require('../game/stats');
 const { createLimiter } = require('../middleware/rateLimiter');
 const mapCache = require('../game/mapCache');
+const serverConfig = require('../game/serverConfig');
 const worldCycle = require('../game/worldCycle');
 const { parseTiles } = require('../game/tiles');
 
@@ -29,7 +30,18 @@ router.get('/state', requireSession, async (req, res, next) => {
     const postac = await computeStats(db, rawPostac);
 
     // Use cache for static map data
-    const mapa     = await mapCache.getMap(db, postac.mapa);
+    let mapa       = await mapCache.getMap(db, postac.mapa);
+    if (!mapa) {
+      // Mapa zniknęła (np. po porządkach w świecie) — przenosimy postać na startową
+      const startId = Number(serverConfig.get('starting_map')) || 0;
+      const [[zapasowa]] = await db.query('SELECT * FROM mapa ORDER BY id=? DESC, id LIMIT 1', [startId]);
+      if (!zapasowa) return res.status(503).json({ error: 'Świat nie ma żadnej mapy' });
+      const nx = Number(serverConfig.get('starting_x')) || Math.floor(zapasowa.maks_x / 2);
+      const ny = Number(serverConfig.get('starting_y')) || Math.floor(zapasowa.maks_y / 2);
+      await db.query('UPDATE postac SET mapa=?, x=?, y=? WHERE id=?', [zapasowa.id, nx, ny, rawPostac.id]);
+      postac.mapa = zapasowa.id; postac.x = nx; postac.y = ny;
+      mapa = await mapCache.getMap(db, zapasowa.id);
+    }
     const npcs     = await mapCache.get(db, postac.mapa, 'npc');
     const portals  = await mapCache.get(db, postac.mapa, 'mapa_przenies', 'id,mapa,x,y,do_mapa,do_x,do_y');
     const blockers = await mapCache.get(db, postac.mapa, 'blokadaprzejscia', 'x,y');
@@ -87,7 +99,17 @@ router.post('/move', requireSession, moveLimit, async (req, res, next) => {
     const [[postac]] = await db.query('SELECT * FROM postac WHERE id = ?', [req.session.postacId]);
     if (!postac || !postac.zalogowany || postac.zycie <= 0) return res.json({ ok: false });
 
-    const [[mapa]] = await db.query('SELECT * FROM mapa WHERE id = ?', [postac.mapa]);
+    let [[mapa]] = await db.query('SELECT * FROM mapa WHERE id = ?', [postac.mapa]);
+    if (!mapa) {
+      // Mapa zniknęła (np. po porządkach w świecie) — przenosimy postać na startową
+      const startId = Number(serverConfig.get('starting_map')) || 0;
+      [[mapa]] = await db.query('SELECT * FROM mapa WHERE id=? OR 1=1 ORDER BY id=? DESC, id LIMIT 1', [startId, startId]);
+      if (!mapa) return res.status(503).json({ error: 'Świat nie ma żadnej mapy' });
+      const nx = Number(serverConfig.get('starting_x')) || Math.floor(mapa.maks_x / 2);
+      const ny = Number(serverConfig.get('starting_y')) || Math.floor(mapa.maks_y / 2);
+      await db.query('UPDATE postac SET mapa=?, x=?, y=? WHERE id=?', [mapa.id, nx, ny, postac.id]);
+      postac.mapa = mapa.id; postac.x = nx; postac.y = ny;
+    }
     const now = Math.floor(Date.now() / 1000);
 
     const dirs = {
