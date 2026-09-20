@@ -7,7 +7,8 @@ import { api } from '../api';
 import { hudColors as G } from './hud/GameHud';
 import {
   TILE, TERENY, OBIEKTY, GRUPY_OBIEKTOW, TEREN_PO_ID, OBIEKT_PO_ID, TEREN_DOMYSLNY,
-  rysujKafelTerenu, rysujKafelObiektu, blokujeKafel,
+  rysujKafelTerenu, rysujKafelObiektu, rysujPodgladObiektu, blokujeKafel,
+  OBJ_W, OBJ_H, OBJ_OX, OBJ_OY,
 } from '../engine/tiles2d';
 
 const FONT = "'Trebuchet MS', Verdana, sans-serif";
@@ -26,9 +27,9 @@ function Probka({ tid, oid, wybrany, onClick, tytul }) {
     if (!c) return;
     const ctx = c.getContext('2d');
     ctx.imageSmoothingEnabled = false;
-    const kafle = { '0,0': { t: tid || TEREN_DOMYSLNY, o: oid } };
-    rysujKafelTerenu(ctx, 0, 0, kafle, 0, 0, 0);
-    rysujKafelObiektu(ctx, 0, 0, kafle, 0, 0, 0);
+    ctx.clearRect(0, 0, c.width, c.height);
+    // sprite obiektu bywa wyższy niż kafel — rysujemy go w całości, wyśrodkowany
+    rysujPodgladObiektu(ctx, oid, tid || TEREN_DOMYSLNY);
   }, [tid, oid]);
   return (
     <button onClick={onClick} title={tytul} style={{
@@ -36,7 +37,8 @@ function Probka({ tid, oid, wybrany, onClick, tytul }) {
       border: `2px solid ${wybrany ? G.gold : G.bronze}`,
       boxShadow: wybrany ? `0 0 12px rgba(231,193,88,0.4)` : 'none', background: '#0b0907',
     }}>
-      <canvas ref={ref} width={TILE} height={TILE} style={{ width: 40, height: 40, display: 'block', imageRendering: 'pixelated' }} />
+      <canvas ref={ref} width={OBJ_W} height={OBJ_H}
+        style={{ width: 40, height: Math.round(40 * OBJ_H / OBJ_W), marginTop: -Math.round((40 * OBJ_H / OBJ_W - 40) / 2), display: 'block', imageRendering: 'pixelated' }} />
     </button>
   );
 }
