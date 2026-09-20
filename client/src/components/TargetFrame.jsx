@@ -1,4 +1,5 @@
 // Karta zaznaczonego przeciwnika: portret, poziom, typ, dystans, życie i atak.
+import { useState, useEffect } from 'react';
 import { hudColors as G } from './hud/GameHud';
 
 const PATTERN = {
@@ -8,6 +9,13 @@ const PATTERN = {
 const SEGMENTS = 4;
 
 export default function TargetFrame({ mob, liveMob, dist, onAttack, onClose }) {
+  // na telefonie karta schodzi pod kartę bohatera i minimapę
+  const [narrow, setNarrow] = useState(() => window.innerWidth < 760);
+  useEffect(() => {
+    const fn = () => setNarrow(window.innerWidth < 760);
+    window.addEventListener('resize', fn);
+    return () => window.removeEventListener('resize', fn);
+  }, []);
   const hp = liveMob?.zycie ?? mob.zycie;
   const hpMax = liveMob?.zycie_max ?? mob.zycie_max;
   const dead = hp <= 0;
@@ -17,7 +25,7 @@ export default function TargetFrame({ mob, liveMob, dist, onAttack, onClose }) {
 
   return (
     <div style={{
-      position: 'absolute', top: 10, left: '50%', transform: 'translateX(-50%)', zIndex: 55,
+      position: 'absolute', top: narrow ? 'calc(env(safe-area-inset-top, 0px) + 208px)' : 10, left: '50%', transform: 'translateX(-50%)', zIndex: 55,
       width: 'min(330px, calc(100vw - 24px))', pointerEvents: 'all',
       background: 'linear-gradient(180deg,#1b1712,#0c0a08)',
       border: `1px solid ${G.gold}`, borderRadius: 5,
