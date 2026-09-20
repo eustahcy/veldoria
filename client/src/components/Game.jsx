@@ -1043,6 +1043,7 @@ export default function Game({ onLogout, onDisconnect }) {
           { icon:'📜', label:'Zadania',      skrot:'Q', onClick:()=>setShowQuests(v=>!v) },
           { icon:'⚜', label:'Gildia',       skrot:'G', onClick:()=>setShowGuild(v=>!v) },
           { icon:'👥', label:'Przyjaciele',  skrot:'U', onClick:()=>setShowSocial(v=>!v) },
+          ...(isAdmin ? [{ icon:'★', label:'Admin', onClick:()=>setShowAdmin(true) }] : []),
         ]}
       />
 
