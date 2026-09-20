@@ -17,7 +17,22 @@ const TEREN_BLOK = new Set(['woda', 'lawa']);
 const OBIEKT_BLOK = new Set([
   'drzewo', 'drzewo2', 'glaz', 'pniak', 'mur', 'dach', 'dach2', 'sciana', 'drzwi', 'okno',
   'plot', 'studnia', 'beczka', 'skrzynia', 'ognisko', 'latarnia', 'stragan', 'tablica', 'posag', 'ruiny', 'grob',
+  // obiekty z atlasu grafik
+  'dom_maly', 'dom_sredni', 'dom_duzy', 'dom_pietrowy', 'dom_kamienny', 'dom_wielki',
+  'wiatrak', 'wieza_dom', 'fontanna', 'mur_bluszcz', 'wieza_mur', 'mur_rog',
+  'swierk_maly', 'dab_wysoki', 'drzewo_jesien', 'drzewo_owoc', 'drzewo3', 'drzewo4', 'drzewo5', 'drzewo6',
+  'beczka2', 'beczka_woda', 'dzban', 'stol', 'lawka', 'lawka2',
+  'stragan2', 'stragan3', 'stragan4', 'stragan5', 'drogowskaz', 'posag2', 'posag3',
+  'sztandar_n', 'sztandar_c', 'koryto', 'latarnia2', 'pochodnia', 'siano', 'woz',
 ]);
+
+// Obiekty szersze/wyzsze niz kafel — kotwica stoi na dolnym-lewym polu,
+// a reszte pola oznaczamy w kaflu polem „p" (te same wartosci co w silniku).
+const ROZMIARY = {
+  dom_maly: [2, 2], dom_sredni: [2, 2], dom_duzy: [2, 2], dom_pietrowy: [2, 2],
+  dom_kamienny: [2, 2], dom_wielki: [3, 3], wiatrak: [2, 2], fontanna: [2, 2],
+  mur_bluszcz: [2, 1], mur_brama: [2, 1], mur_luk: [2, 1], brama_duza: [3, 1], stragan2: [2, 1],
+};
 
 // ── Płótno mapy ──────────────────────────────────────────────────────────────
 const kafle = {};
@@ -39,10 +54,27 @@ const ramka = (x0, y0, x1, y1, o) => {
   for (let x = x0; x <= x1; x++) { ustaw(x, y0, undefined, o); ustaw(x, y1, undefined, o); }
   for (let y = y0; y <= y1; y++) { ustaw(x0, y, undefined, o); ustaw(x1, y, undefined, o); }
 };
+// obiekt zajmujący kilka kafli: kotwica + pola zajęte („p")
+const wielki = (x, y, o) => {
+  const [kx, ky] = ROZMIARY[o] || [1, 1];
+  for (let dy = 0; dy < ky; dy++) for (let dx = 0; dx < kx; dx++) {
+    if (!wKafle(x + dx, y - dy)) continue;
+    const k = kafle[klucz(x + dx, y - dy)] || {};
+    delete k.o; delete k.p;
+    if (dx === 0 && dy === 0) k.o = o; else k.p = o;
+    kafle[klucz(x + dx, y - dy)] = k;
+  }
+};
+
 // powtarzalny „los” — mapa zawsze wygląda tak samo
 let ziarno = 20260920;
 const los = () => { ziarno = (ziarno * 1103515245 + 12345) % 2147483648; return ziarno / 2147483648; };
 const losInt = (a, b) => a + Math.floor(los() * (b - a + 1));
+
+// gatunki drzew i krzewów z atlasu — las nie ma być z jednego stempla
+const DRZEWA = ['drzewo', 'drzewo2', 'swierk_maly', 'dab_wysoki', 'drzewo3', 'drzewo4', 'drzewo5', 'drzewo6', 'drzewo_jesien'];
+const KRZEWY = ['krzak', 'krzak2', 'krzak3', 'krzak4', 'krzak_kwiat', 'krzak_jagody'];
+const ZIELSKO = ['kwiaty', 'kwiaty2', 'kwiaty3', 'kwiaty4', 'kwiaty5', 'trawa_wys1', 'trawa_wys2', 'trawa_wys3', 'paproc', 'grzyby'];
 
 // ── 1. Podkład: łąka, lasy na obrzeżach ──────────────────────────────────────
 prostokat(0, 0, W - 1, H - 1, 'trawa');
@@ -53,7 +85,7 @@ for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
 // gęsty las wzdłuż krawędzi mapy (naturalna granica świata)
 for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
   const odKrawedzi = Math.min(x, y, W - 1 - x, H - 1 - y);
-  if (odKrawedzi <= 1 || (odKrawedzi <= 3 && los() < 0.65)) ustaw(x, y, 'trawa', los() < 0.5 ? 'drzewo' : 'drzewo2');
+  if (odKrawedzi <= 1 || (odKrawedzi <= 3 && los() < 0.65)) ustaw(x, y, 'trawa', DRZEWA[losInt(0, DRZEWA.length - 1)]);
 }
 
 // ── 2. Jezioro na zachodzie ──────────────────────────────────────────────────
@@ -69,12 +101,20 @@ prostokat(20, 46, 24, 46, 'woda', null);
 
 // ── 3. Miasto: mur, bramy, ulice ─────────────────────────────────────────────
 const M = { x0: 15, y0: 6, x1: 48, y1: 35 };
-prostokat(M.x0 + 1, M.y0 + 1, M.x1 - 1, M.y1 - 1, 'ziemia');
+// podwórka w mieście to trawa — ziemię zostawiamy na obrzeża i gospodarstwa
+prostokat(M.x0 + 1, M.y0 + 1, M.x1 - 1, M.y1 - 1, 'trawa');
+for (let y = M.y0 + 1; y < M.y1; y++) for (let x = M.x0 + 1; x < M.x1; x++)
+  if (los() < 0.18) ustaw(x, y, 'ziemia');
 ramka(M.x0, M.y0, M.x1, M.y1, 'mur');
-// bramy: południowa (główna), zachodnia i wschodnia
-for (const [bx, by] of [[BRAMA.x, M.y1], [BRAMA.x - 1, M.y1], [M.x0, 20], [M.x0, 21], [M.x1, 20], [M.x1, 21]]) {
-  ustaw(bx, by, 'bruk', 'brama');
-}
+// narożniki i baszty co kawałek — mur przestaje być jednolitą kreską
+for (const [cx, cy] of [[M.x0, M.y0], [M.x1, M.y0], [M.x0, M.y1], [M.x1, M.y1]]) ustaw(cx, cy, 'bruk', 'mur_rog');
+for (let x = M.x0 + 8; x < M.x1 - 4; x += 9) { ustaw(x, M.y0, 'bruk', 'wieza_mur'); ustaw(x, M.y1, 'bruk', 'wieza_mur'); }
+for (let y = M.y0 + 9; y < M.y1 - 4; y += 10) { ustaw(M.x0, y, 'bruk', 'wieza_mur'); ustaw(M.x1, y, 'bruk', 'wieza_mur'); }
+// brama główna od południa (3 kafle) i mniejsze po bokach
+for (let x = BRAMA.x - 1; x <= BRAMA.x + 1; x++) ustaw(x, M.y1, 'bruk', null);
+wielki(BRAMA.x - 1, M.y1, 'brama_duza');
+for (const [bx, by] of [[M.x0, 20], [M.x1 - 1, 20]]) { ustaw(bx, by, 'bruk', null); ustaw(bx + 1, by, 'bruk', null); wielki(bx, by, 'mur_brama'); }
+ustaw(M.x0, 21, 'bruk', null); ustaw(M.x1, 21, 'bruk', null);
 
 // główne ulice
 prostokat(BRAMA.x - 2, M.y0 + 1, BRAMA.x + 1, M.y1 - 1, 'bruk', null);   // pionowa
@@ -88,45 +128,62 @@ for (const [sx, sy] of [[28, 23], [28, 29], [37, 29], [27, 27]]) ustaw(sx, sy, '
 for (const [lx, ly] of [[26, 22], [38, 22], [26, 30], [38, 30], [30, 34], [33, 34], [30, 8], [33, 8]]) ustaw(lx, ly, undefined, 'latarnia');
 ustaw(29, 31, 'bruk', 'tablica');
 
-// ── 4. Domy w mieście ────────────────────────────────────────────────────────
-// dom: ściany + dach + drzwi od strony ulicy; zwraca środek wejścia
-function dom(x0, y0, szer, wys, dachTyp = 'dach') {
-  const x1 = x0 + szer - 1, y1 = y0 + wys - 1;
-  prostokat(x0, y0, x1, y1, 'deski', 'sciana');
-  prostokat(x0, y0, x1, y0 + Math.max(0, Math.floor(wys / 2) - 1), 'deski', dachTyp);
-  const dx = x0 + Math.floor(szer / 2);
-  ustaw(dx, y1, 'deski', 'drzwi');
-  if (szer >= 4) { ustaw(x0 + 1, y1, 'deski', 'okno'); ustaw(x1 - 1, y1, 'deski', 'okno'); }
-  return { x: dx, y: y1 + 1 };
-}
-
-const domy = [
-  [17, 8, 6, 5, 'dach'], [24, 8, 5, 5, 'dach2'], [36, 8, 6, 5, 'dach'], [43, 8, 5, 5, 'dach2'],
-  [17, 15, 5, 4, 'dach2'], [24, 15, 4, 4, 'dach'], [40, 15, 6, 4, 'dach'],
-  [17, 24, 6, 5, 'dach'], [17, 31, 5, 3, 'dach2'],
-  [41, 24, 6, 5, 'dach2'], [41, 31, 5, 3, 'dach'],
+// ── 4. Domy w mieście (gotowe sprite'y z atlasu) ─────────────────────────────
+// kotwica = dolny-lewy kafel budynku; sprite rośnie w górę
+const DOMY = [
+  [17, 12, 'dom_duzy'], [21, 12, 'dom_maly'], [25, 12, 'dom_kamienny'],
+  [35, 12, 'dom_pietrowy'], [39, 12, 'dom_sredni'], [43, 12, 'dom_maly'],
+  [17, 18, 'dom_sredni'], [21, 18, 'dom_kamienny'], [25, 18, 'dom_maly'],
+  [39, 18, 'dom_duzy'], [43, 18, 'dom_sredni'],
+  [17, 26, 'dom_maly'], [21, 26, 'dom_pietrowy'],
+  [17, 33, 'dom_kamienny'], [21, 33, 'dom_duzy'], [25, 33, 'dom_maly'],
+  [36, 33, 'dom_sredni'], [40, 33, 'dom_maly'],
+  [43, 30, 'dom_wielki'],
+  [41, 25, 'dom_pietrowy'],
 ];
-for (const [x, y, w, h, d] of domy) dom(x, y, w, h, d);
-
-// ogródki i płoty przy domach
-for (const [x, y, w, h] of domy) {
-  if (los() < 0.6) {
-    const gx = x, gy = y + h + 1;
-    prostokat(gx, gy, gx + w - 1, gy, 'ziemia', null);
-    for (let i = 0; i < w; i++) if (los() < 0.5) ustaw(gx + i, gy, 'ziemia', 'kwiaty');
-  }
+for (const [x, y, typ] of DOMY) {
+  const [kx] = ROZMIARY[typ] || [1, 1];
+  for (let i = -1; i <= kx; i++) ustaw(x + i, y + 1, 'bruk', null);   // chodnik przed wejściem
+  wielki(x, y, typ);
 }
+
+// zieleń i drobiazgi przy domach
+for (const [x, y, typ] of DOMY) {
+  const [kx] = ROZMIARY[typ] || [1, 1];
+  if (los() < 0.7) ustaw(x - 1, y, 'ziemia', los() < 0.5 ? 'kwietnik1' : 'kwietnik2');
+  if (los() < 0.5) ustaw(x + kx, y, 'ziemia', los() < 0.5 ? 'beczka' : 'beczka2');
+  if (los() < 0.4) ustaw(x + kx, y - 1, 'ziemia', 'dzban');
+}
+
+// ── 5. Rynek ─────────────────────────────────────────────────────────────────
+wielki(27, 25, 'fontanna');
+ustaw(29, 28, 'bruk', 'studnia');
+ustaw(35, 24, 'bruk', 'posag2');
+wielki(27, 29, 'stragan2');
+for (const [sx, sy, typ] of [[31, 23, 'stragan4'], [37, 23, 'stragan3'], [36, 29, 'stragan5'], [34, 23, 'stragan']])
+  ustaw(sx, sy, 'bruk', typ);
+for (const [lx, ly] of [[26, 22], [38, 22], [26, 30], [38, 30], [30, 34], [33, 34], [30, 8], [33, 8], [24, 20], [40, 21]])
+  ustaw(lx, ly, undefined, 'latarnia');
+ustaw(29, 31, 'bruk', 'drogowskaz');
+ustaw(33, 31, 'bruk', 'lawka');
+ustaw(30, 22, 'bruk', 'lawka2');
+ustaw(24, 7, 'bruk', 'sztandar_n');
+ustaw(41, 7, 'bruk', 'sztandar_c');
 
 // ── 6. Pola uprawne na wschodzie ─────────────────────────────────────────────
 for (let p = 0; p < 3; p++) {
   const fx = 44 + (p % 2) * 8, fy = 40 + Math.floor(p / 2) * 9;
-  prostokat(fx, fy, fx + 6, fy + 6, 'ziemia', null);
+  prostokat(fx, fy, fx + 6, fy + 6, 'pole', null);
   ramka(fx - 1, fy - 1, fx + 7, fy + 7, 'plot');
-  for (let y = fy; y <= fy + 6; y += 2) for (let x = fx; x <= fx + 6; x++) if (los() < 0.7) ustaw(x, y, 'ziemia', 'krzak');
-  ustaw(fx + 3, fy + 7, 'ziemia', null);   // wejście na pole
+  for (let y = fy; y <= fy + 6; y += 2) for (let x = fx; x <= fx + 6; x++)
+    if (los() < 0.45) ustaw(x, y, 'pole', los() < 0.6 ? 'sadzonka' : 'krzak_jagody');
+  ustaw(fx + 3, fy + 7, 'pole', 'brama');   // furtka na pole
 }
-ustaw(43, 39, 'trawa', 'stragan');
-ustaw(44, 38, 'trawa', 'ognisko');
+wielki(52, 38, 'wiatrak');
+ustaw(43, 39, 'trawa', 'siano');
+ustaw(44, 38, 'trawa', 'woz');
+ustaw(46, 38, 'trawa', 'ognisko');
+ustaw(50, 44, 'trawa2', 'siano');
 
 // ── 7. Ruiny na północnym wschodzie ──────────────────────────────────────────
 prostokat(54, 6, 61, 14, 'kamien', null);
@@ -139,7 +196,7 @@ for (const [cx, cy, r] of [[8, 14, 6], [10, 30, 5], [24, 55, 6], [40, 58, 5], [5
     const d = Math.hypot(x - cx, y - cy);
     if (d <= r && los() < 0.55 - d * 0.04 + 0.25) {
       if (teren(x, y) === 'woda' || teren(x, y) === 'bruk' || teren(x, y) === 'droga' || obiekt(x, y)) continue;
-      ustaw(x, y, 'trawa', los() < 0.6 ? 'drzewo' : 'drzewo2');
+      ustaw(x, y, 'trawa', DRZEWA[losInt(0, DRZEWA.length - 1)]);
     }
   }
 }
@@ -160,14 +217,17 @@ for (let i = 0; i < 150; i++) {
   const x = losInt(2, W - 3), y = losInt(2, H - 3);
   if (obiekt(x, y) || ['woda', 'bruk', 'droga', 'deski'].includes(teren(x, y))) continue;
   const r = los();
-  ustaw(x, y, undefined, r < 0.25 ? 'glaz' : r < 0.5 ? 'pniak' : r < 0.78 ? 'krzak' : 'kwiaty');
+  ustaw(x, y, undefined, r < 0.18 ? 'glaz' : r < 0.3 ? 'pniak'
+    : r < 0.62 ? KRZEWY[losInt(0, KRZEWY.length - 1)] : ZIELSKO[losInt(0, ZIELSKO.length - 1)]);
 }
 
 // obozowisko przy drodze (miejsce na odpoczynek)
 prostokat(26, 47, 29, 49, 'ziemia', null);
 ustaw(27, 48, 'ziemia', 'ognisko');
-ustaw(29, 47, 'ziemia', 'beczka');
+ustaw(29, 47, 'ziemia', 'beczka2');
 ustaw(26, 49, 'ziemia', 'skrzynia');
+ustaw(29, 49, 'ziemia', 'stol');
+ustaw(26, 47, 'ziemia', 'pochodnia');
 
 // ── 9. Zapis do bazy ─────────────────────────────────────────────────────────
 const NPC = [
@@ -195,7 +255,7 @@ const statyMoba = (lvl) => ({
 const wolne = (x, y) => {
   const k = kafle[klucz(x, y)];
   if (!k) return false;
-  if (TEREN_BLOK.has(k.t) || OBIEKT_BLOK.has(k.o)) return false;
+  if (TEREN_BLOK.has(k.t) || OBIEKT_BLOK.has(k.o) || OBIEKT_BLOK.has(k.p)) return false;
   return true;
 };
 
@@ -281,7 +341,7 @@ async function main() {
   // kolizje z kafli
   const blokady = [];
   for (const [k, v] of Object.entries(kafle)) {
-    if (TEREN_BLOK.has(v.t) || OBIEKT_BLOK.has(v.o)) {
+    if (TEREN_BLOK.has(v.t) || OBIEKT_BLOK.has(v.o) || OBIEKT_BLOK.has(v.p)) {
       const [x, y] = k.split(',').map(Number);
       blokady.push([mapId, x, y]);
     }

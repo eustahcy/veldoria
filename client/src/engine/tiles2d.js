@@ -61,7 +61,7 @@ export const TERENY = [
   { id: 'trawa2', nazwa: 'Trawa sucha', war: 1, ramp: P_TRAWA2, wzor: 'trawa',  kontrast: 1.4, srodek: 0.54,
     obrazy: ['t_trawa2', 't_trawa3', 't_trawa4'], tint: 'rgba(196,170,72,0.30)' },
   { id: 'ziemia', nazwa: 'Ziemia',      war: 2, ramp: P_ZIEMIA, wzor: 'ziemia', kontrast: 1.3, srodek: 0.50,
-    obrazy: ['t_ziemia1'] },
+    obrazy: ['t_droga1'], tint: 'rgba(74,48,22,0.34)' },
   { id: 'pole',   nazwa: 'Pole uprawne',war: 2, ramp: P_POLE,   wzor: 'pole',   kontrast: 1.1, srodek: 0.50 },
   { id: 'droga',  nazwa: 'Droga',       war: 3, ramp: P_DROGA,  wzor: 'droga',  kontrast: 1.2, srodek: 0.52,
     obrazy: ['t_droga1'] },
