@@ -136,11 +136,9 @@ function PlayersOnMap({ players }) {
   if (!players || players.length === 0) return null;
   return (
     <div style={{
-      position:'absolute', top:8, right:8, zIndex:52,
       background:'linear-gradient(160deg, rgba(20,14,5,0.96), rgba(12,8,3,0.96))',
       border:'1px solid rgba(200,146,42,0.3)',
-      borderRadius:4,
-      minWidth:120, maxWidth:155,
+      borderRadius:4, width:'100%',
       boxShadow:'0 4px 20px rgba(0,0,0,0.7), inset 0 1px 0 rgba(200,146,42,0.06)',
       overflow:'hidden',
     }}>
@@ -1029,11 +1027,6 @@ export default function Game({ onLogout, onDisconnect }) {
             />
           )}
 
-          {/* Players on map (top-right corner) */}
-          {state.players?.length > 0 && (
-            <PlayersOnMap players={state.players} />
-          )}
-
           {/* Combat log (left side of map, top) */}
           {combatLog.length > 0 && (
             <CombatLog entries={combatLog} />
@@ -1047,6 +1040,7 @@ export default function Game({ onLogout, onDisconnect }) {
           <div style={{ position:'absolute', top:186, right:76, width:268, zIndex:55, display:'flex', flexDirection:'column', gap:10 }}>
             <LocationBox mapa={state.mapa} postac={state.postac} />
             <QuestTracker onOpen={()=>setShowQuests(true)} />
+            {state.players?.length > 0 && <PlayersOnMap players={state.players} />}
           </div>
 
           {/* Pasek skrótów przy prawej krawędzi */}
