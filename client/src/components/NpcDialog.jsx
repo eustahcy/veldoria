@@ -1,6 +1,6 @@
 // Okno rozmowy z NPC: menu z kartami, sklep, zadania, świątynia i tablica gildii.
 // Oprawa: ozdobna złota rama, scena z tłem mapy i dymek z wypowiedzią.
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { api } from '../api';
 import { hudColors as G } from './hud/GameHud';
 import { rarityOf, typeLabel, fmtNum } from '../ui/kit';
@@ -195,6 +195,7 @@ function ShopDetail({ item, equippedItem, gold, onBuy, buying, msg, msgType, nar
 export default function NpcDialog({ npc, postac, mapa, onClose, onBought, onQuestReward }) {
   const [view, setView] = useState('menu');
   const [shopItems, setShopItems] = useState(null);
+  const [shopErr, setShopErr] = useState(null);
   const [inventory, setInventory] = useState([]);
   const [selItem, setSelItem] = useState(null);
   const [gold, setGold] = useState(Number(postac.zloto));
@@ -224,15 +225,23 @@ export default function NpcDialog({ npc, postac, mapa, onClose, onBought, onQues
     return () => window.removeEventListener('keydown', on);
   }, [view, onClose]);
 
+  const loadShop = useCallback(() => {
+    if (!(npc.shop > 0)) return;
+    setShopErr(null);
+    api.items.shop(npc.shop).then(items => {
+      // serwer odmawia, gdy odejdziemy od kupca — wtedy pokazujemy powód zamiast wiecznego „wczytywanie”
+      if (Array.isArray(items)) { setShopItems(items); setShopErr(null); }
+      else { setShopItems([]); setShopErr(items?.error || 'Nie udało się wczytać towarów'); }
+    }).catch(() => { setShopItems([]); setShopErr('Błąd połączenia'); });
+    api.items.inventory().then(inv => Array.isArray(inv) && setInventory(inv));
+  }, [npc.shop]);
+
   useEffect(() => {
-    if (npc.shop > 0) {
-      api.items.shop(npc.shop).then(items => Array.isArray(items) && setShopItems(items));
-      api.items.inventory().then(inv => Array.isArray(inv) && setInventory(inv));
-    }
+    loadShop();
     api.quests.forNpc(npc.id).then(r => r && !r.error && setNpcQuests(r));
     if (isTemple) api.items.templeStatus().then(d => d && setTempleData(d));
     if (isGuildBoard) api.items.guildBoard().then(d => d && setGuildData(d));
-  }, [npc.id, npc.shop, isTemple, isGuildBoard]);
+  }, [npc.id, npc.shop, isTemple, isGuildBoard, loadShop]);
 
   const flash = (t, type = 'ok') => { setMsg(t); setMsgType(type); setTimeout(() => setMsg(''), 2500); };
 
@@ -452,7 +461,13 @@ export default function NpcDialog({ npc, postac, mapa, onClose, onBought, onQues
                 )}
                 <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', padding: '0 12px 12px' }}>
                   {shopItems === null && <div style={{ color: G.dim, textAlign: 'center', padding: 30 }}>Wczytywanie towarów…</div>}
-                  {shopItems?.length === 0 && <div style={{ color: G.dim, textAlign: 'center', padding: 30 }}>Sklep jest pusty.</div>}
+                  {shopErr && (
+                    <div style={{ textAlign: 'center', padding: 24 }}>
+                      <div style={{ color: '#ff9b8b', fontSize: 13.5, marginBottom: 12 }}>{shopErr}</div>
+                      <Gold onClick={loadShop}>↻ Spróbuj ponownie</Gold>
+                    </div>
+                  )}
+                  {shopItems?.length === 0 && !shopErr && <div style={{ color: G.dim, textAlign: 'center', padding: 30 }}>Sklep jest pusty.</div>}
                   {shopItems?.length > 0 && filtered.length === 0 && <div style={{ color: G.dim, textAlign: 'center', padding: 30 }}>Brak wyników.</div>}
                   <div style={{ display: 'grid', gridTemplateColumns: `repeat(auto-fill, minmax(${narrow ? 92 : 104}px, 1fr))`, gap: 8 }}>
                     {filtered.map(item => (
