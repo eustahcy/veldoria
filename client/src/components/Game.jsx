@@ -248,7 +248,7 @@ function Hotbar({ postac, onInventory, onHeal, onPvpToggle, onQuests, onSocial, 
 // ─────────────────────────────────────────────────────────────────────────────
 export default function Game({ onLogout, onDisconnect }) {
   const [state,       setState]      = useState(null);
-  const [tiles,       setTiles]      = useState({});   // kafle izometryczne bieżącej mapy
+  const [tiles,       setTiles]      = useState({});   // kafle bieżącej mapy (silnik 2D i izo)
   const [potions,     setPotions]    = useState([]);   // mikstury na pasek szybkich akcji
   const [unread,      setUnread]     = useState(0);
   const [direction,   setDirection]  = useState(0);
@@ -485,15 +485,16 @@ export default function Game({ onLogout, onDisconnect }) {
     return () => clearInterval(id);
   }, []);
 
-  // ── Kafle izometryczne: pobierz przy wejściu na mapę, aktualizuj na żywo ──
+  // ── Kafle mapy: pobierz przy wejściu na mapę, aktualizuj na żywo ──
+  // Pobieramy je dla każdej mapy — rysuje z nich zarówno silnik izometryczny,
+  // jak i nasz silnik 2D (mapy bez kafli po prostu zwrócą pustą listę).
   const mapaId = state?.mapa?.id;
-  const mapaIso = state?.mapa?.iso;
   useEffect(() => {
-    if (!mapaId || !mapaIso) { setTiles({}); return; }
+    if (!mapaId) { setTiles({}); return; }
     let alive = true;
     api.game.tiles(mapaId).then(r => { if (alive && r && !r.error) setTiles(r.kafle || {}); });
     return () => { alive = false; };
-  }, [mapaId, mapaIso]);
+  }, [mapaId]);
 
   useEffect(() => {
     if (!socket) return;
