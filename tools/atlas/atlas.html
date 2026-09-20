@@ -1,0 +1,114 @@
+<!doctype html><meta charset="utf-8"><body style="background:#111;color:#ccc;font:12px monospace">
+<script src="wybor.js"></script>
+<script>
+// Skaluje wybrane sprite'y do siatki 32 px i pakuje w jeden atlas.
+// Zrodlo ma kafel ~60 px, wiec wspolczynnik to 32/60.
+window.ATLAS = null;
+const TILE = 32, ZRODLO = 60;
+// Kafel terenu musi wypelnic caly kwadrat 32x32 bez przezroczystych brzegow,
+// wiec bierzemy tylko wnetrze: prostokat w pelni krytych pikseli, wciety o kilka
+// procent, zeby nie zlapac poszarpanej krawedzi z arkusza.
+function wnetrze(img) {
+  const c = document.createElement('canvas'); c.width = img.naturalWidth; c.height = img.naturalHeight;
+  const x = c.getContext('2d'); x.drawImage(img, 0, 0);
+  const d = x.getImageData(0, 0, c.width, c.height).data;
+  let minx = c.width, miny = c.height, maxx = 0, maxy = 0;
+  for (let j = 0; j < c.height; j++) for (let i = 0; i < c.width; i++) {
+    if (d[(j * c.width + i) * 4 + 3] < 250) continue;
+    if (i < minx) minx = i; if (i > maxx) maxx = i;
+    if (j < miny) miny = j; if (j > maxy) maxy = j;
+  }
+  if (maxx <= minx || maxy <= miny) return { x: 0, y: 0, w: c.width, h: c.height };
+  const wc = maxx - minx + 1, hc = maxy - miny + 1;
+  const wc2 = Math.max(3, Math.round(wc * 0.11)), hc2 = Math.max(3, Math.round(hc * 0.11));
+  return { x: minx + wc2, y: miny + hc2, w: Math.max(4, wc - wc2 * 2), h: Math.max(4, hc - hc2 * 2) };
+}
+
+const zmniejsz = (img, w, h, zrodlo) => {   // schodkowe zmniejszanie = ostrzejszy wynik
+  const zr = zrodlo || { x: 0, y: 0, w: img.naturalWidth, h: img.naturalHeight };
+  let cw = zr.w, ch = zr.h;
+  let c = document.createElement('canvas'); c.width = cw; c.height = ch;
+  let x = c.getContext('2d'); x.imageSmoothingQuality = 'high';
+  x.drawImage(img, zr.x, zr.y, zr.w, zr.h, 0, 0, cw, ch);
+  while (cw > w * 2 && ch > h * 2) {
+    const nw = Math.max(w, Math.round(cw / 2)), nh = Math.max(h, Math.round(ch / 2));
+    const c2 = document.createElement('canvas'); c2.width = nw; c2.height = nh;
+    const x2 = c2.getContext('2d'); x2.imageSmoothingQuality = 'high';
+    x2.drawImage(c, 0, 0, cw, ch, 0, 0, nw, nh);
+    c = c2; x = x2; cw = nw; ch = nh;
+  }
+  const out = document.createElement('canvas'); out.width = w; out.height = h;
+  const ox = out.getContext('2d'); ox.imageSmoothingQuality = 'high';
+  ox.drawImage(c, 0, 0, cw, ch, 0, 0, w, h);
+  return out;
+};
+(async () => {
+  const man = await (await fetch('wyciete/manifest.json')).json();
+  const gotowe = [];
+  for (const s of WYBOR) {
+    const zr = man[s.nr];
+    if (!zr) { console.warn('brak', s.id, s.nr); continue; }
+    const img = new Image(); img.src = 'wyciete/' + zr.plik; await img.decode();
+    let w, h;
+    if (s.rozciagnij) { w = s.kx * TILE; h = Math.round(s.sh ? s.sh * TILE : zr.h / ZRODLO * TILE); }
+    else { w = Math.round(zr.w / ZRODLO * TILE * (s.skala || 1)); h = Math.round(zr.h / ZRODLO * TILE * (s.skala || 1)); }
+    w = Math.max(4, w); h = Math.max(4, h);
+    const teren = s.id.startsWith('t_');
+    gotowe.push({ ...s, c: zmniejsz(img, w, h, teren ? wnetrze(img) : null), w, h });
+  }
+  // Warianty tego samego terenu wyrownujemy jasnoscia, inaczej laka wychodzi
+  // w szachownice raz jasnych, raz ciemnych kafli.
+  const grupy = {};
+  for (const g of gotowe) {
+    if (!g.id.startsWith('t_')) continue;
+    const kl = g.id.replace(/[0-9]+$/, '');
+    (grupy[kl] = grupy[kl] || []).push(g);
+  }
+  for (const lista of Object.values(grupy)) {
+    if (lista.length < 2) continue;
+    const jasnosci = lista.map(g => {
+      const d = g.c.getContext('2d').getImageData(0, 0, g.w, g.h).data;
+      let sum = 0, n = 0;
+      for (let i = 0; i < d.length; i += 4) { sum += d[i] * 0.3 + d[i+1] * 0.59 + d[i+2] * 0.11; n++; }
+      return sum / n;
+    });
+    const cel = jasnosci.reduce((a2, b2) => a2 + b2, 0) / jasnosci.length;
+    lista.forEach((g, i) => {
+      const k = Math.max(0.82, Math.min(1.20, cel / jasnosci[i]));
+      if (Math.abs(k - 1) < 0.02) return;
+      const cx = g.c.getContext('2d');
+      const im = cx.getImageData(0, 0, g.w, g.h);
+      const d = im.data;
+      for (let j = 0; j < d.length; j += 4) {
+        d[j] = Math.min(255, d[j] * k); d[j+1] = Math.min(255, d[j+1] * k); d[j+2] = Math.min(255, d[j+2] * k);
+      }
+      cx.putImageData(im, 0, 0);
+    });
+  }
+
+  // pakowanie polkowe
+  gotowe.sort((a, b) => b.h - a.h);
+  const SZER = 1024;
+  let x = 0, y = 0, polka = 0;
+  for (const g of gotowe) {
+    if (x + g.w + 2 > SZER) { x = 0; y += polka + 2; polka = 0; }
+    g.ax = x + 1; g.ay = y + 1;
+    x += g.w + 2; if (g.h > polka) polka = g.h;
+  }
+  const WYS = y + polka + 2;
+  const atlas = document.createElement('canvas'); atlas.width = SZER; atlas.height = WYS;
+  const ax = atlas.getContext('2d');
+  for (const g of gotowe) ax.drawImage(g.c, g.ax, g.ay);
+  // srednia barwa sprite'a - silnik uzywa jej do przejsc miedzy terenami
+  const mapa = {}, barwy = {};
+  for (const g of gotowe) {
+    mapa[g.id] = [g.ax, g.ay, g.w, g.h];
+    const dd = g.c.getContext('2d').getImageData(0, 0, g.w, g.h).data;
+    let r = 0, gg = 0, bb = 0, n = 0;
+    for (let i = 0; i < dd.length; i += 4) { if (dd[i+3] < 200) continue; r += dd[i]; gg += dd[i+1]; bb += dd[i+2]; n++; }
+    if (n) barwy[g.id] = '#' + [r, gg, bb].map(v => Math.round(v / n).toString(16).padStart(2, '0')).join('');
+  }
+  window.ATLAS = { png: atlas.toDataURL('image/png'), mapa, barwy, w: SZER, h: WYS, ile: gotowe.length };
+  document.title = 'gotowe';
+})();
+</script></body>
