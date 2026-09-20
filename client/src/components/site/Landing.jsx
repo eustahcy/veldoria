@@ -92,13 +92,14 @@ export default function Landing({ stats, classes = [], onPlay, onLogin, onSectio
         padding: narrow ? '38px 16px 28px' : '10px 60px 40px',
         maxWidth: 1500, margin: '0 auto',
       }}>
-        <div style={{ maxWidth: 680 }}>
-          <div style={{ marginBottom: 16, display: 'flex', justifyContent: narrow ? 'center' : 'flex-start' }}>
+        {/* Blok powitalny na środku strony */}
+        <div style={{ maxWidth: 820, width: '100%', margin: '0 auto' }}>
+          <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'center' }}>
             <Ornament>Klasyczne RPG online</Ornament>
           </div>
 
           <h1 style={{
-            margin: 0, textAlign: narrow ? 'center' : 'left',
+            margin: 0, textAlign: 'center',
             fontFamily: S.serif, fontWeight: 700,
             fontSize: narrow ? 52 : 92, lineHeight: 1, letterSpacing: narrow ? 4 : 8,
             background: 'linear-gradient(180deg,#fdf1c8 0%,#e7c158 45%,#a87f2b 100%)',
@@ -107,16 +108,16 @@ export default function Landing({ stats, classes = [], onPlay, onLogin, onSectio
           }}>VELDORIA</h1>
 
           <p style={{
-            margin: '16px 0 26px', textAlign: narrow ? 'center' : 'left',
+            margin: '16px 0 26px', textAlign: 'center',
             fontFamily: S.serif, fontSize: narrow ? 15 : 19, color: S.text, opacity: 0.92,
           }}>Odkryj świat pełen przygód, magii i niebezpieczeństw.</p>
 
-          <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', justifyContent: narrow ? 'center' : 'flex-start' }}>
+          <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', justifyContent: 'center' }}>
             <button onClick={onPlay} style={goldBtn(true)}>⚔ Rozpocznij przygodę →</button>
             <button onClick={onLogin} style={ghostBtn(true)}>👤 Zaloguj się</button>
           </div>
 
-          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginTop: 20, justifyContent: narrow ? 'center' : 'flex-start' }}>
+          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginTop: 20, justifyContent: 'center' }}>
             {PILLS.map(p => (
               <span key={p.label} style={{
                 display: 'inline-flex', alignItems: 'center', gap: 8,
