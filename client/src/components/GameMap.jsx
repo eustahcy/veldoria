@@ -164,6 +164,8 @@ export default function GameMap({
 
   const { postac, mapa, mobs, npcs, players } = state;
   const plotnoRef = useRef(null);
+  const swiatRef = useRef(null);
+  const kamRef = useRef(null);
   const widokRef = useRef({ ox: 0, oy: 0, w: 0, h: 0 });
 
   const cx = Math.floor((size.w - HERO_W) / 2);
@@ -172,14 +174,33 @@ export default function GameMap({
   const mapW = (mapa.maks_x + 1) * TILE;
   const mapH = (mapa.maks_y + 1) * TILE;
 
-  const ox_raw = cx - postac.x * TILE;
-  const oy_raw = cy - postac.y * TILE;
-  const ox = mapW >= size.w
-    ? Math.min(0, Math.max(size.w - mapW, ox_raw))
-    : Math.floor((size.w - mapW) / 2);
-  const oy = mapH >= size.h
-    ? Math.min(0, Math.max(size.h - mapH, oy_raw))
-    : Math.floor((size.h - mapH) / 2);
+  // ── Kamera z martwą strefą ────────────────────────────────────────────
+  // Bohater chodzi po ekranie wewnątrz prostokąta na środku widoku; mapa rusza
+  // się dopiero, gdy z niego wyjdzie. Bez tego postać stoi w miejscu, a wrażenie
+  // jest takie, jakby to świat jeździł pod nogami.
+  const strefaX = Math.max(0, Math.min(size.w / 2 - TILE * 2, TILE * 6));
+  const strefaY = Math.max(0, Math.min(size.h / 2 - TILE * 2, TILE * 4));
+  const klucz = `${mapa.id}|${postac.x},${postac.y}|${size.w}x${size.h}`;
+  if (kamRef.current?.klucz !== klucz) {
+    const hx = postac.x * TILE, hy = postac.y * TILE;
+    const nowaMapa = !kamRef.current || kamRef.current.mapaId !== mapa.id;
+    let nox, noy;
+    if (nowaMapa) {
+      // wejście na mapę (także po teleporcie) — ustawiamy bohatera na środku
+      nox = cx - hx; noy = cy - hy;
+    } else {
+      nox = kamRef.current.ox; noy = kamRef.current.oy;
+      const ekranX = hx + nox, ekranY = hy + noy;
+      if (ekranX < cx - strefaX) nox = cx - strefaX - hx;
+      if (ekranX > cx + strefaX) nox = cx + strefaX - hx;
+      if (ekranY < cy - strefaY) noy = cy - strefaY - hy;
+      if (ekranY > cy + strefaY) noy = cy + strefaY - hy;
+    }
+    nox = mapW >= size.w ? Math.min(0, Math.max(size.w - mapW, nox)) : Math.floor((size.w - mapW) / 2);
+    noy = mapH >= size.h ? Math.min(0, Math.max(size.h - mapH, noy)) : Math.floor((size.h - mapH) / 2);
+    kamRef.current = { klucz, mapaId: mapa.id, ox: Math.round(nox), oy: Math.round(noy) };
+  }
+  const { ox, oy } = kamRef.current;
 
   const heroX = Math.round(postac.x * TILE + ox);
   const heroY = Math.round(postac.y * TILE + oy);
@@ -192,7 +213,18 @@ export default function GameMap({
     let id;
     const rysuj = () => {
       const c = plotnoRef.current;
-      const { ox: vx, oy: vy, w, h } = widokRef.current;
+      let { ox: vx, oy: vy } = widokRef.current;
+      const { w, h } = widokRef.current;
+      // Świat (moby, NPC, bohater) przesuwa się animacją CSS — kafle czytają jej
+      // bieżący stan, żeby teren nie „przeskakiwał" przed resztą sceny.
+      const el = swiatRef.current;
+      if (el) {
+        const t = getComputedStyle(el).transform;
+        if (t && t !== 'none') {
+          const m = new DOMMatrixReadOnly(t);
+          vx = Math.round(m.m41); vy = Math.round(m.m42);
+        }
+      }
       if (c && w && h) {
         const dpr = Math.min(2, window.devicePixelRatio || 1);
         if (c.width !== Math.round(w * dpr) || c.height !== Math.round(h * dpr)) {
@@ -241,7 +273,7 @@ export default function GameMap({
       )}
 
       {/* ── SCROLLING WORLD ──────────────────────────────────────────────── */}
-      <div style={{
+      <div ref={swiatRef} style={{
         position:'absolute', left:0, top:0,
         transform:`translate(${ox}px,${oy}px)`,
         transition: ready ? 'transform 215ms linear' : 'none',
