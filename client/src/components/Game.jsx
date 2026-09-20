@@ -290,9 +290,20 @@ export default function Game({ onLogout, onDisconnect }) {
   const [liveMoves,     setLiveMoves]    = useState({});
   const [skillBar,      setSkillBar]     = useState([]);   // umiejętności klasy dostępne na pasku
   const [barLayout,     setBarLayout]    = useState(null); // zawartość pól 1–9, 0 (ustawia gracz)
+  const barRef = useRef(null);
+  const [barW, setBarW] = useState(0);
   const hotkeys = useRef({});                             // akcje dla klawiszy 1–4 / F1–F3
   const isMobile    = useIsMobile();
   const isLandscape = useIsLandscape();
+
+  // szerokość paska akcji — potrzebna, by ustawić go na środku okna
+  useEffect(() => {
+    const el = barRef.current;
+    if (!el || typeof ResizeObserver === 'undefined') return;
+    const ro = new ResizeObserver(([e]) => setBarW(e.contentRect.width));
+    ro.observe(el);
+    return () => ro.disconnect();
+  });
 
   const [uiScale, setUiScale] = useState(() => Math.min(1, window.innerWidth / 1000, window.innerHeight / 600));
   useEffect(() => {
@@ -810,6 +821,12 @@ export default function Game({ onLogout, onDisconnect }) {
     });
   const stateForMap = { ...state, players: livePlayers, ...(walkTarget ? { _walkTarget: walkTarget } : {}) };
   const liveMob    = target ? state.mobs?.find(m => m.id === target.id) : null;
+  // Środek obszaru mapy leży o połowę szerokości panelu bohatera (238 px) na prawo od środka okna
+  const _wewn = window.innerWidth / (uiScale < 1 ? uiScale : 1);
+  const _czatSzer = chatOpen ? 480 : 90;              // miejsce zajęte przez czat w lewym dolnym rogu
+  const _lewaPoWysrodkowaniu = _wewn / 2 - barW / 2;  // lewa krawędź paska po wyśrodkowaniu w oknie
+  const barShift = -119 + Math.max(0, (_czatSzer + 10) - _lewaPoWysrodkowaniu);
+
   const targetDist = target ? Math.max(Math.abs(target.x - state.postac.x), Math.abs(target.y - state.postac.y)) : null;
 
   // ── MOBILE LAYOUT (portrait only — landscape uses desktop layout) ────────────
@@ -1098,7 +1115,8 @@ export default function Game({ onLogout, onDisconnect }) {
           {/* Dół mapy: pasek z kulami HP/EN — przesunięty w prawo, by nie wchodzić na czat */}
           <div style={{ position:'absolute', left:10, right:10, bottom:8, zIndex:60, display:'flex', alignItems:'flex-end', pointerEvents:'none' }}>
             <div style={{ flex:1, minWidth:0, display:'flex', justifyContent:'center' }}>
-              <div style={{ pointerEvents:'auto' }}>
+              {/* pasek stoi na środku okna; w prawo przesuwa się tylko wtedy, gdy zasłoniłby go czat */}
+              <div ref={barRef} style={{ pointerEvents:'auto', transform:`translateX(${Math.round(barShift)}px)` }}>
                 <BottomBar
                   postac={state.postac}
                   potions={potions}
