@@ -19,6 +19,7 @@ node_mig phase13_schema_uzupelnienie
 node_mig phase14_iso_mapy
 node_mig phase15_czat_kanaly
 node_mig phase16_czat_czas
+node_mig phase17_profil_opis
 echo "== phase9_worldboss.sql"; sql < "$DIR/app/server/src/migrations/phase9_worldboss.sql"
 $COMPOSE restart app
 echo "Baza gotowa."

@@ -157,6 +157,7 @@ export const api = {
   },
   social: {
     profile:      (id)       => req('GET',  `/social/profile/${id}`),
+    setBio:       (opis)     => req('POST', '/social/profile/opis', { opis }),
     guildMy:      ()         => req('GET',  '/social/guild/my'),
     guildList:    ()         => req('GET',  '/social/guild/list'),
     guildCreate:  (d)        => req('POST', '/social/guild/create',  d),

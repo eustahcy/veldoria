@@ -3,6 +3,7 @@ const { logError } = require('../game/log');
 const router  = express.Router();
 const db      = require('../db');
 const { requireSession } = require('../middleware/auth');
+const { computeStats } = require('../game/stats');
 
 // ── Auto-create tables ────────────────────────────────────────────────────────
 (async () => {
@@ -51,60 +52,76 @@ const { requireSession } = require('../middleware/auth');
 // ── PROFIL GRACZA ─────────────────────────────────────────────────────────────
 router.get('/profile/:postacId', requireSession, async (req, res, next) => {
   try {
-    const targetId = req.params.postacId;
-    const [[p]] = await db.query(
-      `SELECT p.id, p.nazwa, p.poziom, p.profesja, p.obrazek, p.ranga,
-              p.exp, p.zycie, p.zycie_max, p.zalogowany,
-              COALESCE(p.kills,0) AS kills, COALESCE(p.deaths,0) AS deaths,
-              COALESCE(p.czas_gry,0) AS czas_gry,
-              COALESCE(p.zloto_zarobione,0) AS zloto_zarobione,
-              COALESCE(p.prestige,0) AS prestige,
-              COALESCE(p.prestige_bonus_pct,0) AS prestige_bonus_pct,
-              p.aktywny_tytul,
-              g.nazwa AS gildia_nazwa, g.tag AS gildia_tag,
-              t.nazwa AS tytul_nazwa, t.ikona AS tytul_ikona
-       FROM postac p
-       LEFT JOIN gildia_czlonkowie gc ON gc.postac_id = p.id
-       LEFT JOIN gilde g ON g.id = gc.gildia_id
-       LEFT JOIN tytuly t ON t.id = p.aktywny_tytul
-       WHERE p.id = ?`,
-      [targetId]
-    ).catch(async () => {
-      // fallback without tytuly join
-      return db.query(
-        `SELECT p.id, p.nazwa, p.poziom, p.profesja, p.obrazek, p.ranga,
-                p.exp, p.zycie, p.zycie_max, p.zalogowany,
-                COALESCE(p.kills,0) AS kills, COALESCE(p.deaths,0) AS deaths,
-                g.nazwa AS gildia_nazwa, g.tag AS gildia_tag
-         FROM postac p
-         LEFT JOIN gildia_czlonkowie gc ON gc.postac_id = p.id
-         LEFT JOIN gilde g ON g.id = gc.gildia_id
-         WHERE p.id = ?`,
-        [targetId]
-      );
+    const targetId = Number(req.params.postacId);
+    const [[raw]] = await db.query('SELECT * FROM postac WHERE id = ?', [targetId]);
+    if (!raw) return res.status(404).json({ error: 'Nie znaleziono' });
+
+    // Statystyki z uwzglednieniem ekwipunku i talentow
+    let eff = raw;
+    try { eff = await computeStats(db, raw); } catch (e) { logError('social:profile:stats')(e); }
+
+    const one = async (sql, params, fallback = null) => {
+      try { const [[r]] = await db.query(sql, params); return r ?? fallback; } catch (e) { logError('social:profile')(e); return fallback; }
+    };
+    const many = async (sql, params) => {
+      try { const [r] = await db.query(sql, params); return r; } catch (e) { logError('social:profile')(e); return []; }
+    };
+
+    const guild = await one(
+      `SELECT g.id, g.nazwa, g.tag, gc.ranga, gc.data_dolaczenia
+       FROM gildia_czlonkowie gc JOIN gilde g ON g.id = gc.gildia_id WHERE gc.postac_id = ?`, [targetId]);
+    const tytul = raw.aktywny_tytul ? await one('SELECT nazwa, ikona FROM tytuly WHERE id = ?', [raw.aktywny_tytul]) : null;
+    const mapa  = await one('SELECT nazwa FROM mapa WHERE id = ?', [raw.mapa]);
+    const konto = raw.account_id ? await one('SELECT data_rejestracji FROM accounts WHERE id = ?', [raw.account_id]) : null;
+
+    const ekwipunek = await many(
+      'SELECT id, nazwa, typ, klasa, obrazek, obr_min, obr_max, ac, sila, zrecznosc, intelekt FROM przedmiot_postac WHERE postac = ? AND zalozony = 1',
+      [targetId]);
+    const osiagniecia = await many(
+      `SELECT o.nazwa, o.opis, o.ikona, po.data FROM postac_osiagniecia po
+       JOIN osiagniecia o ON o.id = po.osiagniecie_id WHERE po.postac_id = ? ORDER BY po.data DESC`, [targetId]);
+    const tytuly = await many(
+      `SELECT t.id, t.nazwa, t.ikona, t.opis, pt.data FROM postac_tytuly pt
+       JOIN tytuly t ON t.id = pt.tytul_id WHERE pt.postac_id = ? ORDER BY pt.data DESC`, [targetId]);
+    const historia = await many(
+      'SELECT quest_nazwa, zakonczenie, data_ukonczenia FROM postac_questy_history WHERE postac_id = ? ORDER BY data_ukonczenia DESC LIMIT 15',
+      [targetId]);
+    const komentarze = await many(
+      'SELECT * FROM profil_komentarze WHERE profil_postac_id = ? ORDER BY data DESC LIMIT 20', [targetId]);
+
+    const osiagnieciaTotal = (await one('SELECT COUNT(*) AS cnt FROM osiagniecia', [], { cnt: 0 })).cnt;
+    const tytulyTotal      = (await one('SELECT COUNT(*) AS cnt FROM tytuly', [], { cnt: 0 })).cnt;
+
+    res.json({
+      id: raw.id, nazwa: raw.nazwa, poziom: raw.poziom, profesja: raw.profesja, obrazek: raw.obrazek,
+      ranga: raw.ranga, exp: raw.exp, zalogowany: raw.zalogowany, pvp: raw.pvp, opis: raw.opis || '',
+      zycie: raw.zycie, zycie_max: eff.zycie_max ?? raw.zycie_max,
+      energia: raw.energia ?? 0, energia_max: raw.energia_max ?? 100,
+      kills: raw.kills || 0, deaths: raw.deaths || 0, boss_kills: raw.boss_kills || 0,
+      czas_gry: raw.czas_gry || 0, zloto_zarobione: raw.zloto_zarobione || 0,
+      prestige: raw.prestige || 0, prestige_bonus_pct: raw.prestige_bonus_pct || 0,
+      ostatnie_logowanie: raw.ostatnie_logowanie, data_rejestracji: konto?.data_rejestracji || null,
+      // statystyki efektywne (z ekwipunkiem)
+      sila: eff.sila, zrecznosc: eff.zrecznosc, intelekt: eff.intelekt,
+      ac: eff.ac, sa: eff.sa, obrazenia_min: eff.obrazenia_min, obrazenia_max: eff.obrazenia_max,
+      mapa: raw.mapa, mapa_nazwa: mapa?.nazwa || null, x: raw.x, y: raw.y,
+      gildia_nazwa: guild?.nazwa || null, gildia_tag: guild?.tag || null,
+      gildia_ranga: guild?.ranga || null, gildia_od: guild?.data_dolaczenia || null,
+      tytul_nazwa: tytul?.nazwa || null, tytul_ikona: tytul?.ikona || null,
+      ekwipunek, osiagniecia, tytuly, historia, komentarze,
+      osiagniecia_count: osiagniecia.length, osiagniecia_total: osiagnieciaTotal,
+      tytuly_count: tytuly.length, tytuly_total: tytulyTotal,
+      questy_count: historia.length,
     });
-    if (!p) return res.status(404).json({ error: 'Nie znaleziono' });
+  } catch(e) { next(e); }
+});
 
-    // Extra stats
-    let tytuly_count = 0, osiagniecia_count = 0, questy_count = 0;
-    let komentarze = [];
-    try {
-      [[{ cnt: tytuly_count }]] = await db.query('SELECT COUNT(*) AS cnt FROM postac_tytuly WHERE postac_id=?', [targetId]);
-    } catch (e) { logError('social:93')(e); }
-    try {
-      [[{ cnt: osiagniecia_count }]] = await db.query('SELECT COUNT(*) AS cnt FROM postac_osiagniecia WHERE postac_id=?', [targetId]);
-    } catch (e) { logError('social:96')(e); }
-    try {
-      [[{ cnt: questy_count }]] = await db.query('SELECT COUNT(*) AS cnt FROM postac_questy_history WHERE postac_id=?', [targetId]);
-    } catch (e) { logError('social:99')(e); }
-    try {
-      [komentarze] = await db.query(
-        'SELECT * FROM profil_komentarze WHERE profil_postac_id=? ORDER BY data DESC LIMIT 20',
-        [targetId]
-      );
-    } catch (e) { logError('social:105')(e); }
-
-    res.json({ ...p, tytuly_count, osiagniecia_count, questy_count, komentarze });
+// POST /api/social/profile/opis — wlasny opis na profilu
+router.post('/profile/opis', requireSession, async (req, res, next) => {
+  try {
+    const opis = String(req.body?.opis ?? '').slice(0, 300);
+    await db.query('UPDATE postac SET opis = ? WHERE id = ?', [opis, req.session.postacId]);
+    res.json({ ok: true, opis });
   } catch(e) { next(e); }
 });
 
