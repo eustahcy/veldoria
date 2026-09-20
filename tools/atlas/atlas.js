@@ -15,7 +15,7 @@ const fs = require('fs'), path = require('path');
   // jako modul JS, zeby dzialal i w Vite, i w zwyklej przegladarce (podglad)
   const nl = String.fromCharCode(10);
   const naglowek = "// Plik generowany skryptem scratchpad/browser/atlas.js - nie edytowac recznie.";
-  const dane = JSON.stringify({ plik: '/assets/kafle/atlas.png', w: a.w, h: a.h, sprity: a.mapa, barwy: a.barwy }, null, 1);
+  const dane = JSON.stringify({ plik: '/assets/kafle/atlas.png?v=' + Buffer.from(a.png.split(',')[1], 'base64').length, skala: a.skala, w: a.w, h: a.h, sprity: a.mapa, barwy: a.barwy }, null, 1);
   const tresc = [naglowek, "export default " + dane + ";", ""].join(nl);
   fs.writeFileSync(path.join(repo, 'client/src/engine/atlas.js'), tresc);
   fs.mkdirSync('../podglad/assets/kafle', { recursive: true });

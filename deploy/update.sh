@@ -19,6 +19,10 @@ git merge --ff-only origin/main
 
 # Nowe grafiki z repo dokładamy do wolumenu (istniejących i wgranych w grze nie ruszamy)
 cp -an "$DIR/app/original/MAEGONEM_pliki/." "$DIR/data/assets/"
+# Atlas kafli jest generowany z repo (a nie wgrywany w grze), wiec ten jeden
+# katalog nadpisujemy zawsze — inaczej gra zostaje ze stara grafika.
+mkdir -p "$DIR/data/assets/kafle"
+cp -a "$DIR/app/original/MAEGONEM_pliki/kafle/." "$DIR/data/assets/kafle/"
 chown -R 1000:1000 "$DIR/data/assets"
 
 docker compose -f "$DIR/app/deploy/docker-compose.yml" --env-file "$DIR/.env" up -d --build app

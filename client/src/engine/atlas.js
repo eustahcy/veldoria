@@ -1,6 +1,6 @@
 // Plik generowany skryptem scratchpad/browser/atlas.js - nie edytowac recznie.
 export default {
- "plik": "/assets/kafle/atlas.png",
+ "plik": "/assets/kafle/atlas.png?v=2014325",
  "skala": 2,
  "w": 2048,
  "h": 628,
