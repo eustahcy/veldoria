@@ -1,5 +1,5 @@
 // Wybór postaci po zalogowaniu.
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { S, pageBg, vignette, panel, goldBtn, ghostBtn, Diamond, Ornament, Logo, OnlineBadge } from './siteStyle';
 
 const MAX_SLOTS = 3;
@@ -142,6 +142,175 @@ function CharCard({ ch, mapName, onEnter, onDelete, busy, narrow }) {
   );
 }
 
+
+// ── Karuzela postaci (telefon) ───────────────────────────────────────────────
+// Trzy karty jedna pod drugą to na telefonie 1000 px przewijania, więc
+// pokazujemy jedną postać naraz: strzałki, kropki i przesuwanie palcem.
+function Karuzela({ chars, slots, mapNames, onEnter, onDelete, onCreate, busy, canCreate }) {
+  const puste = Math.max(0, slots - chars.length);
+  const strony = [...chars.map(ch => ({ typ: 'postac', ch })), ...Array.from({ length: puste }, () => ({ typ: 'pusty' }))];
+  const [idx, setIdx] = useState(0);
+  const [confirm, setConfirm] = useState(false);
+  const dotyk = useRef(null);
+
+  const ile = strony.length || 1;
+  const teraz = Math.min(idx, ile - 1);
+  const strona = strony[teraz] || { typ: 'pusty' };
+  const skocz = (o) => { setConfirm(false); setIdx((teraz + o + ile) % ile); };
+
+  useEffect(() => { if (idx > ile - 1) setIdx(0); }, [ile, idx]);
+
+  const zacznij = (e) => { dotyk.current = e.touches[0]?.clientX ?? null; };
+  const skoncz = (e) => {
+    if (dotyk.current == null) return;
+    const dx = (e.changedTouches[0]?.clientX ?? dotyk.current) - dotyk.current;
+    dotyk.current = null;
+    if (Math.abs(dx) > 45) skocz(dx < 0 ? 1 : -1);
+  };
+
+  const Strzalka = ({ kier }) => (
+    <button
+      onClick={() => skocz(kier)}
+      aria-label={kier > 0 ? 'Następna postać' : 'Poprzednia postać'}
+      style={{
+        position: 'absolute', top: '50%', transform: 'translateY(-50%)',
+        [kier > 0 ? 'right' : 'left']: 2, width: 46, height: 46, zIndex: 2,
+        display: ile > 1 ? 'grid' : 'none', placeItems: 'center',
+        background: 'rgba(6,9,18,0.55)', border: `1px solid ${S.line}`, borderRadius: 12,
+        color: S.gold, fontSize: 22, cursor: 'pointer', fontFamily: S.serif,
+      }}
+    >{kier > 0 ? '›' : '‹'}</button>
+  );
+
+  const ch = strona.ch;
+  const color = ch ? (PROF_COLOR[ch.profesja] || S.gold) : S.gold;
+
+  return (
+    <div style={{ width: '100%', maxWidth: 520, margin: '0 auto' }}>
+      {/* Scena ze sprite'em */}
+      <div
+        onTouchStart={zacznij} onTouchEnd={skoncz}
+        style={{
+          position: 'relative', height: 236, borderRadius: 16, overflow: 'hidden',
+          border: `1px solid ${S.lineSoft}`, display: 'grid', placeItems: 'center',
+          background: 'radial-gradient(ellipse at 50% 92%, rgba(231,193,88,0.18), rgba(4,7,14,0.92) 68%)',
+        }}
+      >
+        <Strzalka kier={-1} />
+        <Strzalka kier={1} />
+
+        {ch ? (
+          <>
+            {ch.ranga === 'GameAdmin' && (
+              <span style={{
+                position: 'absolute', top: 10, left: 10, padding: '3px 9px', borderRadius: 999,
+                background: 'rgba(229,98,76,0.18)', border: '1px solid rgba(229,98,76,0.5)',
+                color: '#ff8b78', fontSize: 10, fontWeight: 'bold',
+              }}>★ ADMIN</span>
+            )}
+            {!!ch.zalogowany && (
+              <span style={{
+                position: 'absolute', top: 10, right: 10, padding: '3px 9px', borderRadius: 999,
+                background: 'rgba(95,208,122,0.14)', border: '1px solid rgba(95,208,122,0.45)',
+                color: S.green, fontSize: 10,
+              }}>● Online</span>
+            )}
+            <div style={{
+              width: 32, height: 48, transform: 'scale(3.1)', transformOrigin: 'center',
+              backgroundImage: `url(/assets/${ch.obrazek})`, backgroundPosition: '0 0',
+              backgroundRepeat: 'no-repeat', imageRendering: 'pixelated',
+              filter: 'drop-shadow(0 10px 14px rgba(0,0,0,0.85))',
+            }} />
+          </>
+        ) : (
+          <div style={{ display: 'grid', placeItems: 'center', gap: 10, color: S.muted }}>
+            <span style={{
+              width: 62, height: 62, borderRadius: '50%', display: 'grid', placeItems: 'center',
+              border: `1px dashed ${S.line}`, color: S.gold, fontSize: 28,
+            }}>+</span>
+            <span style={{ fontFamily: S.serif, fontSize: 17, color: S.text }}>Pusty slot</span>
+          </div>
+        )}
+      </div>
+
+      {/* Kropki */}
+      {ile > 1 && (
+        <div style={{ display: 'flex', justifyContent: 'center', gap: 7, margin: '10px 0 12px' }}>
+          {strony.map((st, i) => (
+            <button key={i} onClick={() => { setConfirm(false); setIdx(i); }}
+              aria-label={`Postać ${i + 1}`}
+              style={{
+                width: i === teraz ? 20 : 8, height: 8, borderRadius: 999, padding: 0, cursor: 'pointer',
+                background: i === teraz ? S.gold : 'rgba(231,193,88,0.25)',
+                border: 'none', transition: 'width .18s, background .18s',
+              }} />
+          ))}
+        </div>
+      )}
+
+      {/* Karta z danymi */}
+      <div style={{ ...panel, padding: 14, boxSizing: 'border-box' }}>
+        {ch ? (
+          <>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+              <span style={{ fontFamily: S.serif, fontSize: 21, color: S.text }}>{ch.nazwa}</span>
+              <span style={{ padding: '3px 10px', borderRadius: 999, fontSize: 11, background: `${color}1f`, border: `1px solid ${color}66`, color }}>{ch.profesja}</span>
+              <span style={{ padding: '3px 10px', borderRadius: 999, fontSize: 11, background: 'rgba(231,193,88,0.12)', border: `1px solid ${S.line}`, color: S.gold }}>Lv. {ch.poziom}</span>
+              {ch.prestige > 0 && (
+                <span style={{ padding: '3px 8px', borderRadius: 999, fontSize: 11, background: 'rgba(192,122,224,0.15)', border: '1px solid rgba(192,122,224,0.45)', color: '#d9a7f0' }}>✦ {ch.prestige}</span>
+              )}
+            </div>
+            {mapNames[ch.mapa] && (
+              <div style={{ color: S.muted, fontSize: 12, margin: '8px 0 10px' }}>📍 {mapNames[ch.mapa]}</div>
+            )}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+              <span style={{ color: '#ff8b78', fontSize: 11, width: 26 }}>HP</span>
+              <Bar pct={ch.zycie_max > 0 ? Math.round((ch.zycie / ch.zycie_max) * 100) : 0}
+                   color="linear-gradient(90deg,#8e2f22,#e5624c)" glow="rgba(229,98,76,0.5)" />
+              <span style={{ color: S.muted, fontSize: 11, width: 56, textAlign: 'right' }}>{ch.zycie}/{ch.zycie_max}</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
+              <span style={{ color: S.green, fontSize: 11, width: 26 }}>EXP</span>
+              <Bar pct={expPct(ch)} color="linear-gradient(90deg,#2f6a3a,#5fd07a)" glow="rgba(95,208,122,0.45)" />
+              <span style={{ color: S.muted, fontSize: 11, width: 56, textAlign: 'right' }}>{expPct(ch)}%</span>
+            </div>
+
+            {confirm ? (
+              <div>
+                <div style={{ color: '#ffb3a6', fontSize: 12, textAlign: 'center', marginBottom: 8 }}>
+                  Usunąć „{ch.nazwa}" bezpowrotnie?
+                </div>
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <button onClick={() => { onDelete(ch.id); setConfirm(false); }} style={{ ...ghostBtn(), flex: 1, minHeight: 46, color: '#ff8b78', borderColor: 'rgba(229,98,76,0.5)' }}>Tak, usuń</button>
+                  <button onClick={() => setConfirm(false)} style={{ ...ghostBtn(), flex: 1, minHeight: 46 }}>Anuluj</button>
+                </div>
+              </div>
+            ) : (
+              <div style={{ display: 'flex', gap: 8 }}>
+                <button onClick={() => onEnter(ch.id)} disabled={busy} style={{ ...goldBtn(), flex: 1, minHeight: 50, opacity: busy ? 0.6 : 1 }}>
+                  ▶ Wejdź do gry
+                </button>
+                <button onClick={() => setConfirm(true)} title="Usuń postać" aria-label="Usuń postać" style={{ ...ghostBtn(), minHeight: 50, padding: '0 16px' }}>🗑</button>
+              </div>
+            )}
+          </>
+        ) : (
+          <>
+            <div style={{ fontFamily: S.serif, fontSize: 19, color: S.text, marginBottom: 4 }}>Utwórz nową postać</div>
+            <div style={{ color: S.muted, fontSize: 12, marginBottom: 14 }}>
+              Wolne miejsce w drużynie — wybierz klasę i rozpocznij nową historię.
+            </div>
+            <button onClick={canCreate ? onCreate : undefined} disabled={!canCreate}
+              style={{ ...goldBtn(), width: '100%', minHeight: 50, opacity: canCreate ? 1 : 0.5 }}>
+              + Stwórz postać
+            </button>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function EmptySlot({ onCreate, narrow }) {
   const [hover, setHover] = useState(false);
   return (
@@ -251,25 +420,32 @@ export default function CharacterSelect({
 
         <div style={{ display: 'flex', gap: 22, alignItems: 'flex-start', flexDirection: narrow ? 'column' : 'row' }}>
           {menu}
-          <div style={{
-            // trzy kafelki obok siebie (na telefonie jeden pod drugim)
-            flex: 1, minWidth: 0, display: 'grid', gap: 18,
-            gridTemplateColumns: narrow ? 'minmax(0, 340px)' : `repeat(${medium ? 2 : 3}, minmax(0, 1fr))`,
-            justifyContent: narrow ? 'center' : 'stretch', justifyItems: 'center',
-          }}>
-            {chars.map(ch => (
-              <CharCard key={ch.id} ch={ch} mapName={mapNames[ch.mapa]} narrow={narrow}
-                        onEnter={onEnterGame} onDelete={onDelete} busy={loading} />
-            ))}
-            {/* na telefonie jeden kafel „nowa postać" wystarczy — reszta to tylko szum,
-                a na dole i tak jest przycisk tworzenia */}
-            {Array.from({ length: Math.max(0, narrow ? Math.min(1, slots - chars.length) : slots - chars.length) }, (_, i) => (
-              <EmptySlot key={`e${i}`} narrow={narrow} onCreate={canCreate ? onCreate : undefined} />
-            ))}
-          </div>
+          {narrow ? (
+            <div style={{ flex: 1, minWidth: 0, width: '100%' }}>
+              <Karuzela
+                chars={chars} slots={slots} mapNames={mapNames} busy={loading} canCreate={canCreate}
+                onEnter={onEnterGame} onDelete={onDelete} onCreate={onCreate}
+              />
+            </div>
+          ) : (
+            <div style={{
+              // trzy kafelki obok siebie
+              flex: 1, minWidth: 0, display: 'grid', gap: 18,
+              gridTemplateColumns: `repeat(${medium ? 2 : 3}, minmax(0, 1fr))`,
+              justifyContent: 'stretch', justifyItems: 'center',
+            }}>
+              {chars.map(ch => (
+                <CharCard key={ch.id} ch={ch} mapName={mapNames[ch.mapa]} narrow={narrow}
+                          onEnter={onEnterGame} onDelete={onDelete} busy={loading} />
+              ))}
+              {Array.from({ length: Math.max(0, slots - chars.length) }, (_, i) => (
+                <EmptySlot key={`e${i}`} narrow={narrow} onCreate={canCreate ? onCreate : undefined} />
+              ))}
+            </div>
+          )}
         </div>
 
-        {canCreate && (
+        {canCreate && !narrow && (
           <div style={{ display: 'flex', justifyContent: 'center', marginTop: 26 }}>
             <button onClick={onCreate} style={{ ...ghostBtn(true), minWidth: 320 }}>+ Stwórz nową postać</button>
           </div>
