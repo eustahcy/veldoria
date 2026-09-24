@@ -1,6 +1,13 @@
 // Ekran rozgrywki (komputer): górny pasek, panel bohatera, śledzenie zadań,
 // dolny pasek z kulami HP/EN i skrótami. Oprawa: ciemny kamień + złote ramki.
 import { useEffect, useState } from 'react';
+import {
+  IconCoin, IconGem, IconStore, IconTrophy, IconMail, IconSettings, IconMoon, IconSun,
+  IconSword, IconShield, IconMuscle, IconBow, IconBrain, IconCrosshair, IconFlask,
+  IconMegaphone, IconX, IconMenu, IconScroll, IconBag, IconStar, IconMap, IconChat,
+  IconMessages, IconUser, IconBanner, IconHammer, IconFish, IconCastle, IconPalette,
+  IconDagger, IconLogout, IconLock, IconCheck, IconCompass, IconRefresh, IconTrash,
+} from '../../Icons';
 import { api } from '../../api';
 import { C, fmtNum } from '../../ui/kit';
 
@@ -168,17 +175,17 @@ export function TopBar({ postac, mapa, worldState, tokens, onAuction, onRanking,
         <Bar value={exp.pct} max={100} from={G.exp} to={G.expHi} height={12} label={`${exp.pct.toFixed(2)}%`} />
       </div>
 
-      {pill('🪙', fmtNum(postac.zloto), G.goldHi)}
-      {tokens > 0 && pill('💎', fmtNum(tokens), '#e88ad8')}
+      {pill(<IconCoin size={12} />, fmtNum(postac.zloto), G.goldHi)}
+      {tokens > 0 && pill(<IconGem size={12} />, fmtNum(tokens), '#e88ad8')}
 
       <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 2 }}>
-        {btn('🏪', 'Aukcja', onAuction)}
-        {btn('🏆', 'Ranking', onRanking)}
-        {btn('✉', 'Poczta', onMail, unread)}
-        {btn('⚙', 'Ustawienia', onSettings)}
+        {btn(<IconStore size={13} />, 'Aukcja', onAuction)}
+        {btn(<IconTrophy size={13} />, 'Ranking', onRanking)}
+        {btn(<IconMail size={13} />, 'Poczta', onMail, unread)}
+        {btn(<IconSettings size={13} />, 'Ustawienia', onSettings)}
         <Sep />
         <span style={{ color: G.muted, fontSize: 12.5, whiteSpace: 'nowrap', fontFamily: G.serif }}>
-          {worldState?.pora === 'noc' ? '🌙' : worldState?.pora === 'swit' ? '🌅' : worldState?.pora === 'zmierzch' ? '🌇' : '☀'}{' '}
+          {worldState?.pora === 'noc' ? <IconMoon size={12} /> : <IconSun size={12} />}{' '}
           {zegar.toLocaleTimeString('pl-PL', { hour: '2-digit', minute: '2-digit' })}
         </span>
         {/* Połączenie z serwerem */}
@@ -204,12 +211,12 @@ export function HeroPanel({ postac, actions, reserve = 0 }) {
   const [hov, setHov] = useState(null);
 
   const stats = [
-    ['⚔', 'Atak', `${postac.obrazenia_min} – ${postac.obrazenia_max}`],
-    ['🛡', 'Obrona', postac.ac ?? 0],
-    ['💪', 'Siła', postac.sila ?? 0],
-    ['🏹', 'Zręczność', postac.zrecznosc ?? 0],
-    ['🧠', 'Inteligencja', postac.intelekt ?? 0],
-    ['🎯', 'Celność', postac.sa ?? 0],
+    [<IconSword size={12} />, 'Atak', `${postac.obrazenia_min} – ${postac.obrazenia_max}`],
+    [<IconShield size={12} />, 'Obrona', postac.ac ?? 0],
+    [<IconMuscle size={12} />, 'Siła', postac.sila ?? 0],
+    [<IconBow size={12} />, 'Zręczność', postac.zrecznosc ?? 0],
+    [<IconBrain size={12} />, 'Inteligencja', postac.intelekt ?? 0],
+    [<IconCrosshair size={12} />, 'Celność', postac.sa ?? 0],
   ];
 
   return (
@@ -490,10 +497,10 @@ function SlotPicker({ slotKey, skills, potions, panels, onPick, onClear, onClose
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
           <span style={{ fontFamily: G.serif, fontSize: 18, color: G.goldHi }}>Pole {slotKey} — wybierz zawartość</span>
-          <button onClick={onClose} style={{ marginLeft: 'auto', width: 34, height: 34, borderRadius: 3, cursor: 'pointer', background: 'rgba(0,0,0,0.35)', border: `1px solid ${G.bronze}`, color: G.goldHi, fontSize: 16 }}>✕</button>
+          <button onClick={onClose} style={{ marginLeft: 'auto', width: 34, height: 34, borderRadius: 3, cursor: 'pointer', background: 'rgba(0,0,0,0.35)', border: `1px solid ${G.bronze}`, color: G.goldHi, fontSize: 16 }}><IconX size={15} /></button>
         </div>
         {sekcja('UMIEJĘTNOŚCI', skills.map(sk => ({ key: `s${sk.id}`, icon: sk.icon, label: sk.name, opis: sk.desc, wpis: { t: 'skill', id: sk.id } })))}
-        {sekcja('MIKSTURY', potions.map(p => ({ key: `p${p.id}`, icon: '🧪', label: `${p.nazwa}${p.ilosc > 1 ? ` ×${p.ilosc}` : ''}`, wpis: { t: 'potion', nazwa: p.nazwa } })))}
+        {sekcja('MIKSTURY', potions.map(p => ({ key: `p${p.id}`, icon: <IconFlask size={13} />, label: `${p.nazwa}${p.ilosc > 1 ? ` ×${p.ilosc}` : ''}`, wpis: { t: 'potion', nazwa: p.nazwa } })))}
         {sekcja('OKNA I TRYBY', panels.map(a => ({ key: `a${a.id}`, icon: a.icon, label: a.label, wpis: { t: 'panel', id: a.id } })))}
         <button onClick={() => { onClear(); onClose(); }} style={{
           width: '100%', padding: '10px', borderRadius: 3, cursor: 'pointer', marginTop: 4,
@@ -643,7 +650,7 @@ export function AdminAnnounce({ socket }) {
       width: 'min(620px, calc(100vw - 32px))', cursor: 'pointer', animation: 'annIn .35s ease-out',
     }}>
       <Ornate pad="16px 22px" style={{ textAlign: 'center', boxShadow: '0 0 40px rgba(231,193,88,0.25), 0 20px 50px rgba(0,0,0,0.8)' }}>
-        <div style={{ fontFamily: G.serif, fontSize: 12, letterSpacing: 4, color: G.goldDim, marginBottom: 6 }}>📢 KOMUNIKAT SERWERA</div>
+        <div style={{ fontFamily: G.serif, fontSize: 12, letterSpacing: 4, color: G.goldDim, marginBottom: 6 }}><IconMegaphone size={12} /> KOMUNIKAT SERWERA</div>
         <div style={{ fontFamily: G.serif, fontSize: 19, color: G.goldHi, lineHeight: 1.4, textShadow: '0 2px 6px #000' }}>{msg.message}</div>
         {msg.from && <div style={{ fontSize: 11.5, color: G.muted, marginTop: 8 }}>— {msg.from}</div>}
       </Ornate>

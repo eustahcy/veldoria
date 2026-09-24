@@ -525,3 +525,35 @@ export function IconSkull({ size }) {
     </Svg>
   );
 }
+export function IconMenu({ size }) {
+  return (
+    <Svg size={size}>
+      <line x1="4" y1="7" x2="20" y2="7" />
+      <line x1="4" y1="12" x2="20" y2="12" />
+      <line x1="4" y1="17" x2="20" y2="17" />
+    </Svg>
+  );
+}
+export function IconMoon({ size }) {
+  return (
+    <Svg size={size}>
+      <path d="M21 13A9 9 0 1111 3a7 7 0 1010 10z" />
+    </Svg>
+  );
+}
+export function IconSun({ size }) {
+  return (
+    <Svg size={size}>
+      <circle cx="12" cy="12" r="4" />
+      <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" />
+    </Svg>
+  );
+}
+export function IconMessages({ size }) {
+  return (
+    <Svg size={size}>
+      <path d="M8 13H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1" />
+      <path d="M9 10h10a2 2 0 012 2v5a2 2 0 01-2 2h-3l-4 3v-3H9a2 2 0 01-2-2v-5a2 2 0 012-2z" />
+    </Svg>
+  );
+}

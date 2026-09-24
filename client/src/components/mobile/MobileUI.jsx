@@ -2,6 +2,13 @@
 // (menu, ekwipunek, postać, umiejętności, zadania, mapa świata).
 // Oprawa jak na komputerze: ciemny kamień, brązowe ramki, złote akcenty.
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import {
+  IconCoin, IconGem, IconStore, IconTrophy, IconMail, IconSettings, IconMoon, IconSun,
+  IconSword, IconShield, IconMuscle, IconBow, IconBrain, IconCrosshair, IconFlask,
+  IconMegaphone, IconX, IconMenu, IconScroll, IconBag, IconStar, IconMap, IconChat,
+  IconMessages, IconUser, IconBanner, IconHammer, IconFish, IconCastle, IconPalette,
+  IconDagger, IconLogout, IconLock, IconCheck, IconCompass, IconRefresh, IconTrash, IconMapPin,
+} from '../../Icons';
 import { api } from '../../api';
 import { hudColors as G } from '../hud/GameHud';
 import { rarityOf, fmtNum } from '../../ui/kit';
@@ -95,7 +102,7 @@ export function Sheet({ title, onClose, children, footer, header, pad = 12 }) {
         <button onClick={onClose} aria-label="Zamknij" style={{
           marginLeft: 'auto', width: 36, height: 36, background: 'none', border: 'none', cursor: 'pointer',
           color: G.gold, fontSize: 22, lineHeight: 1,
-        }}>✕</button>
+        }}><IconX size={16} /></button>
       </div>
       <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', padding: pad, WebkitOverflowScrolling: 'touch' }}>
         {children}
@@ -347,12 +354,12 @@ export function MobileHud({
           <button onClick={() => onScreen('menu')} aria-label="Menu" style={{
             width: landscape ? 42 : 40, height: landscape ? 42 : 40, background: 'none', border: 'none',
             color: G.gold, fontSize: landscape ? 25 : 24, cursor: 'pointer',
-          }}>☰</button>
+          }}><IconMenu size={18} /></button>
           <div style={{ flex: 1, display: 'flex', justifyContent: 'center' }}><Logo size={landscape ? 19 : 17} /></div>
           <button onClick={() => onScreen('zadania')} aria-label="Zadania" style={{
             width: landscape ? 42 : 40, height: landscape ? 42 : 40, background: 'none', border: 'none',
             color: G.gold, fontSize: landscape ? 21 : 21, cursor: 'pointer',
-          }}>📜</button>
+          }}><IconScroll size={16} /></button>
         </div>
       </div>
 
@@ -403,9 +410,9 @@ export function MobileHud({
       {/* Szybkie przyciski po prawej */}
       <div style={{ position: 'fixed', right: `calc(${SAFE_R} + ${landscape ? 14 : 10}px)`,
         bottom: landscape ? `calc(${SAFE_B} + 12px)` : `calc(${SAFE_B} + 150px)`, zIndex: 480, display: 'flex', flexDirection: 'column', gap: landscape ? 8 : 10 }}>
-        <RoundBtn size={landscape ? 56 : 50} icon="🎒" label="Ekwipunek" onClick={() => onScreen('ekwipunek')} />
-        <RoundBtn size={landscape ? 56 : 50} icon="⭐" label="Umiejętności" onClick={() => onScreen('umiejetnosci')} badge={p.punkty_talentow > 0 ? p.punkty_talentow : null} />
-        <RoundBtn size={landscape ? 56 : 50} icon="🗺" label="Mapa" onClick={() => onScreen('mapa')} />
+        <RoundBtn size={landscape ? 56 : 50} icon={<IconBag size={22} />} label="Ekwipunek" onClick={() => onScreen('ekwipunek')} />
+        <RoundBtn size={landscape ? 56 : 50} icon={<IconStar size={22} />} label="Umiejętności" onClick={() => onScreen('umiejetnosci')} badge={p.punkty_talentow > 0 ? p.punkty_talentow : null} />
+        <RoundBtn size={landscape ? 56 : 50} icon={<IconMap size={22} />} label="Mapa" onClick={() => onScreen('mapa')} />
       </div>
 
       {/* Joystick */}
@@ -422,13 +429,13 @@ export function MobileHud({
       }}>
         <div style={{ display: 'flex', gap: landscape ? 7 : 6, padding: landscape ? '0' : '10px 8px 0',
           transform: landscape ? 'scale(0.96)' : 'none', transformOrigin: 'center bottom' }}>
-          <BottomSlot landscape={landscape} label="Czat" onClick={onChat} active={chatOpen} count={unread > 0 && !chatOpen ? unread : null}>💬</BottomSlot>
-          <BottomSlot landscape={landscape} label="Atak" onClick={onAttack}>⚔️</BottomSlot>
-          <BottomSlot landscape={landscape} label="Rozmowa" onClick={onTalk}>🗨️</BottomSlot>
+          <BottomSlot landscape={landscape} label="Czat" onClick={onChat} active={chatOpen} count={unread > 0 && !chatOpen ? unread : null}><IconMessages size={20} /></BottomSlot>
+          <BottomSlot landscape={landscape} label="Atak" onClick={onAttack}><IconSword size={20} /></BottomSlot>
+          <BottomSlot landscape={landscape} label="Rozmowa" onClick={onTalk}><IconChat size={20} /></BottomSlot>
           <BottomSlot landscape={landscape} label={potion ? 'Mikstura' : 'Brak'} onClick={() => potion && onPotion(potion)} disabled={!potion} count={potion ? potionCount : null}>
-            {potion ? <Icon item={potion} size={26} /> : '🧪'}
+            {potion ? <Icon item={potion} size={26} /> : <IconFlask size={20} />}
           </BottomSlot>
-          <BottomSlot landscape={landscape} label="Auto" onClick={onAuto} active={autoHunt}>Ⓜ</BottomSlot>
+          <BottomSlot landscape={landscape} label="Auto" onClick={onAuto} active={autoHunt}><IconRefresh size={20} /></BottomSlot>
         </div>
       </div>
       <style>{`@keyframes mHudPulse{0%,100%{filter:none}50%{filter:brightness(1.6)}}`}</style>
@@ -442,22 +449,22 @@ export function MobileHud({
 export function MenuScreen({ postac, isAdmin, unread, onClose, onPick }) {
   const exp = expPct(postac);
   const rows = [
-    ['postac', '🧍', 'Postać'],
-    ['ekwipunek', '🎒', 'Ekwipunek'],
-    ['umiejetnosci', '⭐', 'Umiejętności', postac.punkty_talentow > 0 ? postac.punkty_talentow : null],
-    ['zadania', '📜', 'Zadania'],
-    ['mapa', '🗺', 'Mapa świata'],
-    ['gildia', '⚜', 'Gildia'],
-    ['aukcja', '🏪', 'Sklep i aukcje'],
-    ['ranking', '🏆', 'Ranking gildii'],
-    ['poczta', '✉', 'Poczta i znajomi', unread > 0 ? unread : null],
-    ['rzemioslo', '⚒', 'Rzemiosło'],
-    ['lowienie', '🎣', 'Wędkarstwo'],
-    ['lochy', '🏰', 'Lochy'],
-    ['wyglad', '🎨', 'Wygląd postaci'],
-    ['pvp', '🗡', `Tryb PvP: ${postac.pvp ? 'włączony' : 'wyłączony'}`],
-    ...(isAdmin ? [['admin', '🛡', 'Panel admina']] : []),
-    ['wyloguj', '🚪', 'Wyjdź do wyboru postaci'],
+    ['postac', <IconUser size={17} />, 'Postać'],
+    ['ekwipunek', <IconBag size={17} />, 'Ekwipunek'],
+    ['umiejetnosci', <IconStar size={17} />, 'Umiejętności', postac.punkty_talentow > 0 ? postac.punkty_talentow : null],
+    ['zadania', <IconScroll size={17} />, 'Zadania'],
+    ['mapa', <IconMap size={17} />, 'Mapa świata'],
+    ['gildia', <IconBanner size={17} />, 'Gildia'],
+    ['aukcja', <IconStore size={17} />, 'Sklep i aukcje'],
+    ['ranking', <IconTrophy size={17} />, 'Ranking gildii'],
+    ['poczta', <IconMail size={17} />, 'Poczta i znajomi', unread > 0 ? unread : null],
+    ['rzemioslo', <IconHammer size={17} />, 'Rzemiosło'],
+    ['lowienie', <IconFish size={17} />, 'Wędkarstwo'],
+    ['lochy', <IconCastle size={17} />, 'Lochy'],
+    ['wyglad', <IconPalette size={17} />, 'Wygląd postaci'],
+    ['pvp', <IconDagger size={17} />, `Tryb PvP: ${postac.pvp ? 'włączony' : 'wyłączony'}`],
+    ...(isAdmin ? [['admin', <IconShield size={17} />, 'Panel admina']] : []),
+    ['wyloguj', <IconLogout size={17} />, 'Wyjdź do wyboru postaci'],
   ];
   return (
     <Sheet onClose={onClose} header={<Logo size={20} />}>
@@ -487,7 +494,7 @@ export function MenuScreen({ postac, isAdmin, unread, onClose, onPick }) {
             background: 'linear-gradient(180deg,#1a1611,#0f0c09)', border: `1px solid ${G.bronze}99`, borderRadius: 4,
             color: id === 'wyloguj' ? '#ff9b8b' : G.text, fontFamily: G.serif, fontSize: 14.5, WebkitTapHighlightColor: 'transparent',
           }}>
-            <span style={{ width: 26, textAlign: 'center', fontSize: 18 }}>{icon}</span>
+            <span style={{ width: 26, display: 'flex', justifyContent: 'center', color: G.goldDim }}>{icon}</span>
             <span style={{ flex: 1 }}>{label}</span>
             {badge ? <span style={{ minWidth: 20, height: 20, borderRadius: 10, padding: '0 6px', background: '#a8281c', color: '#fff', fontSize: 11, display: 'grid', placeItems: 'center' }}>{badge}</span> : null}
             <span style={{ color: G.goldDim, fontSize: 18 }}>›</span>
@@ -538,7 +545,7 @@ function ItemSheet({ item, compare, postac, onClose, onUse, onDrop, onSell }) {
         background: PANEL, border: `1px solid ${G.gold}`, borderRadius: 4, padding: '16px 14px 14px',
         boxShadow: `0 0 0 1px #000, 0 0 30px ${r.color}33, 0 20px 50px rgba(0,0,0,0.8)`,
       }}>
-        <button onClick={onClose} aria-label="Zamknij" style={{ position: 'absolute', top: 6, right: 6, width: 34, height: 34, background: 'none', border: 'none', color: G.gold, fontSize: 20, cursor: 'pointer' }}>✕</button>
+        <button onClick={onClose} aria-label="Zamknij" style={{ position: 'absolute', top: 6, right: 6, width: 34, height: 34, background: 'none', border: 'none', color: G.gold, fontSize: 20, cursor: 'pointer' }}><IconX size={16} /></button>
         <ItemDetails item={item} compare={compare} postac={postac} />
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 10 }}>
           <Btn primary onClick={onUse} disabled={!canUse}>{useLabelFor(item)}</Btn>
@@ -546,7 +553,7 @@ function ItemSheet({ item, compare, postac, onClose, onUse, onDrop, onSell }) {
           <Btn onClick={() => setMore(m => !m)}>{more ? 'Mniej' : 'Więcej'}</Btn>
           {more && (
             <Btn onClick={onSell} disabled={item.zalozony === 1 || !(item.wartosc_sprzedazy > 0)}>
-              Sprzedaj{item.wartosc_sprzedazy > 0 ? ` (🪙 ${fmtNum(item.wartosc_sprzedazy)})` : ''}
+              Sprzedaj{item.wartosc_sprzedazy > 0 ? ` (${fmtNum(item.wartosc_sprzedazy)} zł.)` : ''}
             </Btn>
           )}
         </div>
@@ -617,12 +624,12 @@ export function InventoryScreen({ postac, onClose, onRefresh }) {
       onClose={onClose}
       header={<>
         <Diamond /><span style={{ fontFamily: G.serif, fontSize: 18, color: G.goldHi }}>Ekwipunek</span>
-        <span style={{ marginLeft: 'auto', color: G.muted, fontSize: 12.5 }}>🎒 {bag.length}</span>
+        <span style={{ marginLeft: 'auto', color: G.muted, fontSize: 12.5 }}><IconBag size={13} /> {bag.length}</span>
       </>}
       footer={<>
         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10, fontSize: 15 }}>
-          <span style={{ color: G.goldHi }}>🪙 {Number(postac.zloto || 0).toLocaleString('pl-PL')}</span>
-          <span style={{ color: '#ff8fa3' }}>💎 {fmtNum(postac.event_tokeny || 0)}</span>
+          <span style={{ color: G.goldHi }}><IconCoin size={13} /> {Number(postac.zloto || 0).toLocaleString('pl-PL')}</span>
+          <span style={{ color: '#ff8fa3' }}><IconGem size={13} /> {fmtNum(postac.event_tokeny || 0)}</span>
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
           <Btn onClick={() => setSort(s => (s + 1) % SORTS.length)}>⇅ Sortuj: {SORTS[sort][1]}</Btn>
@@ -715,12 +722,12 @@ export function CharacterScreen({ postac, onClose, onRefresh, onOutfit }) {
 
         <div style={{ marginTop: 14, borderTop: `1px solid ${G.bronze}66`, paddingTop: 10 }}>
           {[
-            ['⚔', 'Atak', `${postac.obrazenia_min} – ${postac.obrazenia_max}`],
-            ['🛡', 'Obrona', postac.ac ?? 0],
-            ['💪', 'Siła', postac.sila ?? 0],
-            ['🏹', 'Zręczność', postac.zrecznosc ?? 0],
-            ['🧠', 'Inteligencja', postac.intelekt ?? 0],
-            ['🎯', 'Celność', postac.sa ?? 0],
+            [<IconSword size={13} />, 'Atak', `${postac.obrazenia_min} – ${postac.obrazenia_max}`],
+            [<IconShield size={13} />, 'Obrona', postac.ac ?? 0],
+            [<IconMuscle size={13} />, 'Siła', postac.sila ?? 0],
+            [<IconBow size={13} />, 'Zręczność', postac.zrecznosc ?? 0],
+            [<IconBrain size={13} />, 'Inteligencja', postac.intelekt ?? 0],
+            [<IconCrosshair size={13} />, 'Celność', postac.sa ?? 0],
           ].map(([ic, l, v]) => (
             <div key={l} style={{ display: 'flex', alignItems: 'center', gap: 9, fontSize: 14, padding: '4px 0' }}>
               <span style={{ width: 18, textAlign: 'center', opacity: 0.85 }}>{ic}</span>
@@ -790,7 +797,7 @@ export function SkillsScreen({ postac, onClose, onRefresh }) {
                 width: 54, height: 54, flexShrink: 0, display: 'grid', placeItems: 'center', fontSize: 28, borderRadius: 3,
                 background: 'radial-gradient(circle at 50% 40%, rgba(229,98,76,0.45), #1a0806 75%)',
                 border: `1px solid ${max ? G.gold : G.bronze}`, boxShadow: 'inset 0 0 10px rgba(0,0,0,0.8)',
-              }}>{t.ikona || '⚔️'}</div>
+              }}>{t.ikona || <IconSword size={18} />}</div>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ fontFamily: G.serif, fontSize: 14.5, color: G.text }}>{t.nazwa}</div>
                 <div style={{ fontSize: 12, color: G.muted, marginTop: 2 }}>Lv. {t.myLevel} / {t.max_poziom}</div>
@@ -803,7 +810,7 @@ export function SkillsScreen({ postac, onClose, onRefresh }) {
                   width: 40, height: 40, borderRadius: 3, fontSize: 22, cursor: can ? 'pointer' : 'default',
                   background: can ? 'linear-gradient(180deg,#5a4520,#2d2210)' : '#0e0c0a',
                   border: `1px solid ${can ? G.gold : '#3a3122'}`, color: can ? G.goldHi : G.dim,
-                }}>{locked ? '🔒' : '+'}</button>
+                }}>{locked ? <IconLock size={13} /> : '+'}</button>
               )}
             </Card>
           );
@@ -818,7 +825,7 @@ export function SkillsScreen({ postac, onClose, onRefresh }) {
 // ZADANIA
 // ══════════════════════════════════════════════════════════════════════════════
 function questMark(q, tab) {
-  if (tab === 'done') return { icon: '✓', bg: '#1d4a26', bd: '#5fd07a', fg: '#c6f5cf' };
+  if (tab === 'done') return { icon: <IconCheck size={13} />, bg: '#1d4a26', bd: '#5fd07a', fg: '#c6f5cf' };
   if (tab === 'avail') return { icon: '!', bg: '#6b5114', bd: G.gold, fg: '#fff3c4' };
   if (q.status === 'ukonczone') return { icon: '?', bg: '#1d6b2c', bd: '#5fd07a', fg: '#fff' };
   if (q.typ === 'kill') return { icon: '!', bg: '#8e1f18', bd: '#e5624c', fg: '#fff' };
@@ -849,7 +856,7 @@ export function QuestsScreen({ onClose, onShowOnMap }) {
   return (
     <Sheet title="Zadania" onClose={onClose} footer={
       <Btn style={{ width: '100%' }} disabled={!place} onClick={() => onShowOnMap({ ...place, label: place.nazwa, quest: selQ.nazwa })}>
-        🧭 Pokaż na mapie
+        <IconCompass size={13} /> Pokaż na mapie
       </Btn>
     }>
       <Tabs value={tab} onChange={(t) => { setTab(t); setSel(null); }} tabs={[
@@ -962,7 +969,7 @@ export function MapScreen({ state, focus, onClose, onWalk, onNpc }) {
             <div style={{ position: 'relative', flex: 1, minHeight: 280, borderRadius: 4, overflow: 'hidden', border: `1px solid ${G.bronze}` }}>
               <canvas ref={ref} onPointerDown={down} onPointerMove={moveP} onPointerUp={up} onPointerCancel={() => { drag.current = null; }}
                 style={{ width: '100%', height: '100%', display: 'block', touchAction: 'none' }} />
-              {ctrl('➤', 'Do mnie', () => { setCenter(null); setZoom(z => Math.max(z, 2.5)); }, { top: 10, right: 10, transform: 'rotate(-45deg)' })}
+              {ctrl(<IconCrosshair size={15} />, 'Do mnie', () => { setCenter(null); setZoom(z => Math.max(z, 2.5)); }, { top: 10, right: 10, transform: 'rotate(-45deg)' })}
               {ctrl('+', 'Przybliż', () => setZoom(z => Math.min(8, z * 1.5)), { top: '50%', right: 10, marginTop: -50 })}
               {ctrl('−', 'Oddal', () => { setZoom(z => { const n = Math.max(1, z / 1.5); if (n === 1) setCenter(null); return n; }); }, { top: '50%', right: 10, marginTop: 4 })}
               <span style={{ position: 'absolute', left: 8, bottom: 8, padding: '3px 8px', borderRadius: 3, background: 'rgba(0,0,0,0.7)', color: G.text, fontSize: 12 }}>
@@ -973,13 +980,13 @@ export function MapScreen({ state, focus, onClose, onWalk, onNpc }) {
               </span>
             </div>
             <Card style={{ display: 'flex', alignItems: 'center', gap: 12, padding: 12, marginTop: 10, flexShrink: 0 }}>
-              <span style={{ fontSize: 26 }}>{mapa.pvp ? '⚔️' : '🏰'}</span>
+              <span style={{ color: G.goldHi, display: 'flex' }}>{mapa.pvp ? <IconSword size={22} /> : <IconCastle size={22} />}</span>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ fontFamily: G.serif, fontSize: 15, color: G.goldHi }}>{mapa.nazwa}</div>
                 <div style={{ fontSize: 12, color: mapa.pvp ? '#ff9b8b' : '#9be8ac' }}>{mapa.pvp ? 'Strefa PvP' : 'Bezpieczna strefa'}</div>
                 {focus && (
                   <div style={{ fontSize: 12, color: G.text, marginTop: 4 }}>
-                    📍 {focus.label}{focusHere ? ` (${focus.x}, ${focus.y})` : ` — ${focus.mapa_nazwa || 'inna mapa'}`}
+                    <IconMapPin size={13} /> {focus.label}{focusHere ? ` (${focus.x}, ${focus.y})` : ` — ${focus.mapa_nazwa || 'inna mapa'}`}
                   </div>
                 )}
               </div>
@@ -993,7 +1000,7 @@ export function MapScreen({ state, focus, onClose, onWalk, onNpc }) {
             {!maps && <div style={{ color: G.dim, textAlign: 'center', padding: 30 }}>Ładowanie…</div>}
             {(maps || []).map(m => (
               <Card key={m.id} active={m.id === mapa.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px' }}>
-                <span>{m.id === mapa.id ? '📍' : '🗺'}</span>
+                <span style={{ display: 'flex', color: G.goldDim }}>{m.id === mapa.id ? <IconMapPin size={13} /> : <IconMap size={13} />}</span>
                 <span style={{ flex: 1, fontFamily: G.serif, fontSize: 14, color: m.id === mapa.id ? G.goldHi : G.text }}>{m.nazwa}</span>
                 {m.id === mapa.id && <span style={{ fontSize: 11, color: G.gold }}>Tu jesteś</span>}
                 {focus?.mapa === m.id && m.id !== mapa.id && <span style={{ fontSize: 11, color: G.gold }}>Cel zadania</span>}
