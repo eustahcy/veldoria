@@ -220,19 +220,21 @@ function Scena({ chars, slots, classes, mapNames, onEnter, onDelete, onCreate, b
       <div style={{
         flex: 1, minWidth: 0, position: 'relative', borderRadius: 16, overflow: 'hidden',
         border: `1px solid ${S.lineSoft}`, background: 'linear-gradient(180deg, rgba(4,7,14,0.25), rgba(4,7,14,0.72))',
-        display: 'flex', alignItems: 'flex-end', justifyContent: 'center', padding: '28px 20px 34px',
+        display: 'flex', alignItems: 'flex-end', justifyContent: 'center', padding: '28px 20px 58px',
       }}>
-        {/* poświata podestu */}
+        {/* kamienny podest ze złotą obręczą */}
         <div style={{
-          position: 'absolute', left: '50%', bottom: 18, transform: 'translateX(-50%)',
-          width: 'min(88%, 620px)', height: 118, borderRadius: '50%',
-          background: 'radial-gradient(ellipse at 50% 50%, rgba(231,193,88,0.22), rgba(231,193,88,0.06) 55%, transparent 72%)',
-          pointerEvents: 'none',
+          position: 'absolute', left: '50%', bottom: 58, transform: 'translateX(-50%)',
+          width: 'min(86%, 600px)', height: 132, borderRadius: '50%', pointerEvents: 'none',
+          background: 'radial-gradient(ellipse at 50% 42%, rgba(46,38,26,0.92), rgba(12,12,16,0.92) 62%, rgba(4,7,14,0) 78%)',
+          border: '1px solid rgba(231,193,88,0.35)',
+          boxShadow: 'inset 0 10px 26px rgba(0,0,0,0.75), 0 0 42px rgba(231,193,88,0.12)',
         }} />
         <div style={{
-          position: 'absolute', left: '50%', bottom: 44, transform: 'translateX(-50%)',
-          width: 'min(80%, 560px)', height: 3,
-          background: 'linear-gradient(90deg, transparent, rgba(231,193,88,0.5), transparent)',
+          position: 'absolute', left: '50%', bottom: 86, transform: 'translateX(-50%)',
+          width: 'min(66%, 430px)', height: 74, borderRadius: '50%', pointerEvents: 'none',
+          border: '1px solid rgba(231,193,88,0.18)',
+          background: 'radial-gradient(ellipse at 50% 50%, rgba(231,193,88,0.16), transparent 70%)',
         }} />
 
         <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'center', gap: 'clamp(10px, 3vw, 44px)', position: 'relative', zIndex: 1, maxWidth: '100%' }}>
