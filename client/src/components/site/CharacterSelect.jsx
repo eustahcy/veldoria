@@ -210,13 +210,13 @@ export default function CharacterSelect({
   );
 
   return (
-    <div style={{ position: 'relative', minHeight: '100vh', color: S.text, fontFamily: S.sans }}>
+    <div className="vh-min" style={{ position: 'relative', color: S.text, fontFamily: S.sans }}>
       <div style={pageBg} />
       <div style={vignette} />
 
       <header style={{
         position: 'relative', zIndex: 3, display: 'flex', alignItems: 'center',
-        padding: narrow ? '14px 14px 0' : '18px 28px 0',
+        padding: narrow ? 'calc(14px + var(--safe-t)) calc(14px + var(--safe-r)) 0 calc(14px + var(--safe-l))' : '18px 28px 0',
       }}>
         <Logo size={narrow ? 18 : 22} sub={narrow ? null : 'ONLINE RPG'} />
         <div style={{ marginLeft: 'auto' }}><OnlineBadge online={stats?.online} /></div>
@@ -224,7 +224,7 @@ export default function CharacterSelect({
 
       <main style={{
         position: 'relative', zIndex: 2, maxWidth: 1360, margin: '0 auto',
-        padding: narrow ? '18px 14px 40px' : '26px 28px 50px',
+        padding: narrow ? '16px 14px calc(34px + var(--safe-b))' : '26px 28px 50px',
       }}>
         <div style={{ textAlign: 'center', marginBottom: 6 }}><Ornament>Wybierz bohatera</Ornament></div>
         <h1 style={{

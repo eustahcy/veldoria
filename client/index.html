@@ -10,6 +10,24 @@
     <style>
       * { margin: 0; padding: 0; box-sizing: border-box; }
 
+      /* Ekran telefonu: wcięcia systemowe (notch, pasek gestu) i pełna wysokość
+         widocznego obszaru. 100vh na iOS liczy ekran razem z paskiem Safari,
+         dlatego wszędzie, gdzie to ważne, dokładamy 100dvh. */
+      :root {
+        --safe-t: env(safe-area-inset-top, 0px);
+        --safe-r: env(safe-area-inset-right, 0px);
+        --safe-b: env(safe-area-inset-bottom, 0px);
+        --safe-l: env(safe-area-inset-left, 0px);
+      }
+
+      .vh-pelny { height: 100vh; height: 100dvh; }
+      .vh-min { min-height: 100vh; min-height: 100dvh; }
+
+      .mobile-scroll {
+        overflow-y: auto; overflow-x: hidden;
+        -webkit-overflow-scrolling: touch; overscroll-behavior: contain;
+      }
+
       /* Gra zajmuje cały ekran i nie daje się „odciągnąć" gestem przewijania
          — na telefonie bez tego mapa skacze przy przesuwaniu palcem. */
       html, body, #root { width: 100%; min-width: 0; height: 100%; min-height: 100%; }
@@ -22,8 +40,16 @@
         -webkit-tap-highlight-color: transparent;
       }
 
-      button, input, textarea { font: inherit; }
-      button { -webkit-tap-highlight-color: transparent; }
+      button, input, textarea, select { font: inherit; }
+      button { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+      input, textarea, select { max-width: 100%; }
+      img { max-width: 100%; }
+
+      /* iOS przybliża stronę, gdy pole ma mniej niż 16 px — dotyczy to formularzy
+         logowania i rejestracji, więc tam wymuszamy 16 px. */
+      @media (max-width: 720px) {
+        input[type="text"], input[type="password"], input[type="email"], textarea, select { font-size: 16px; }
+      }
     </style>
   </head>
   <body>

@@ -93,7 +93,7 @@ export default function AuthScreen({ mode = 'login', stats, onBack, onDone, apiF
   );
 
   return (
-    <div style={{ position: 'relative', minHeight: '100vh', color: S.text, fontFamily: S.sans }}>
+    <div className="vh-min" style={{ position: 'relative', color: S.text, fontFamily: S.sans }}>
       {/* Autouzupełnianie przeglądarki potrafi wstawić białe tło — wymuszamy ciemne */}
       <style>{`
         input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:focus {
@@ -124,7 +124,7 @@ export default function AuthScreen({ mode = 'login', stats, onBack, onDone, apiF
         position: 'relative', zIndex: 2,
         display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 46,
         padding: narrow ? '22px 14px 40px' : '30px 28px 50px',
-        minHeight: 'calc(100vh - 90px)', flexWrap: 'wrap',
+        minHeight: 'calc(100dvh - 90px)', flexWrap: 'wrap',
       }}>
         {/* Karta logowania */}
         <div style={{ ...panel, width: 430, maxWidth: '100%', padding: narrow ? 22 : 30 }}>

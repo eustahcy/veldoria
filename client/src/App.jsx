@@ -20,7 +20,7 @@ function ReconnectScreen({ onReconnect, onLogout }) {
 
   return (
     <div style={{
-      background:'#2A1A08', height:'100vh',
+      background:'#2A1A08',
       display:'flex', flexDirection:'column',
       alignItems:'center', justifyContent:'center',
       gap:16, fontFamily:'Verdana,sans-serif',
@@ -71,7 +71,7 @@ export default function App() {
   }, []);
 
   if (loggedIn === null) return (
-    <div style={{ background:'#2A1A08', height:'100vh', display:'flex', alignItems:'center', justifyContent:'center', color:'#2E5A7A', fontFamily:'Verdana,sans-serif', fontSize:12 }}>
+    <div style={{ background:'#2A1A08', display:'flex', alignItems:'center', justifyContent:'center', color:'#2E5A7A', fontFamily:'Verdana,sans-serif', fontSize:12 }}>
       Łączenie z serwerem...
     </div>
   );

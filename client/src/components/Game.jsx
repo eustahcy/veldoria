@@ -802,7 +802,7 @@ export default function Game({ onLogout, onDisconnect }) {
 
   // ── Loading screen ────────────────────────────────────────────────────────────
   if (!state) return (
-    <div style={{ display:'flex', alignItems:'center', justifyContent:'center', height:'100vh', background:'#2A1A08', flexDirection:'column', gap:16, fontFamily:'"Palatino Linotype",Palatino,serif' }}>
+    <div className="vh-pelny" style={{ display:'flex', alignItems:'center', justifyContent:'center', background:'#2A1A08', flexDirection:'column', gap:16, fontFamily:'"Palatino Linotype",Palatino,serif' }}>
       <div style={{ color:'rgba(200,146,42,0.8)', fontSize:18, letterSpacing:'4px', fontWeight:'bold', textShadow:'0 0 20px rgba(200,146,42,0.4)' }}>VELDORIA</div>
       <div style={{ width:200, height:3, background:'rgba(200,146,42,0.1)', borderRadius:2, overflow:'hidden' }}>
         <div style={{ height:'100%', width:'60%', background:'linear-gradient(90deg, #7A5C1E, #E8B84B)', borderRadius:2, animation:'shimmer 1.4s ease infinite' }} />
@@ -845,7 +845,7 @@ export default function Game({ onLogout, onDisconnect }) {
 
     // ── UKŁAD MOBILNY — mapa na cały ekran + pływający HUD ───────────────────
     return (
-      <div style={{ position:'relative', width:'100vw', height:'100vh', overflow:'hidden', background:'#2A1A08' }}>
+      <div className="vh-pelny" style={{ position:'relative', width:'100vw', overflow:'hidden', background:'#2A1A08' }}>
         {/* Full-screen map */}
         <MapRenderer iso={!!state.mapa?.iso} tiles={tiles}
           state={stateForMap} direction={direction} animStep={animStep}
@@ -1014,7 +1014,7 @@ export default function Game({ onLogout, onDisconnect }) {
   const _innerW = uiScale < 1 ? `${(100 / uiScale).toFixed(2)}vw` : '100vw';
   const _innerH = uiScale < 1 ? `${(100 / uiScale).toFixed(2)}vh` : '100vh';
   return (
-    <div style={{ width:'100vw', height:'100vh', overflow:'hidden', position:'relative', background:'#2A1A08' }}>
+    <div className="vh-pelny" style={{ width:'100vw', overflow:'hidden', position:'relative', background:'#2A1A08' }}>
     <div style={{ display:'flex', flexDirection:'column', width:_innerW, height:_innerH, overflow:'hidden', zoom:_zoom, position:'relative' }}>
 
       {/* Górny pasek — na całą szerokość okna */}

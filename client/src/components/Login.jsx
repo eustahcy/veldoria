@@ -201,7 +201,7 @@ function CreateCharacter({ classes, onBack, onSuccess }) {
   const cls = classes.find(c=>c.name===klasa);
 
   return (
-    <div style={{ minHeight:'100vh', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', padding:`${sm?16:24}px ${sm?12:20}px`, position:'relative', zIndex:1 }}>
+    <div className="vh-min" style={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', padding:`calc(${sm?16:24}px + var(--safe-t)) ${sm?12:20}px calc(${sm?16:24}px + var(--safe-b))`, position:'relative', zIndex:1 }}>
 
       {/* Header */}
       <div style={{ textAlign:'center', marginBottom:sm?16:24 }}>

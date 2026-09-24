@@ -46,14 +46,14 @@ export default function Landing({ stats, classes = [], onPlay, onLogin, onSectio
   const narrow = useNarrow();
 
   return (
-    <div style={{ position: 'relative', minHeight: '100vh', color: S.text, fontFamily: S.sans, overflowX: 'hidden' }}>
+    <div className="vh-min" style={{ position: 'relative', color: S.text, fontFamily: S.sans, overflowX: 'hidden' }}>
       <div style={pageBg} />
       <div style={vignette} />
 
       {/* Pasek górny */}
       <header style={{
         position: 'relative', zIndex: 3, display: 'flex', alignItems: 'center', gap: 18,
-        padding: narrow ? '12px 14px' : '14px 28px',
+        padding: narrow ? 'calc(12px + var(--safe-t)) calc(14px + var(--safe-r)) 12px calc(14px + var(--safe-l))' : '14px 28px',
         borderBottom: `1px solid ${S.lineSoft}`, background: 'rgba(5,8,16,0.72)', backdropFilter: 'blur(8px)',
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -87,9 +87,9 @@ export default function Landing({ stats, classes = [], onPlay, onLogin, onSectio
       {/* Hero */}
       <main style={{
         position: 'relative', zIndex: 2,
-        minHeight: narrow ? 'auto' : 'calc(100vh - 66px)',
+        minHeight: narrow ? 'auto' : 'calc(100dvh - 66px)',
         display: 'flex', flexDirection: 'column', justifyContent: 'center',
-        padding: narrow ? '38px 16px 28px' : '10px 60px 40px',
+        padding: narrow ? '26px 16px 20px' : '10px 60px 40px',
         maxWidth: 1500, margin: '0 auto',
       }}>
         {/* Blok powitalny na środku strony */}
@@ -133,7 +133,7 @@ export default function Landing({ stats, classes = [], onPlay, onLogin, onSectio
 
         {/* Pasek statystyk */}
         <div id="swiat" style={{
-          marginTop: narrow ? 26 : 56, alignSelf: 'center', width: narrow ? '100%' : 'auto', boxSizing: 'border-box',
+          marginTop: narrow ? 18 : 56, alignSelf: 'center', width: narrow ? '100%' : 'auto', boxSizing: 'border-box',
           display: narrow ? 'grid' : 'flex', gridTemplateColumns: narrow ? '1fr 1fr' : undefined,
           flexWrap: 'wrap', justifyContent: 'center', gap: narrow ? 10 : 0,
           padding: narrow ? 14 : '16px 10px', borderRadius: 14,
