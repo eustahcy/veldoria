@@ -191,7 +191,7 @@ function Karuzela({ chars, slots, mapNames, onEnter, onDelete, onCreate, busy, c
       <div
         onTouchStart={zacznij} onTouchEnd={skoncz}
         style={{
-          position: 'relative', height: 236, borderRadius: 16, overflow: 'hidden',
+          position: 'relative', height: 198, borderRadius: 16, overflow: 'hidden',
           border: `1px solid ${S.lineSoft}`, display: 'grid', placeItems: 'center',
           background: 'radial-gradient(ellipse at 50% 92%, rgba(231,193,88,0.18), rgba(4,7,14,0.92) 68%)',
         }}
@@ -216,7 +216,7 @@ function Karuzela({ chars, slots, mapNames, onEnter, onDelete, onCreate, busy, c
               }}>● Online</span>
             )}
             <div style={{
-              width: 32, height: 48, transform: 'scale(3.1)', transformOrigin: 'center',
+              width: 32, height: 48, transform: 'scale(2.7)', transformOrigin: 'center',
               backgroundImage: `url(/assets/${ch.obrazek})`, backgroundPosition: '0 0',
               backgroundRepeat: 'no-repeat', imageRendering: 'pixelated',
               filter: 'drop-shadow(0 10px 14px rgba(0,0,0,0.85))',
@@ -235,7 +235,7 @@ function Karuzela({ chars, slots, mapNames, onEnter, onDelete, onCreate, busy, c
 
       {/* Kropki */}
       {ile > 1 && (
-        <div style={{ display: 'flex', justifyContent: 'center', gap: 7, margin: '10px 0 12px' }}>
+        <div style={{ display: 'flex', justifyContent: 'center', gap: 7, margin: '9px 0 10px' }}>
           {strony.map((st, i) => (
             <button key={i} onClick={() => { setConfirm(false); setIdx(i); }}
               aria-label={`Postać ${i + 1}`}
