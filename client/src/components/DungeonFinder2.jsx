@@ -1,13 +1,17 @@
 import { useState, useEffect, useCallback } from 'react';
+import {
+  IconCastle, IconSparkles, IconFlame, IconSnowflake, IconSettings, IconSword,
+  IconMoon, IconSkull, IconLock, IconUsers, IconCoin, IconScroll,
+} from '../Icons';
 import { api } from '../api';
 
 const SERIF = '"Palatino Linotype",Palatino,serif';
 
-const TYP_ICON = { loch:'🏰', ruiny:'🔮', wulkan:'🌋', mrozny:'❄', podziemia:'⚙' };
+const TYP_ICON = { loch:<IconCastle size={13} />, ruiny:<IconSparkles size={13} />, wulkan:<IconFlame size={13} />, mrozny:<IconSnowflake size={13} />, podziemia:<IconSettings size={13} /> };
 const TYP_CLR  = { loch:'#e7c158', ruiny:'#A78BFA', wulkan:'#F97316', mrozny:'#60A5FA', podziemia:'#34D399' };
 const DIFF_CLR = { normalny:'#4ADE80', heroiczny:'#F59E0B', legendarny:'#EF4444' };
 const DIFF_ICN = { normalny:'★', heroiczny:'★★', legendarny:'★★★' };
-const MOD_ICN  = { dark_curse:'🌑', blessed:'✨', mutated:'👾', no_potions:'🚫', horde:'💀', golden:'💰' };
+const MOD_ICN  = { dark_curse:<IconMoon size={11} />, blessed:<IconSparkles size={11} />, mutated:<IconSkull size={11} />, no_potions:<IconLock size={11} />, horde:'', golden:'' };
 
 function fmt(ms) {
   const s=Math.floor(ms/1000), m=Math.floor(s/60), se=s%60;
@@ -22,7 +26,7 @@ function fmtCd(wygasa) {
 // ── Karta dungeonu ────────────────────────────────────────────────────────────
 function DungeonCard({ dung, onEnter, postacPoziom }) {
   const [diff, setDiff] = useState('normalny');
-  const icon  = TYP_ICON[dung.typ]  || '⚔';
+  const icon  = TYP_ICON[dung.typ]  || <IconSword size={13} />;
   const color = TYP_CLR[dung.typ]   || '#e7c158';
   const cd    = dung.cooldowns?.[diff];
   const canEnter = !cd && postacPoziom >= dung.min_poziom;
@@ -93,7 +97,7 @@ function DungeonCard({ dung, onEnter, postacPoziom }) {
           }}>
           {!dung.eligible ? `Wymagany poz. ${dung.min_poziom}`
             : cd ? `⏱ Cooldown: ${fmtCd(cd)}`
-            : '⚔ Wejdź do dungeonu'}
+            : <><IconSword size={12} /> Wejdź do dungeonu</>}
         </button>
       </div>
     </div>
@@ -156,7 +160,7 @@ export default function DungeonFinder2({ onClose, addToast, onTeleport, postac }
           borderBottom:'1px solid rgba(200,146,42,0.22)',
           display:'flex', alignItems:'center', gap:8,
         }}>
-          <span style={{ fontSize:16 }}>⚔</span>
+          <span style={{ display:'flex', color:'#C8940A' }}><IconSword size={15} /></span>
           <span style={{ color:'#E8B84B', fontWeight:'bold', fontSize:13, flex:1, letterSpacing:'1px' }}>
             Dungeony Instancyjne
           </span>
@@ -165,7 +169,7 @@ export default function DungeonFinder2({ onClose, addToast, onTeleport, postac }
 
         {/* Zakładki */}
         <div style={{ display:'flex', borderBottom:'1px solid rgba(200,146,42,0.12)', flexShrink:0 }}>
-          {[['list','📋 Dungeony'],['history','📜 Historia']].map(([key,label]) => (
+          {[['list','Dungeony'],['history','Historia']].map(([key,label]) => (
             <button key={key} onClick={() => setTab(key)} style={{
               flex:1, padding:'7px', fontSize:10, fontFamily:SERIF,
               background: tab===key ? 'rgba(200,146,42,0.08)' : 'transparent',

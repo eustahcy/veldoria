@@ -1,6 +1,13 @@
 // Profil gracza: karta postaci, statystyki, ekwipunek, osiągnięcia, tytuły,
 // PvP, gildia i historia. Oprawa jak reszta gry: kamień, brąz i złoto.
 import { useState, useEffect, useCallback } from 'react';
+import {
+  IconSettings, IconBag, IconTrophy, IconStar, IconSword, IconBanner, IconScroll,
+  IconBox, IconUser, IconCrown, IconShield, IconMapPin, IconHeart, IconZap,
+  IconSparkles, IconCalendar, IconClock, IconTrendingUp, IconSkull, IconAward,
+  IconMuscle, IconBrain, IconBow, IconCrosshair, IconCoin, IconEye, IconMail,
+  IconUsers, IconDagger, IconChat,
+} from '../Icons';
 import { api } from '../api';
 import { hudColors as G } from './hud/GameHud';
 import { rarityOf, typeLabel, fmtNum } from '../ui/kit';
@@ -83,13 +90,13 @@ function Btn({ children, onClick, tone, disabled, style }) {
 }
 
 const TABS = [
-  { id: 'stats', icon: '⚙', label: 'Statystyki' },
-  { id: 'eq', icon: '🎒', label: 'Ekwipunek' },
-  { id: 'ach', icon: '🏆', label: 'Osiągnięcia' },
-  { id: 'titles', icon: '⭐', label: 'Tytuły' },
-  { id: 'pvp', icon: '⚔', label: 'PvP' },
-  { id: 'guild', icon: '⚜', label: 'Gildia' },
-  { id: 'history', icon: '📜', label: 'Historia' },
+  { id: 'stats', icon: <IconSettings size={13} />, label: 'Statystyki' },
+  { id: 'eq', icon: <IconBag size={13} />, label: 'Ekwipunek' },
+  { id: 'ach', icon: <IconTrophy size={13} />, label: 'Osiągnięcia' },
+  { id: 'titles', icon: <IconStar size={13} />, label: 'Tytuły' },
+  { id: 'pvp', icon: <IconSword size={13} />, label: 'PvP' },
+  { id: 'guild', icon: <IconBanner size={13} />, label: 'Gildia' },
+  { id: 'history', icon: <IconScroll size={13} />, label: 'Historia' },
 ];
 
 // ── Lalka postaci z założonym zestawem ───────────────────────────────────────
@@ -119,7 +126,7 @@ function Doll({ profile, narrow }) {
 
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8, color: G.goldHi, fontFamily: G.serif, fontSize: 13.5 }}>
-          <span>🗃</span> Założony zestaw
+          <IconBox size={12} /> Założony zestaw
         </div>
         {eq.length === 0 && <div style={{ color: G.dim, fontSize: 13 }}>Nic nie założono.</div>}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
@@ -238,7 +245,7 @@ export default function PlayerProfile({ postacId, myId, onClose, onSendMessage, 
           display: 'flex', alignItems: 'center', gap: 12, padding: narrow ? '10px 12px' : '14px 20px', flexShrink: 0,
           borderBottom: `1px solid ${G.bronze}`, background: 'linear-gradient(180deg,#1f1a13,#110e0a)',
         }}>
-          <span style={{ fontSize: 22 }}>👤</span>
+          <span style={{ color: '#e7c158', display: 'flex' }}><IconUser size={20} /></span>
           <span style={{ fontFamily: G.serif, fontSize: narrow ? 16 : 20, color: G.goldHi, letterSpacing: 0.5 }}>Profil gracza</span>
           <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13, color: profile.zalogowany ? '#5fd07a' : G.dim }}>
             <span style={{ width: 9, height: 9, borderRadius: '50%', background: profile.zalogowany ? '#5fd07a' : '#4a453c', boxShadow: profile.zalogowany ? '0 0 8px #5fd07a' : 'none' }} />
@@ -275,13 +282,13 @@ export default function PlayerProfile({ postacId, myId, onClose, onSendMessage, 
           <div style={{ minWidth: 190, flex: '1 1 210px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <span style={{ fontFamily: G.serif, fontSize: 26, color: G.goldHi }}>{profile.nazwa}</span>
-              {rankCol && <span title={profile.ranga} style={{ color: rankCol, fontSize: 19 }}>♛</span>}
+              {rankCol && <span title={profile.ranga} style={{ color: rankCol, display: 'inline-flex' }}><IconCrown size={17} /></span>}
               {profile.prestige > 0 && <span style={{ color: '#6fb2ff', fontSize: 14, fontFamily: G.serif }}>P{profile.prestige}</span>}
             </div>
             {profile.gildia_nazwa ? (
               <>
                 <div style={{ color: '#6fb2ff', fontSize: 14, marginTop: 4 }}>[{profile.gildia_tag}] {profile.gildia_nazwa}</div>
-                <div style={{ color: G.muted, fontSize: 13, marginTop: 2 }}>🛡 {GUILD_RANK[profile.gildia_ranga] || profile.gildia_ranga || 'Członek'} gildii</div>
+                <div style={{ color: G.muted, fontSize: 13, marginTop: 2 }}><IconShield size={12} /> {GUILD_RANK[profile.gildia_ranga] || profile.gildia_ranga || 'Członek'} gildii</div>
               </>
             ) : <div style={{ color: G.dim, fontSize: 13, marginTop: 4 }}>Bez gildii</div>}
             {profile.tytul_nazwa && <div style={{ color: '#c79bff', fontSize: 13, marginTop: 4 }}>{profile.tytul_ikona} {profile.tytul_nazwa}</div>}
@@ -294,14 +301,14 @@ export default function PlayerProfile({ postacId, myId, onClose, onSendMessage, 
               }}>{profile.profesja}</span>
             </div>
             <div style={{ color: profile.zalogowany ? '#5fd07a' : G.dim, fontSize: 12.5, marginTop: 6 }}>
-              📍 {profile.mapa_nazwa || 'Nieznana kraina'} {profile.zalogowany ? `(X: ${profile.x}, Y: ${profile.y})` : ''}
+              <IconMapPin size={12} /> {profile.mapa_nazwa || 'Nieznana kraina'} {profile.zalogowany ? `(X: ${profile.x}, Y: ${profile.y})` : ''}
             </div>
           </div>
 
           <div style={{ flex: '2 1 280px', minWidth: 240 }}>
-            {[['❤️', 'HP', hpPct, G.hp, G.hpHi, `${fmtNum(profile.zycie)} / ${fmtNum(profile.zycie_max)}`],
-              ['⚡', 'EN', enPct, G.en, G.enHi, `${profile.energia} / ${profile.energia_max}`],
-              ['✨', 'EXP', exp.pct, G.exp, G.expHi, `${exp.pct.toFixed(2)}%`]].map(([ic, l, pct, from, to, val]) => (
+            {[[<IconHeart size={11} />, 'HP', hpPct, G.hp, G.hpHi, `${fmtNum(profile.zycie)} / ${fmtNum(profile.zycie_max)}`],
+              [<IconZap size={11} />, 'EN', enPct, G.en, G.enHi, `${profile.energia} / ${profile.energia_max}`],
+              [<IconSparkles size={11} />, 'EXP', exp.pct, G.exp, G.expHi, `${exp.pct.toFixed(2)}%`]].map(([ic, l, pct, from, to, val]) => (
               <div key={l} style={{ display: 'flex', alignItems: 'center', gap: 9, marginBottom: 7 }}>
                 <span style={{ width: 18 }}>{ic}</span>
                 <span style={{ width: 30, color: G.muted, fontSize: 12.5 }}>{l}</span>
@@ -318,10 +325,10 @@ export default function PlayerProfile({ postacId, myId, onClose, onSendMessage, 
 
           {!narrow && (
             <div style={{ flex: '1 1 210px', minWidth: 200, borderLeft: `1px solid ${G.bronze}55`, paddingLeft: 18 }}>
-              <Row icon="📅" label="Dołączył" value={fmtDate(profile.data_rejestracji)} />
+              <Row icon={<IconCalendar size={11} />} label="Dołączył" value={fmtDate(profile.data_rejestracji)} />
               <Row icon="⏳" label="Czas gry" value={fmtTime(profile.czas_gry)} />
-              <Row icon="🕒" label="Ostatnio" value={profile.zalogowany ? 'teraz' : fmtDateTime(profile.ostatnie_logowanie)} color={profile.zalogowany ? '#9be8ac' : undefined} />
-              <Row icon="📍" label="Region" value={profile.mapa_nazwa || '—'} />
+              <Row icon={<IconClock size={11} />} label="Ostatnio" value={profile.zalogowany ? 'teraz' : fmtDateTime(profile.ostatnie_logowanie)} color={profile.zalogowany ? '#9be8ac' : undefined} />
+              <Row icon={<IconMapPin size={11} />} label="Region" value={profile.mapa_nazwa || '—'} />
             </div>
           )}
         </div>
@@ -348,33 +355,33 @@ export default function PlayerProfile({ postacId, myId, onClose, onSendMessage, 
           {tab === 'stats' && (
             <div style={{ display: 'grid', gridTemplateColumns: narrow ? '1fr' : '1fr 1fr', gap: 14, alignItems: 'start' }}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 14, minWidth: 0 }}>
-                <Box icon="👤" title="Podstawowe informacje">
+                <Box icon={<IconUser size={13} />} title="Podstawowe informacje">
                   <div style={twoCol}>
-                    <Row icon="📈" label="Poziom" value={profile.poziom} />
-                    <Row icon="⚔" label="Zabójstwa" value={fmtNum(profile.kills)} />
-                    <Row icon="🛡" label="Klasa" value={profile.profesja} />
-                    <Row icon="💀" label="Śmierci" value={fmtNum(profile.deaths)} />
-                    <Row icon="⚜" label="Gildia" value={profile.gildia_nazwa || '—'} />
-                    <Row icon="⚖" label="K/D" value={kd} />
-                    <Row icon="🎖" label="Ranga gildii" value={profile.gildia_nazwa ? (GUILD_RANK[profile.gildia_ranga] || profile.gildia_ranga || 'Członek') : '—'} />
-                    <Row icon="👑" label="Bossy" value={fmtNum(profile.boss_kills)} />
+                    <Row icon={<IconTrendingUp size={11} />} label="Poziom" value={profile.poziom} />
+                    <Row icon={<IconSword size={11} />} label="Zabójstwa" value={fmtNum(profile.kills)} />
+                    <Row icon={<IconShield size={11} />} label="Klasa" value={profile.profesja} />
+                    <Row icon={<IconSkull size={11} />} label="Śmierci" value={fmtNum(profile.deaths)} />
+                    <Row icon={<IconBanner size={11} />} label="Gildia" value={profile.gildia_nazwa || '—'} />
+                    <Row icon={<IconTrendingUp size={11} />} label="K/D" value={kd} />
+                    <Row icon={<IconAward size={11} />} label="Ranga gildii" value={profile.gildia_nazwa ? (GUILD_RANK[profile.gildia_ranga] || profile.gildia_ranga || 'Członek') : '—'} />
+                    <Row icon={<IconCrown size={11} />} label="Bossy" value={fmtNum(profile.boss_kills)} />
                   </div>
                 </Box>
 
-                <Box icon="✨" title="Atrybuty">
+                <Box icon={<IconSparkles size={13} />} title="Atrybuty">
                   <div style={twoCol}>
-                    <Row icon="💪" label="Siła" value={profile.sila ?? '—'} />
-                    <Row icon="🧠" label="Inteligencja" value={profile.intelekt ?? '—'} />
-                    <Row icon="🏹" label="Zręczność" value={profile.zrecznosc ?? '—'} />
-                    <Row icon="🛡" label="Obrona" value={profile.ac ?? '—'} />
-                    <Row icon="❤️" label="Życie" value={fmtNum(profile.zycie_max)} />
-                    <Row icon="⚔" label="Atak" value={`${profile.obrazenia_min ?? 0} - ${profile.obrazenia_max ?? 0}`} />
-                    <Row icon="🎯" label="Celność" value={profile.sa ?? '—'} />
-                    <Row icon="🪙" label="Zarobione" value={fmtNum(profile.zloto_zarobione)} />
+                    <Row icon={<IconMuscle size={11} />} label="Siła" value={profile.sila ?? '—'} />
+                    <Row icon={<IconBrain size={11} />} label="Inteligencja" value={profile.intelekt ?? '—'} />
+                    <Row icon={<IconBow size={11} />} label="Zręczność" value={profile.zrecznosc ?? '—'} />
+                    <Row icon={<IconShield size={11} />} label="Obrona" value={profile.ac ?? '—'} />
+                    <Row icon={<IconHeart size={11} />} label="Życie" value={fmtNum(profile.zycie_max)} />
+                    <Row icon={<IconSword size={11} />} label="Atak" value={`${profile.obrazenia_min ?? 0} - ${profile.obrazenia_max ?? 0}`} />
+                    <Row icon={<IconCrosshair size={11} />} label="Celność" value={profile.sa ?? '—'} />
+                    <Row icon={<IconCoin size={11} />} label="Zarobione" value={fmtNum(profile.zloto_zarobione)} />
                   </div>
                 </Box>
 
-                <Box icon="🏆" title="Osiągnięcia" right={<button onClick={() => setTab('ach')} style={{ background: 'none', border: `1px solid ${G.bronze}`, borderRadius: 3, color: G.goldHi, cursor: 'pointer', padding: '6px 12px', fontFamily: G.serif, fontSize: 12.5 }}>Zobacz wszystkie</button>}>
+                <Box icon={<IconTrophy size={13} />} title="Osiągnięcia" right={<button onClick={() => setTab('ach')} style={{ background: 'none', border: `1px solid ${G.bronze}`, borderRadius: 3, color: G.goldHi, cursor: 'pointer', padding: '6px 12px', fontFamily: G.serif, fontSize: 12.5 }}>Zobacz wszystkie</button>}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8, fontSize: 13.5 }}>
                     <span style={{ color: G.muted }}>Zdobyte osiągnięcia</span>
                     <span style={{ marginLeft: 'auto', fontFamily: G.serif, color: G.text }}>{profile.osiagniecia_count} / {profile.osiagniecia_total}</span>
@@ -385,7 +392,7 @@ export default function PlayerProfile({ postacId, myId, onClose, onSendMessage, 
                   </div>
                 </Box>
 
-                <Box icon="⭐" title="Tytuły" right={isSelf ? <button onClick={() => setTab('titles')} style={{ background: 'none', border: `1px solid ${G.bronze}`, borderRadius: 3, color: G.goldHi, cursor: 'pointer', padding: '6px 12px', fontFamily: G.serif, fontSize: 12.5 }}>Zmień tytuł</button> : null}>
+                <Box icon={<IconStar size={13} />} title="Tytuły" right={isSelf ? <button onClick={() => setTab('titles')} style={{ background: 'none', border: `1px solid ${G.bronze}`, borderRadius: 3, color: G.goldHi, cursor: 'pointer', padding: '6px 12px', fontFamily: G.serif, fontSize: 12.5 }}>Zmień tytuł</button> : null}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 12, fontSize: 13.5 }}>
                     <span style={{ color: G.muted }}>Aktywny tytuł</span>
                     <span style={{
@@ -398,9 +405,9 @@ export default function PlayerProfile({ postacId, myId, onClose, onSendMessage, 
               </div>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: 14, minWidth: 0 }}>
-                <Box icon="👁" title="Wygląd postaci"><Doll profile={profile} narrow={narrow} /></Box>
+                <Box icon={<IconEye size={13} />} title="Wygląd postaci"><Doll profile={profile} narrow={narrow} /></Box>
 
-                <Box icon="📋" title="Informacje dodatkowe">
+                <Box icon={<IconBox size={13} />} title="Informacje dodatkowe">
                   {isSelf ? (
                     <>
                       <textarea value={bio} onChange={e => setBio(e.target.value)} maxLength={300} rows={3}
@@ -425,9 +432,9 @@ export default function PlayerProfile({ postacId, myId, onClose, onSendMessage, 
                 {!isSelf && (
                   <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
                     <Btn tone="green" onClick={addFriend}>+ Dodaj do znajomych</Btn>
-                    <Btn tone="blue" onClick={() => onSendMessage?.({ toId: postacId, toName: profile.nazwa })}>✉ Wyślij wiadomość</Btn>
-                    {!!profile.zalogowany && <Btn tone="red" onClick={() => { onChallengePvp?.(postacId); onClose(); }}>⚔ Wyzwij na pojedynek</Btn>}
-                    {!!profile.zalogowany && <Btn onClick={() => { onTradeRequest?.(postacId); onClose(); }}>🤝 Handluj</Btn>}
+                    <Btn tone="blue" onClick={() => onSendMessage?.({ toId: postacId, toName: profile.nazwa })}><IconMail size={12} /> Wyślij wiadomość</Btn>
+                    {!!profile.zalogowany && <Btn tone="red" onClick={() => { onChallengePvp?.(postacId); onClose(); }}><IconSword size={12} /> Wyzwij na pojedynek</Btn>}
+                    {!!profile.zalogowany && <Btn onClick={() => { onTradeRequest?.(postacId); onClose(); }}><IconUsers size={12} /> Handluj</Btn>}
                   </div>
                 )}
               </div>
@@ -435,16 +442,16 @@ export default function PlayerProfile({ postacId, myId, onClose, onSendMessage, 
           )}
 
           {tab === 'eq' && (
-            <Box icon="🎒" title="Założony ekwipunek"><Doll profile={profile} narrow={narrow} /></Box>
+            <Box icon={<IconBag size={13} />} title="Założony ekwipunek"><Doll profile={profile} narrow={narrow} /></Box>
           )}
 
           {tab === 'ach' && (
-            <Box icon="🏆" title={`Osiągnięcia (${profile.osiagniecia_count} / ${profile.osiagniecia_total})`}>
+            <Box icon={<IconTrophy size={13} />} title={`Osiągnięcia (${profile.osiagniecia_count} / ${profile.osiagniecia_total})`}>
               {(profile.osiagniecia || []).length === 0 && <div style={{ color: G.dim, fontSize: 13.5 }}>Brak zdobytych osiągnięć.</div>}
               <div style={{ display: 'grid', gridTemplateColumns: narrow ? '1fr' : '1fr 1fr', gap: 8 }}>
                 {(profile.osiagniecia || []).map((o, i) => (
                   <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '9px 11px', borderRadius: 3, background: 'rgba(0,0,0,0.3)', border: `1px solid ${G.bronze}66` }}>
-                    <span style={{ fontSize: 22 }}>{o.ikona || '🏆'}</span>
+                    <span style={{ fontSize: 22 }}>{o.ikona || <IconTrophy size={18} />}</span>
                     <div style={{ minWidth: 0 }}>
                       <div style={{ color: G.goldHi, fontFamily: G.serif, fontSize: 14 }}>{o.nazwa}</div>
                       <div style={{ color: G.muted, fontSize: 12.5 }}>{o.opis}</div>
@@ -457,7 +464,7 @@ export default function PlayerProfile({ postacId, myId, onClose, onSendMessage, 
           )}
 
           {tab === 'titles' && (
-            <Box icon="⭐" title={`Tytuły (${profile.tytuly_count} / ${profile.tytuly_total})`}>
+            <Box icon={<IconStar size={13} />} title={`Tytuły (${profile.tytuly_count} / ${profile.tytuly_total})`}>
               {(profile.tytuly || []).length === 0 && <div style={{ color: G.dim, fontSize: 13.5 }}>Brak zdobytych tytułów.</div>}
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                 {(profile.tytuly || []).map(t => {
@@ -467,7 +474,7 @@ export default function PlayerProfile({ postacId, myId, onClose, onSendMessage, 
                       display: 'flex', alignItems: 'center', gap: 12, padding: '10px 12px', borderRadius: 3,
                       background: active ? 'rgba(199,155,234,0.08)' : 'rgba(0,0,0,0.3)', border: `1px solid ${active ? '#7c5bb0' : G.bronze + '66'}`,
                     }}>
-                      <span style={{ fontSize: 20 }}>{t.ikona || '⭐'}</span>
+                      <span style={{ fontSize: 20 }}>{t.ikona || <IconStar size={16} />}</span>
                       <div style={{ minWidth: 0 }}>
                         <div style={{ color: active ? '#c79bff' : G.text, fontFamily: G.serif, fontSize: 14 }}>{t.nazwa}</div>
                         {t.opis && <div style={{ color: G.muted, fontSize: 12.5 }}>{t.opis}</div>}
@@ -487,13 +494,13 @@ export default function PlayerProfile({ postacId, myId, onClose, onSendMessage, 
           )}
 
           {tab === 'pvp' && (
-            <Box icon="⚔" title="Statystyki walki">
+            <Box icon={<IconSword size={13} />} title="Statystyki walki">
               <div style={twoCol}>
-                <Row icon="⚔" label="Zabójstwa" value={fmtNum(profile.kills)} color="#ff9b8b" />
-                <Row icon="👑" label="Pokonane bossy" value={fmtNum(profile.boss_kills)} />
-                <Row icon="💀" label="Śmierci" value={fmtNum(profile.deaths)} />
-                <Row icon="🗡" label="Tryb PvP" value={profile.pvp ? 'Włączony' : 'Wyłączony'} color={profile.pvp ? '#ff9b8b' : G.muted} />
-                <Row icon="⚖" label="Stosunek K/D" value={kd} color="#f7e3a4" />
+                <Row icon={<IconSword size={11} />} label="Zabójstwa" value={fmtNum(profile.kills)} color="#ff9b8b" />
+                <Row icon={<IconCrown size={11} />} label="Pokonane bossy" value={fmtNum(profile.boss_kills)} />
+                <Row icon={<IconSkull size={11} />} label="Śmierci" value={fmtNum(profile.deaths)} />
+                <Row icon={<IconDagger size={11} />} label="Tryb PvP" value={profile.pvp ? 'Włączony' : 'Wyłączony'} color={profile.pvp ? '#ff9b8b' : G.muted} />
+                <Row icon={<IconTrendingUp size={11} />} label="Stosunek K/D" value={kd} color="#f7e3a4" />
                 <Row icon="✦" label="Prestiż" value={`P${profile.prestige} (+${profile.prestige_bonus_pct}%)`} color="#6fb2ff" />
               </div>
               <div style={{ marginTop: 12, color: G.dim, fontSize: 12.5 }}>
@@ -503,13 +510,13 @@ export default function PlayerProfile({ postacId, myId, onClose, onSendMessage, 
           )}
 
           {tab === 'guild' && (
-            <Box icon="⚜" title="Gildia">
+            <Box icon={<IconBanner size={13} />} title="Gildia">
               {profile.gildia_nazwa ? (
                 <div style={twoCol}>
-                  <Row icon="⚜" label="Nazwa" value={profile.gildia_nazwa} />
-                  <Row icon="🎖" label="Ranga" value={GUILD_RANK[profile.gildia_ranga] || profile.gildia_ranga || 'Członek'} />
-                  <Row icon="🏷" label="Tag" value={`[${profile.gildia_tag}]`} color="#6fb2ff" />
-                  <Row icon="📅" label="Od" value={fmtDate(profile.gildia_od)} />
+                  <Row icon={<IconBanner size={11} />} label="Nazwa" value={profile.gildia_nazwa} />
+                  <Row icon={<IconAward size={11} />} label="Ranga" value={GUILD_RANK[profile.gildia_ranga] || profile.gildia_ranga || 'Członek'} />
+                  <Row icon={<IconBanner size={11} />} label="Tag" value={`[${profile.gildia_tag}]`} color="#6fb2ff" />
+                  <Row icon={<IconCalendar size={11} />} label="Od" value={fmtDate(profile.gildia_od)} />
                 </div>
               ) : <div style={{ color: G.dim, fontSize: 13.5 }}>Ten gracz nie należy do żadnej gildii.</div>}
             </Box>
@@ -517,7 +524,7 @@ export default function PlayerProfile({ postacId, myId, onClose, onSendMessage, 
 
           {tab === 'history' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-              <Box icon="📜" title="Ukończone zadania">
+              <Box icon={<IconScroll size={13} />} title="Ukończone zadania">
                 {(profile.historia || []).length === 0 && <div style={{ color: G.dim, fontSize: 13.5 }}>Brak ukończonych zadań.</div>}
                 {(profile.historia || []).map((h, i) => (
                   <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '7px 0', borderBottom: `1px solid ${G.bronze}33`, fontSize: 13.5 }}>
@@ -528,7 +535,7 @@ export default function PlayerProfile({ postacId, myId, onClose, onSendMessage, 
                 ))}
               </Box>
 
-              <Box icon="💬" title="Komentarze">
+              <Box icon={<IconChat size={13} />} title="Komentarze">
                 {!isSelf && (
                   <div style={{ display: 'flex', gap: 8, marginBottom: 10 }}>
                     <input value={comment} onChange={e => setComment(e.target.value)} onKeyDown={e => e.key === 'Enter' && sendComment()}
@@ -559,8 +566,8 @@ export default function PlayerProfile({ postacId, myId, onClose, onSendMessage, 
         {!isSelf && (narrow || tab !== 'stats') && (
           <div style={{ display: 'flex', gap: 8, padding: '10px 12px', borderTop: `1px solid ${G.bronze}88`, background: '#0d0b08', flexWrap: 'wrap', flexShrink: 0 }}>
             <Btn tone="green" onClick={addFriend}>+ Znajomi</Btn>
-            <Btn tone="blue" onClick={() => onSendMessage?.({ toId: postacId, toName: profile.nazwa })}>✉ Wiadomość</Btn>
-            {!!profile.zalogowany && <Btn tone="red" onClick={() => { onChallengePvp?.(postacId); onClose(); }}>⚔ PvP</Btn>}
+            <Btn tone="blue" onClick={() => onSendMessage?.({ toId: postacId, toName: profile.nazwa })}><IconMail size={12} /> Wiadomość</Btn>
+            {!!profile.zalogowany && <Btn tone="red" onClick={() => { onChallengePvp?.(postacId); onClose(); }}><IconSword size={12} /> PvP</Btn>}
           </div>
         )}
       </div>

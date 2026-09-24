@@ -598,3 +598,34 @@ export function IconHome({ size }) {
     </Svg>
   );
 }
+export function IconFlame({ size }) {
+  return (
+    <Svg size={size}>
+      <path d="M12 3s5 4.5 5 9a5 5 0 11-10 0c0-2 1-3.5 2-4.5.3 1.5 1 2.5 2 2.5 1.5 0 1.5-4 1-7z" />
+    </Svg>
+  );
+}
+export function IconSnowflake({ size }) {
+  return (
+    <Svg size={size}>
+      <path d="M12 2v20M4 6l16 12M20 6L4 18" />
+      <path d="M9 4l3 2 3-2M9 20l3-2 3 2" />
+    </Svg>
+  );
+}
+export function IconMute({ size }) {
+  return (
+    <Svg size={size}>
+      <path d="M4 10v4h3l4 3V7L7 10H4z" />
+      <line x1="15" y1="9" x2="21" y2="15" />
+      <line x1="21" y1="9" x2="15" y2="15" />
+    </Svg>
+  );
+}
+export function IconBurst({ size }) {
+  return (
+    <Svg size={size}>
+      <path d="M12 2l2.2 5.3L20 6l-3 4.6L21 14l-5.6.7L14 21l-3.4-4.2L6 19l1.2-5.4L3 10l5.6-1L12 2z" />
+    </Svg>
+  );
+}

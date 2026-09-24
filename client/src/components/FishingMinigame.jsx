@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { IconFish, IconCoin, IconLock, IconStar, IconMuscle, IconCheck, IconBox, IconX } from '../Icons';
 import { api } from '../api';
 
 // ── Design tokens ─────────────────────────────────────────────────────────────
@@ -70,7 +71,7 @@ function Bobber({ bite }) {
         fontSize: 38, display: 'inline-block',
         animation: bite ? 'fm-shake .25s ease-in-out infinite' : 'fm-bob 1.6s ease-in-out infinite',
         filter: bite ? 'drop-shadow(0 0 8px #3DD68C)' : 'none',
-      }}>🪝</span>
+      }}><IconFish size={16} /></span>
       {!bite && [0, 0.55, 1.1].map(d => (
         <div key={d} style={{
           position: 'absolute', bottom: -4, left: '50%', transform: 'translateX(-50%)',
@@ -101,7 +102,7 @@ function TensionMeter({ tension, tensionMax, fishHp, fishHpMax }) {
         <div style={{ height: 12, background: 'rgba(0,0,0,0.5)', borderRadius: 6, overflow: 'hidden', border: `1px solid ${T.border}` }}>
           <div style={{ height: '100%', width: `${tPct}%`, background: `linear-gradient(90deg,${T.green},${tColor})`, transition: 'width .1s', boxShadow: `0 0 8px ${tColor}99` }} />
         </div>
-        {tPct > 85 && <div style={{ color: T.red, fontSize: 8, marginTop: 2, animation: 'fm-pulse .5s ease-in-out infinite' }}>⚠ Żyłka prawie pęka! Odpuść!</div>}
+        {tPct > 85 && <div style={{ color: T.red, fontSize: 8, marginTop: 2, animation: 'fm-pulse .5s ease-in-out infinite' }}>Żyłka prawie pęka! Odpuść!</div>}
       </div>
       <div>
         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 3 }}>
@@ -152,8 +153,8 @@ function EquipTab({ equip, onBuy, msg }) {
                   {r.cena}g
                 </Btn>
               )}
-              {owned && <span style={{ color: T.green, fontSize: 9 }}>✔ Posiadasz</span>}
-              {locked && <span style={{ color: T.dim, fontSize: 9 }}>🔒 Poz. {r.minLvl}</span>}
+              {owned && <span style={{ color: T.green, fontSize: 9 }}><IconCheck size={10} /> Posiadasz</span>}
+              {locked && <span style={{ color: T.dim, fontSize: 9 }}><IconLock size={10} /> Poz. {r.minLvl}</span>}
             </div>
           </Panel>
         );
@@ -358,7 +359,7 @@ export default function FishingMinigame({ onClose, postac }) {
       {/* ── Header ── */}
       <div style={{ padding: '9px 14px', borderBottom: `1px solid ${T.border}`, background: 'rgba(3,8,18,0.9)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
-          <span style={{ fontSize: 15 }}>🎣</span>
+          <span style={{ color: '#C8940A', display: 'flex' }}><IconFish size={15} /></span>
           <span style={{ color: T.gold, fontSize: 11, fontWeight: 700 }}>Wędkarstwo</span>
           {stats && <span style={{ color: T.muted, fontSize: 8 }}>Złapanych: <b style={{ color: T.blue }}>{stats.ryby_zlapane || 0}</b></span>}
           {stats?.zloty_haczyk ? <span style={{ color: T.gold, fontSize: 8 }}>✦</span> : null}
@@ -368,7 +369,7 @@ export default function FishingMinigame({ onClose, postac }) {
 
       {/* ── Tabs ── */}
       <div style={{ display: 'flex', borderBottom: `1px solid ${T.border}`, flexShrink: 0 }}>
-        {[['catch','🎣 Łowienie'], ['equip','🎽 Wędka'], ['hist','📋 Statystyki']].map(([k, l]) => (
+        {[['catch','Łowienie'], ['equip','Wędka'], ['hist','Statystyki']].map(([k, l]) => (
           <button key={k} onClick={() => setTab(k)} style={{
             flex: 1, padding: '6px 0', fontSize: 8, fontWeight: 700, fontFamily: FF,
             background: tab === k ? 'rgba(90,168,248,0.1)' : 'transparent',
@@ -398,8 +399,8 @@ export default function FishingMinigame({ onClose, postac }) {
                   </div>
                 )}
                 <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: 'center' }}>
-                  <Btn onClick={doCast} variant="gold" style={{ fontSize: 11, padding: '9px 22px' }}>🎣 Zarzuć</Btn>
-                  {stats?.bagFish > 0 && <Btn onClick={doSell} variant="green">💰 Sprzedaj ryby</Btn>}
+                  <Btn onClick={doCast} variant="gold" style={{ fontSize: 11, padding: '9px 22px' }}><IconFish size={12} /> Zarzuć</Btn>
+                  {stats?.bagFish > 0 && <Btn onClick={doSell} variant="green"><IconCoin size={12} /> Sprzedaj ryby</Btn>}
                 </div>
               </div>
             )}
@@ -407,7 +408,7 @@ export default function FishingMinigame({ onClose, postac }) {
             {/* CASTING */}
             {phase === 'casting' && (
               <div style={{ textAlign: 'center', padding: 20 }}>
-                <div style={{ fontSize: 32, marginBottom: 8 }}>🎣</div>
+                <div style={{ marginBottom: 8, display: 'flex', justifyContent: 'center', color: '#C8940A' }}><IconFish size={28} /></div>
                 <div style={{ color: T.goldDim, fontSize: 10 }}>Zarzucam...</div>
               </div>
             )}
@@ -430,7 +431,7 @@ export default function FishingMinigame({ onClose, postac }) {
                 <Bobber bite={true} />
                 <div style={{ color: T.green, fontSize: 15, fontWeight: 700, animation: 'fm-pulse .4s ease-in-out infinite' }}>⬆ BRANIE!</div>
                 <Btn onClick={doHook} variant="green" style={{ fontSize: 13, padding: '12px 40px', width: '100%' }} disabled={busy}>
-                  🎣 HOLUJ!
+                  <IconFish size={14} /> HOLUJ!
                 </Btn>
                 <div style={{ color: T.muted, fontSize: 8 }}>Kliknij natychmiast!</div>
               </div>
@@ -440,7 +441,7 @@ export default function FishingMinigame({ onClose, postac }) {
             {phase === 'fighting' && fight && (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                 <div style={{ textAlign: 'center' }}>
-                  <span style={{ fontSize: 28 }}>🐟</span>
+                  <span style={{ color: '#6fb2ff', display: 'flex' }}><IconFish size={26} /></span>
                   <div style={{ color: RARITYC[fishRar] || T.muted, fontSize: 11, fontWeight: 700 }}>
                     {fight.fish?.nazwa}
                   </div>
@@ -452,10 +453,10 @@ export default function FishingMinigame({ onClose, postac }) {
                 />
                 <div style={{ display: 'flex', gap: 8 }}>
                   <Btn onClick={doReel} variant="blue" style={{ flex: 2, fontSize: 11, padding: '10px 0' }}>
-                    💪 HOLUJ
+                    <IconMuscle size={14} /> HOLUJ
                   </Btn>
                   <Btn onClick={doRelax} variant="ghost" style={{ flex: 1, fontSize: 10, padding: '10px 0' }}>
-                    😮‍💨 Odpuść
+                    Odpuść
                   </Btn>
                 </div>
                 <div style={{ color: T.dim, fontSize: 8, textAlign: 'center' }}>
@@ -470,24 +471,24 @@ export default function FishingMinigame({ onClose, postac }) {
                 {result.ok && result.fish ? (
                   <>
                     <div>
-                      <span style={{ fontSize: 42 }}>🐟</span>
+                      <span style={{ color: '#6fb2ff', display: 'flex' }}><IconFish size={38} /></span>
                       <div style={{ color: RARITYC[resRar] || T.muted, fontSize: 14, fontWeight: 700, marginTop: 6 }}>{result.fish.nazwa}</div>
                       <div style={{ color: RARITYC[resRar] || T.muted, fontSize: 9 }}>{RARITYL[resRar] || ''} · {result.fish.wartosc}g</div>
                     </div>
-                    {result.lvlUp && <div style={{ color: T.gold, fontSize: 10, fontWeight: 700 }}>⭐ Poziom wędkarski {result.newFishingLvl}!</div>}
+                    {result.lvlUp && <div style={{ color: T.gold, fontSize: 10, fontWeight: 700 }}><IconStar size={10} /> Poziom wędkarski {result.newFishingLvl}!</div>}
                     {result.bonus && <div style={{ color: T.purple, fontSize: 10 }}>{result.bonus.label} +{result.bonus.gold}g</div>}
                     {result.soldMsg && <div style={{ color: T.green, fontSize: 9 }}>{result.soldMsg}</div>}
                   </>
                 ) : (
                   <>
-                    <span style={{ fontSize: 36 }}>😞</span>
+                    <span style={{ color: '#9a9182', display: 'flex' }}><IconX size={30} /></span>
                     <div style={{ color: T.red, fontSize: 11, fontWeight: 700 }}>{result.msg}</div>
                     {result.soldMsg && <div style={{ color: T.green, fontSize: 9 }}>{result.soldMsg}</div>}
                   </>
                 )}
                 <div style={{ display: 'flex', gap: 8, justifyContent: 'center', marginTop: 4 }}>
-                  <Btn onClick={doCast} variant="gold">🎣 Ponów</Btn>
-                  {stats?.bagFish > 0 && <Btn onClick={doSell} variant="green" style={{ fontSize: 9 }}>💰 Sprzedaj</Btn>}
+                  <Btn onClick={doCast} variant="gold"><IconFish size={12} /> Ponów</Btn>
+                  {stats?.bagFish > 0 && <Btn onClick={doSell} variant="green" style={{ fontSize: 9 }}><IconCoin size={11} /> Sprzedaj</Btn>}
                 </div>
               </div>
             )}

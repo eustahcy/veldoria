@@ -1,9 +1,13 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
+import {
+  IconCastle, IconSparkles, IconFlame, IconSnowflake, IconSettings, IconSword,
+  IconSkull, IconGem, IconTrophy, IconStar, IconLogout,
+} from '../Icons';
 import { api } from '../api';
 
 const SERIF = '"Palatino Linotype",Palatino,serif';
-const TYP_ICON  = { loch:'🏰', ruiny:'🔮', wulkan:'🌋', mrozny:'❄', podziemia:'⚙' };
-const FLOOR_ICON = { arena:'⚔', elite:'👹', boss:'💀', treasure:'💎', shrine:'✦' };
+const TYP_ICON  = { loch:<IconCastle size={12} />, ruiny:<IconSparkles size={12} />, wulkan:<IconFlame size={12} />, mrozny:<IconSnowflake size={12} />, podziemia:<IconSettings size={12} /> };
+const FLOOR_ICON = { arena:<IconSword size={12} />, elite:<IconSkull size={12} />, boss:<IconSkull size={12} />, treasure:<IconGem size={12} />, shrine:<IconSparkles size={12} /> };
 const FLOOR_CLR  = { arena:'#C8940A', elite:'#F87171', boss:'#EF4444', treasure:'#FFD700', shrine:'#4ADE80' };
 const MOD_CLR    = { dark_curse:'#6B7280', blessed:'#4ADE80', mutated:'#F97316', no_potions:'#EF4444', horde:'#F87171', golden:'#FFD700' };
 const DIFF_CLR   = { normalny:'#4ADE80', heroiczny:'#F59E0B', legendarny:'#EF4444' };
@@ -23,7 +27,7 @@ function BossBar({ bossHp, bossMaxHp, bossFaza, nazwa }) {
   return (
     <div style={{ marginBottom:8 }}>
       <div style={{ display:'flex', justifyContent:'space-between', fontSize:8, marginBottom:2 }}>
-        <span style={{ color:'#F87171', fontWeight:'bold' }}>💀 {nazwa}</span>
+        <span style={{ color:'#F87171', fontWeight:'bold' }}><IconSkull size={12} /> {nazwa}</span>
         <span style={{ color:'#E8B84B' }}>Faza {bossFaza} · {Math.round(pct*100)}%</span>
       </div>
       <div style={{ height:12, background:'rgba(60,10,10,0.8)', borderRadius:6, overflow:'hidden', border:'1px solid rgba(200,50,50,0.4)', position:'relative' }}>
@@ -67,7 +71,7 @@ function CompleteScreen({ result, onClose }) {
           borderBottom:`1px solid ${RATING_CLR[rating]||'#C8940A'}33`,
         }}>
           <div style={{ fontSize:64, lineHeight:1, marginBottom:4, filter:`drop-shadow(0 0 20px ${RATING_CLR[rating]})` }}>
-            {rating==='S'?'🏆':rating==='A'?'⭐':rating==='B'?'✦':'◇'}
+            {rating==='S'?<IconTrophy size={16} />:rating==='A'?<IconStar size={16} />:rating==='B'?'✦':'◇'}
           </div>
           <div style={{ fontSize:28, fontWeight:'bold', color:RATING_CLR[rating], letterSpacing:4 }}>{rating}</div>
           <div style={{ fontSize:10, color:'rgba(200,150,32,0.5)', marginTop:2 }}>{score} pkt</div>
@@ -79,9 +83,9 @@ function CompleteScreen({ result, onClose }) {
           <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8 }}>
             {[
               { label:'⏱ Czas', value:`${m}:${s.toString().padStart(2,'0')}`, color:'#CDD4AA' },
-              { label:'💀 Zgony', value:zgony, color:zgony===0?'#4ADE80':'#F87171' },
-              { label:'📋 Cele', value:`${cele?.length||0}`, color:'#C8940A' },
-              { label:'🏅 Wynik', value:`${score}/100`, color:RATING_CLR[rating] },
+              { label:'Zgony', value:zgony, color:zgony===0?'#4ADE80':'#F87171' },
+              { label:'Cele', value:`${cele?.length||0}`, color:'#C8940A' },
+              { label:'Wynik', value:`${score}/100`, color:RATING_CLR[rating] },
             ].map(({label,value,color}) => (
               <div key={label} style={{
                 background:'rgba(0,0,0,0.3)', border:'1px solid rgba(200,150,32,0.1)',
@@ -230,7 +234,7 @@ export default function DungeonHUD({ addToast, onLeave }) {
         borderBottom:`1px solid ${dungColor}22`,
         display:'flex', alignItems:'center', gap:6,
       }}>
-        <span style={{ fontSize:12 }}>{TYP_ICON[sesja.dungeonTyp]||'⚔'}</span>
+        <span style={{ fontSize:12 }}>{TYP_ICON[sesja.dungeonTyp]||<IconSword size={12} />}</span>
         <span style={{ color:'#E8B84B', fontSize:9, fontWeight:'bold', flex:1, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
           {sesja.dungeonNazwa}
         </span>
@@ -258,7 +262,7 @@ export default function DungeonHUD({ addToast, onLeave }) {
           <div>
             <div style={{ display:'flex', justifyContent:'space-between', fontSize:8, marginBottom:3 }}>
               <span style={{ color:floorClr, fontWeight:'bold' }}>
-                {FLOOR_ICON[sesja.floorTyp]||'⚔'} Piętro {sesja.currentFloor}/{sesja.totalFloors}
+                {FLOOR_ICON[sesja.floorTyp]||<IconSword size={12} />} Piętro {sesja.currentFloor}/{sesja.totalFloors}
               </span>
               <span style={{ color:'rgba(200,150,32,0.45)' }}>{sesja.floorNazwa}</span>
             </div>
@@ -295,7 +299,7 @@ export default function DungeonHUD({ addToast, onLeave }) {
               </span>
             </div>
           ) : sesja.floorTyp === 'treasure' ? (
-            <div style={{ color:'#FFD700', fontSize:9, textAlign:'center' }}>💎 Skarbiec {sesja.chestClaimed?'✓ Odebrano':'— otwórz skrzynię!'}</div>
+            <div style={{ color:'#FFD700', fontSize:9, textAlign:'center' }}><IconGem size={10} /> Skarbiec {sesja.chestClaimed?'✓ Odebrano':'— otwórz skrzynię!'}</div>
           ) : sesja.floorTyp === 'shrine' ? (
             <div style={{ color:'#4ADE80', fontSize:9, textAlign:'center' }}>✦ Kaplica — HP/EN przywrócone</div>
           ) : null}
@@ -330,7 +334,7 @@ export default function DungeonHUD({ addToast, onLeave }) {
                 padding:'6px', background:'rgba(255,215,0,0.15)', color:'#FFD700',
                 border:'1px solid rgba(255,215,0,0.4)', borderRadius:5,
                 cursor:claimingChest?'not-allowed':'pointer', fontSize:10, fontFamily:SERIF, fontWeight:'bold',
-              }}>💎 Otwórz skrzynię</button>
+              }}><IconGem size={12} /> Otwórz skrzynię</button>
             )}
 
             {/* Następne piętro */}
@@ -349,7 +353,7 @@ export default function DungeonHUD({ addToast, onLeave }) {
                 border:'1px solid rgba(255,215,0,0.4)', borderRadius:5,
                 cursor:completing?'not-allowed':'pointer', fontSize:10, fontFamily:SERIF, fontWeight:'bold',
                 animation:'furiaPulse 0.8s ease infinite',
-              }}>🏆 {completing?'Obliczam nagrody...':'Ukończ dungeon!'}</button>
+              }}><IconTrophy size={12} /> {completing?'Obliczam nagrody...':'Ukończ dungeon!'}</button>
             )}
           </div>
         </div>
@@ -362,7 +366,7 @@ export default function DungeonHUD({ addToast, onLeave }) {
         border:'none', borderTop:`1px solid rgba(180,30,30,0.3)`,
         cursor:'pointer', fontSize:9, fontFamily:SERIF,
         WebkitTapHighlightColor:'transparent',
-      }}>🚪 Opuść dungeon</button>
+      }}><IconLogout size={12} /> Opuść dungeon</button>
 
       <style>{`@keyframes furiaPulse{0%,100%{opacity:1}50%{opacity:0.55}}`}</style>
     </div>

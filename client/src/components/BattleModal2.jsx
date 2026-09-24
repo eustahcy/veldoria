@@ -1,4 +1,8 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import {
+  IconHeart, IconZap, IconFlame, IconBurst, IconMute, IconDagger, IconShield,
+  IconFlask, IconRun, IconSword, IconGift,
+} from '../Icons';
 import { api } from '../api';
 
 // ── Kolory i style logów ──────────────────────────────────────────────────────
@@ -18,8 +22,8 @@ const LOG_CFG = {
   debuff:       { c: '#F87171', i: '▼' },
   dot:          { c: '#FB923C', i: '◆' },
   skill_use:    { c: '#A5B4FC', i: '✦' },
-  berserk:      { c: '#FF4500', i: '💥' },
-  initiative:   { c: '#FCD34D', i: '⚡' },
+  berserk:      { c: '#FF4500', i: <IconBurst size={11} /> },
+  initiative:   { c: '#FCD34D', i: <IconZap size={11} /> },
   start:        { c: '#C8940A', i: '►' },
 };
 
@@ -36,7 +40,7 @@ function fmtLog(e) {
     case 'defend':    text = `Postawa obronna`; break;
     case 'dot':       text = e.text || `DOT: −${e.dmg} HP`; break;
     case 'skill_use': text = `${e.actor} → ${e.skill} ${e.icon || ''}`; break;
-    case 'berserk':   text = `💥 BERSERK! Następny atak × ${e.mult || 2}`; break;
+    case 'berserk':   text = `BERSERK! Następny atak × ${e.mult || 2}`; break;
     case 'initiative': text = e.text; break;
     case 'mob_dead':  text = `${e.mob} poległ! +${e.exp} EXP`; break;
     case 'hero_dead': text = `Zginąłeś! Respawn...`; break;
@@ -50,22 +54,22 @@ function fmtLog(e) {
 // ── Metadane efektów ─────────────────────────────────────────────────────────
 const EFFECT_META = {
   shield_flat:  { label: 'Tarcza',    color: '#C8940A', icon: '▣' },
-  regen:        { label: 'Regen',     color: '#4ADE80', icon: '❤' },
-  haste:        { label: 'Pośpiech',  color: '#FDE047', icon: '⚡' },
-  fury_boost:   { label: 'Furia×2',  color: '#F97316', icon: '🔥' },
+  regen:        { label: 'Regen',     color: '#4ADE80', icon: <IconHeart size={11} /> },
+  haste:        { label: 'Pośpiech',  color: '#FDE047', icon: <IconZap size={11} /> },
+  fury_boost:   { label: 'Furia×2',  color: '#F97316', icon: <IconFlame size={11} /> },
   barrier:      { label: 'Bariera',   color: '#A5B4FC', icon: '◈' },
   absorb_next:  { label: 'Absorb',    color: '#A5B4FC', icon: '◈' },
   next_crit:    { label: 'Krytek×3',  color: '#FCD34D', icon: '★' },
   exp_bonus:    { label: 'EXP+',      color: '#4ADE80', icon: '►' },
-  atk:          { label: 'ATK+',      color: '#FDE047', icon: '⚡' },
-  burn:         { label: 'Płomień',   color: '#EF4444', icon: '🔥' },
+  atk:          { label: 'ATK+',      color: '#FDE047', icon: <IconZap size={11} /> },
+  burn:         { label: 'Płomień',   color: '#EF4444', icon: <IconFlame size={11} /> },
   bleed:        { label: 'Krwaw.',    color: '#F87171', icon: '◆' },
   poison:       { label: 'Trucizna',  color: '#86EFAC', icon: '◌' },
   slow:         { label: 'Spowol.',   color: '#F59E0B', icon: '▼' },
   stun:         { label: 'Ogłusz.',   color: '#F87171', icon: '✗' },
   weakness:     { label: 'Słabość',   color: '#818CF8', icon: '⬇' },
   blind:        { label: 'Ślepota',   color: '#6B7280', icon: '○' },
-  silence:      { label: 'Ucisz.',    color: '#8B5CF6', icon: '🔇' },
+  silence:      { label: 'Ucisz.',    color: '#8B5CF6', icon: <IconMute size={11} /> },
 };
 
 function EffBadge({ eff, side }) {
@@ -148,11 +152,11 @@ function Portrait({ children, color, flash }) {
 
 // Karta akcji na dole ekranu
 const ACTIONS = [
-  { id: 'attack', label: 'Atak',       icon: '🗡️', key: 'A', color: '#5fd07a' },
+  { id: 'attack', label: 'Atak',       icon: <IconDagger size={17} />, key: 'A', color: '#5fd07a' },
   { id: 'skill',  label: 'Skill',      icon: '✦',  key: 'S', color: '#7c8cff' },
-  { id: 'block',  label: 'Blok',       icon: '🛡️', key: 'B', color: '#e7c158' },
-  { id: 'item',   label: 'Przedmiot',  icon: '🧪', key: 'I', color: '#c792ea' },
-  { id: 'flee',   label: 'Ucieczka',   icon: '🏃', key: 'F', color: '#9a9182' },
+  { id: 'block',  label: 'Blok',       icon: <IconShield size={17} />, key: 'B', color: '#e7c158' },
+  { id: 'item',   label: 'Przedmiot',  icon: <IconFlask size={17} />, key: 'I', color: '#c792ea' },
+  { id: 'flee',   label: 'Ucieczka',   icon: <IconRun size={17} />, key: 'F', color: '#9a9182' },
 ];
 
 function ActionCard({ a, onClick, onHover, disabled, active, glow, compact }) {
@@ -434,7 +438,7 @@ export default function BattleModal2({ mob: initMob, postac: initPostac, mapa, o
       background: 'linear-gradient(180deg,#14110d,#0c0a08)', display: narrow ? 'flex' : 'block', gap: 14,
     }}>
       <div style={{ flex: 1 }}>
-        <div style={{ color: B.goldHi, fontFamily: B.serif, fontSize: 12.5, marginBottom: 8 }}>⚔ Kolejność tur</div>
+        <div style={{ color: B.goldHi, fontFamily: B.serif, fontSize: 12.5, marginBottom: 8 }}><IconSword size={12} /> Kolejność tur</div>
         {[heroFirst ? 'hero' : 'mob', heroFirst ? 'mob' : 'hero'].map((s, i) => (
           <div key={s} style={{
             display: 'flex', alignItems: 'center', gap: 8, padding: '5px 7px', marginBottom: 4, borderRadius: 3,
@@ -478,7 +482,7 @@ export default function BattleModal2({ mob: initMob, postac: initPostac, mapa, o
           paddingTop: narrow ? 'calc(env(safe-area-inset-top, 0px) + 9px)' : undefined,
           background: 'linear-gradient(180deg,#1f1a13,#110e0a)', borderBottom: `1px solid ${B.bronze}`,
         }}>
-          <span style={{ color: '#5fd07a', fontSize: 20 }}>⚔</span>
+          <span style={{ color: '#5fd07a', display: 'flex' }}><IconSword size={18} /></span>
           <span style={{ fontFamily: B.serif, fontSize: narrow ? 14 : 18, color: B.goldHi, letterSpacing: 1, fontWeight: 700 }}>WALKA TUROWA</span>
           <span style={{ padding: '2px 11px', borderRadius: 999, fontSize: 11.5, color: '#9be8ac', border: '1px solid #5fd07a88', background: 'rgba(95,208,122,0.1)' }}>
             Tura {Math.max(1, turn + (ended ? 0 : 1))}
@@ -529,9 +533,9 @@ export default function BattleModal2({ mob: initMob, postac: initPostac, mapa, o
                   )}
                 </div>
                 {narrow && <div style={{ fontFamily: B.serif, fontSize: 13, color: B.goldHi, marginTop: 4, textShadow: '0 1px 3px #000' }}>{initPostac.nazwa}</div>}
-                <ResBar icon="💚" value={heroHp} max={heroMaxHp} from="#15803d" to="#4ade80" height={9} />
-                <ResBar icon="⚡" value={heroEn} max={heroMaxEn} from="#1d4ed8" to="#60a5fa" height={9} />
-                <ResBar icon="🔥" value={heroFuria} max={100} from="#b45309" to={isBerserk ? '#ff4500' : '#f59e0b'} height={7} text={`${Math.round(heroFuria)}%${isBerserk ? ' BERSERK!' : ''}`} />
+                <ResBar icon={<IconHeart size={11} />} value={heroHp} max={heroMaxHp} from="#15803d" to="#4ade80" height={9} />
+                <ResBar icon={<IconZap size={11} />} value={heroEn} max={heroMaxEn} from="#1d4ed8" to="#60a5fa" height={9} />
+                <ResBar icon={<IconFlame size={11} />} value={heroFuria} max={100} from="#b45309" to={isBerserk ? '#ff4500' : '#f59e0b'} height={7} text={`${Math.round(heroFuria)}%${isBerserk ? ' BERSERK!' : ''}`} />
               </div>
 
               {/* Potwór: karta + pasek */}
@@ -548,7 +552,7 @@ export default function BattleModal2({ mob: initMob, postac: initPostac, mapa, o
                   )}
                 </div>
                 {narrow && <div style={{ fontFamily: B.serif, fontSize: 13, color: '#ff9b7b', marginTop: 4, textShadow: '0 1px 3px #000' }}>{mobData.nazwa} <span style={{ color: B.muted, fontSize: 11 }}>poz. {mobData.poziom}</span></div>}
-                <ResBar icon="❤️" value={mobHp} max={mobMaxHp} from="#991b1b" to="#ef4444" height={9} reverse />
+                <ResBar icon={<IconHeart size={11} />} value={mobHp} max={mobMaxHp} from="#991b1b" to="#ef4444" height={9} reverse />
               </div>
 
               {/* VS */}
@@ -595,7 +599,7 @@ export default function BattleModal2({ mob: initMob, postac: initPostac, mapa, o
                     {expGained > 0 && <div style={{ color: '#67e8f9', fontSize: 15, fontWeight: 700, marginTop: 6 }}>+{expGained} EXP</div>}
                     {levelUp && <div style={{ color: '#fcd34d', fontSize: 15, fontWeight: 700, marginTop: 4 }}>★ Awans na poziom {initPostac.poziom + 1}!</div>}
                     {xpLoss > 0 && <div style={{ color: '#f87171', fontSize: 13, marginTop: 4 }}>−{xpLoss} EXP utracone</div>}
-                    {loot && <div style={{ marginTop: 8, fontSize: 13 }}>🎁 Zdobyto: <b style={{ color: B.goldHi }}>{loot.nazwa}</b></div>}
+                    {loot && <div style={{ marginTop: 8, fontSize: 13 }}><IconGift size={12} /> Zdobyto: <b style={{ color: B.goldHi }}>{loot.nazwa}</b></div>}
                   </div>
                 </div>
               )}
