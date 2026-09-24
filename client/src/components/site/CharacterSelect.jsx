@@ -142,27 +142,32 @@ function CharCard({ ch, mapName, onEnter, onDelete, busy, narrow }) {
   );
 }
 
-function EmptySlot({ onCreate }) {
+function EmptySlot({ onCreate, narrow }) {
   const [hover, setHover] = useState(false);
   return (
     <button
       onClick={onCreate}
       onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}
       style={{
-        width: '100%', maxWidth: 340, minHeight: 386, boxSizing: 'border-box', borderRadius: 14, cursor: 'pointer',
+        width: '100%', maxWidth: narrow ? 520 : 340, minHeight: narrow ? 92 : 386,
+        padding: narrow ? '14px 16px' : 0, boxSizing: 'border-box', borderRadius: 14, cursor: 'pointer',
         background: hover ? 'rgba(231,193,88,0.06)' : 'rgba(6,9,18,0.5)',
         border: `1px dashed ${hover ? S.gold : S.line}`,
-        display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 12,
-        color: S.muted, fontFamily: S.sans, transition: 'all .15s',
+        display: 'flex', flexDirection: narrow ? 'row' : 'column',
+        alignItems: 'center', justifyContent: narrow ? 'flex-start' : 'center', gap: narrow ? 14 : 12,
+        color: S.muted, fontFamily: S.sans, transition: 'all .15s', textAlign: narrow ? 'left' : 'center',
       }}
     >
       <span style={{
-        width: 54, height: 54, borderRadius: '50%', display: 'grid', placeItems: 'center',
-        border: `1px dashed ${hover ? S.gold : S.line}`, color: S.gold, fontSize: 26,
+        width: narrow ? 46 : 54, height: narrow ? 46 : 54, flexShrink: 0,
+        borderRadius: '50%', display: 'grid', placeItems: 'center',
+        border: `1px dashed ${hover ? S.gold : S.line}`, color: S.gold, fontSize: narrow ? 22 : 26,
       }}>+</span>
-      <span style={{ fontFamily: S.serif, fontSize: 19, color: S.text }}>Nowa postać</span>
-      <span style={{ fontSize: 12, maxWidth: 190, textAlign: 'center' }}>
-        Stwórz nowego bohatera i rozpocznij przygodę
+      <span style={{ display: 'flex', flexDirection: 'column', gap: narrow ? 2 : 12, alignItems: narrow ? 'flex-start' : 'center' }}>
+        <span style={{ fontFamily: S.serif, fontSize: narrow ? 17 : 19, color: S.text }}>Nowa postać</span>
+        <span style={{ fontSize: 12, maxWidth: 190 }}>
+          Stwórz nowego bohatera i rozpocznij przygodę
+        </span>
       </span>
     </button>
   );
@@ -257,7 +262,7 @@ export default function CharacterSelect({
                         onEnter={onEnterGame} onDelete={onDelete} busy={loading} />
             ))}
             {Array.from({ length: Math.max(0, slots - chars.length) }, (_, i) => (
-              <EmptySlot key={`e${i}`} onCreate={canCreate ? onCreate : undefined} />
+              <EmptySlot key={`e${i}`} narrow={narrow} onCreate={canCreate ? onCreate : undefined} />
             ))}
           </div>
         </div>
