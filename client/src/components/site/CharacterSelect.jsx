@@ -1,6 +1,10 @@
 // Wybór postaci po zalogowaniu.
 import { useState, useEffect, useRef } from 'react';
 import { S, pageBg, vignette, panel, goldBtn, ghostBtn, Diamond, Ornament, Logo, OnlineBadge } from './siteStyle';
+import {
+  IconSword, IconShield, IconDagger, IconBow, IconCompass, IconSparkles,
+  IconStar, IconCrown, IconMapPin, IconTrash, IconPlay, IconPlus,
+} from '../../Icons';
 
 const MAX_SLOTS = 3;
 
@@ -65,7 +69,7 @@ function CharCard({ ch, mapName, onEnter, onDelete, busy, narrow }) {
             position: 'absolute', top: 8, left: 8, padding: '3px 8px', borderRadius: 999,
             background: 'rgba(229,98,76,0.18)', border: '1px solid rgba(229,98,76,0.5)',
             color: '#ff8b78', fontSize: 10, fontWeight: 'bold',
-          }}>★ ADMIN</span>
+          }}><IconStar size={10} /> ADMIN</span>
         )}
         {ch.zalogowany ? (
           <span style={{
@@ -95,13 +99,13 @@ function CharCard({ ch, mapName, onEnter, onDelete, busy, narrow }) {
         }}>Lv. {ch.poziom}</span>
         {ch.prestige > 0 && (
           <span style={{ padding: '3px 8px', borderRadius: 999, fontSize: 11, background: 'rgba(192,122,224,0.15)', border: '1px solid rgba(192,122,224,0.45)', color: '#d9a7f0' }}>
-            ✦ {ch.prestige}
+            <IconSparkles size={10} /> {ch.prestige}
           </span>
         )}
       </div>
 
       {mapName && (
-        <div style={{ textAlign: narrow ? 'left' : 'center', color: S.muted, fontSize: 12, marginBottom: 10 }}>📍 {mapName}</div>
+        <div style={{ textAlign: narrow ? 'left' : 'center', color: S.muted, fontSize: 12, marginBottom: 10 }}><IconMapPin size={11} /> {mapName}</div>
       )}
 
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
@@ -133,9 +137,9 @@ function CharCard({ ch, mapName, onEnter, onDelete, busy, narrow }) {
       ) : (
         <div style={{ display: 'flex', gap: 8 }}>
           <button onClick={() => onEnter(ch.id)} disabled={busy} style={{ ...goldBtn(), flex: 1, opacity: busy ? 0.6 : 1 }}>
-            ▶ Wejdź do gry
+            <IconPlay size={13} /> Wejdź do gry
           </button>
-          <button onClick={() => setConfirm(true)} title="Usuń postać" style={{ ...ghostBtn(), padding: '11px 14px' }}>🗑</button>
+          <button onClick={() => setConfirm(true)} title="Usuń postać" style={{ ...ghostBtn(), padding: '11px 14px' }}><IconTrash size={14} /></button>
         </div>
       )}
     </div>
@@ -148,7 +152,12 @@ function CharCard({ ch, mapName, onEnter, onDelete, busy, narrow }) {
 // Po lewej opis klasy wybranej postaci, na środku bohaterowie na podeście,
 // po prawej lista postaci i wolne sloty.
 const IKONA_KLASY = {
-  Wojownik: '⚔', Paladyn: '✚', 'Tancerz Ostrzy': '⚡', Lowca: '🏹', Tropiciel: '🧭', Mag: '✦',
+  Wojownik: IconSword, Paladyn: IconShield, 'Tancerz Ostrzy': IconDagger,
+  Lowca: IconBow, Tropiciel: IconCompass, Mag: IconSparkles,
+};
+const IkonaKlasy = ({ profesja, size }) => {
+  const I = IKONA_KLASY[profesja] || IconSparkles;
+  return <I size={size} />;
 };
 
 function PasekStatu({ etykieta, pct, wartosc, kolor, glow }) {
@@ -183,7 +192,7 @@ function Scena({ chars, slots, classes, mapNames, onEnter, onDelete, onCreate, b
         {ch ? (
           <>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
-              <span style={{ fontSize: 22, color: kolor }}>{IKONA_KLASY[ch.profesja] || '◆'}</span>
+              <span style={{ color: kolor, display: 'flex' }}><IkonaKlasy profesja={ch.profesja} size={20} /></span>
               <span style={{ fontFamily: S.serif, fontSize: 21, letterSpacing: 2, color: S.gold, textTransform: 'uppercase' }}>
                 {ch.profesja}
               </span>
@@ -204,13 +213,13 @@ function Scena({ chars, slots, classes, mapNames, onEnter, onDelete, onCreate, b
 
             {mapNames[ch.mapa] && (
               <div style={{ paddingTop: 14, color: S.muted, fontSize: 12 }}>
-                📍 {mapNames[ch.mapa]}
+                <IconMapPin size={11} /> {mapNames[ch.mapa]}
               </div>
             )}
           </>
         ) : (
           <div style={{ margin: '30px 0', textAlign: 'center', color: S.muted, fontSize: 13 }}>
-            <div style={{ fontSize: 34, marginBottom: 10 }}>🛡</div>
+            <div style={{ marginBottom: 10, display: 'flex', justifyContent: 'center', color: S.gold }}><IconShield size={32} /></div>
             Nie masz jeszcze żadnej postaci.<br />Wybierz wolny slot po prawej.
           </div>
         )}
@@ -318,7 +327,7 @@ function Scena({ chars, slots, classes, mapNames, onEnter, onDelete, onCreate, b
                   </span>
                   <span style={{ display: 'block', color: S.muted, fontSize: 11 }}>Lv. {c.poziom}</span>
                 </span>
-                <span style={{ color: kol, fontSize: 16, flexShrink: 0 }}>{IKONA_KLASY[c.profesja] || '◆'}</span>
+                <span style={{ color: kol, flexShrink: 0, display: 'flex' }}><IkonaKlasy profesja={c.profesja} size={15} /></span>
                 {!!c.zalogowany && <span style={{ color: S.green, fontSize: 10, flexShrink: 0 }}>●</span>}
               </button>
             );
@@ -358,11 +367,11 @@ function Scena({ chars, slots, classes, mapNames, onEnter, onDelete, onCreate, b
             <>
               <button onClick={() => ch && onEnter(ch.id)} disabled={!ch || busy}
                 style={{ ...goldBtn(), width: '100%', minHeight: 52, fontSize: 15, opacity: (!ch || busy) ? 0.55 : 1 }}>
-                ▶ Wejdź do gry
+                <IconPlay size={13} /> Wejdź do gry
               </button>
               <div style={{ display: 'flex', justifyContent: 'center', marginTop: 10 }}>
                 <button onClick={() => ch && setConfirm(true)} disabled={!ch} title="Usuń postać" aria-label="Usuń postać"
-                  style={{ ...ghostBtn(), minHeight: 44, padding: '0 22px', opacity: ch ? 1 : 0.45 }}>🗑</button>
+                  style={{ ...ghostBtn(), minHeight: 44, padding: '0 22px', opacity: ch ? 1 : 0.45 }}><IconTrash size={14} /></button>
               </div>
             </>
           )}
@@ -435,7 +444,7 @@ function Karuzela({ chars, slots, mapNames, onEnter, onDelete, onCreate, busy, c
                 position: 'absolute', top: 10, left: 10, padding: '3px 9px', borderRadius: 999,
                 background: 'rgba(229,98,76,0.18)', border: '1px solid rgba(229,98,76,0.5)',
                 color: '#ff8b78', fontSize: 10, fontWeight: 'bold',
-              }}>★ ADMIN</span>
+              }}><IconStar size={10} /> ADMIN</span>
             )}
             {!!ch.zalogowany && (
               <span style={{
@@ -486,11 +495,11 @@ function Karuzela({ chars, slots, mapNames, onEnter, onDelete, onCreate, busy, c
               <span style={{ padding: '3px 10px', borderRadius: 999, fontSize: 11, background: `${color}1f`, border: `1px solid ${color}66`, color }}>{ch.profesja}</span>
               <span style={{ padding: '3px 10px', borderRadius: 999, fontSize: 11, background: 'rgba(231,193,88,0.12)', border: `1px solid ${S.line}`, color: S.gold }}>Lv. {ch.poziom}</span>
               {ch.prestige > 0 && (
-                <span style={{ padding: '3px 8px', borderRadius: 999, fontSize: 11, background: 'rgba(192,122,224,0.15)', border: '1px solid rgba(192,122,224,0.45)', color: '#d9a7f0' }}>✦ {ch.prestige}</span>
+                <span style={{ padding: '3px 8px', borderRadius: 999, fontSize: 11, background: 'rgba(192,122,224,0.15)', border: '1px solid rgba(192,122,224,0.45)', color: '#d9a7f0' }}><IconSparkles size={10} /> {ch.prestige}</span>
               )}
             </div>
             {mapNames[ch.mapa] && (
-              <div style={{ color: S.muted, fontSize: 12, margin: '8px 0 10px' }}>📍 {mapNames[ch.mapa]}</div>
+              <div style={{ color: S.muted, fontSize: 12, margin: '8px 0 10px' }}><IconMapPin size={11} /> {mapNames[ch.mapa]}</div>
             )}
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
               <span style={{ color: '#ff8b78', fontSize: 11, width: 26 }}>HP</span>
@@ -517,9 +526,9 @@ function Karuzela({ chars, slots, mapNames, onEnter, onDelete, onCreate, busy, c
             ) : (
               <div style={{ display: 'flex', gap: 8 }}>
                 <button onClick={() => onEnter(ch.id)} disabled={busy} style={{ ...goldBtn(), flex: 1, minHeight: 50, opacity: busy ? 0.6 : 1 }}>
-                  ▶ Wejdź do gry
+                  <IconPlay size={13} /> Wejdź do gry
                 </button>
-                <button onClick={() => setConfirm(true)} title="Usuń postać" aria-label="Usuń postać" style={{ ...ghostBtn(), minHeight: 50, padding: '0 16px' }}>🗑</button>
+                <button onClick={() => setConfirm(true)} title="Usuń postać" aria-label="Usuń postać" style={{ ...ghostBtn(), minHeight: 50, padding: '0 16px' }}><IconTrash size={14} /></button>
               </div>
             )}
           </>
@@ -531,7 +540,7 @@ function Karuzela({ chars, slots, mapNames, onEnter, onDelete, onCreate, busy, c
             </div>
             <button onClick={canCreate ? onCreate : undefined} disabled={!canCreate}
               style={{ ...goldBtn(), width: '100%', minHeight: 50, opacity: canCreate ? 1 : 0.5 }}>
-              + Stwórz postać
+              <IconPlus size={14} /> Stwórz postać
             </button>
           </>
         )}
@@ -583,7 +592,7 @@ export default function CharacterSelect({
     <div style={{ ...panel, padding: 14, width: '100%', alignSelf: 'flex-start', boxShadow: 'none', background: 'rgba(6,9,18,0.45)' }}>
       <div style={{ color: S.dim, fontSize: 10, letterSpacing: 3 }}>KONTO</div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, margin: '8px 0 14px' }}>
-        <span style={{ fontSize: 20 }}>{me?.isAdmin ? '👑' : '🛡'}</span>
+        <span style={{ color: S.gold, display: 'flex' }}>{me?.isAdmin ? <IconCrown size={18} /> : <IconShield size={18} />}</span>
         <div>
           <div style={{ fontFamily: S.serif, fontSize: 17, color: S.gold }}>{me?.login || '—'}</div>
           <div style={{ color: S.muted, fontSize: 11 }}>
@@ -598,7 +607,7 @@ export default function CharacterSelect({
             ...ghostBtn(), flex: 1, width: narrow ? 'auto' : '100%', marginBottom: narrow ? 0 : 8,
             padding: narrow ? '9px 8px' : undefined, fontSize: narrow ? 12 : undefined,
             color: '#ff8b78', borderColor: 'rgba(229,98,76,0.45)',
-          }}>★ {narrow ? 'Panel' : 'Panel administratora'}</button>
+          }}><IconStar size={12} /> {narrow ? 'Panel' : 'Panel administratora'}</button>
         )}
         <button onClick={onHome} style={{
           ...ghostBtn(), flex: 1, width: narrow ? 'auto' : '100%', marginBottom: narrow ? 0 : 8,
@@ -669,7 +678,7 @@ export default function CharacterSelect({
 
         {canCreate && !narrow && (
           <div style={{ display: 'flex', justifyContent: 'center', marginTop: 26 }}>
-            <button onClick={onCreate} style={{ ...ghostBtn(true), minWidth: 320 }}>+ Stwórz nową postać</button>
+            <button onClick={onCreate} style={{ ...ghostBtn(true), minWidth: 320 }}><IconPlus size={14} /> Stwórz nową postać</button>
           </div>
         )}
       </main>

@@ -1,12 +1,13 @@
 // Logowanie i rejestracja.
 import { useState, useEffect } from 'react';
 import { S, pageBg, vignette, panel, goldBtn, Logo, Diamond, OnlineBadge } from './siteStyle';
+import { IconSword, IconUsers, IconCompass, IconTrendingUp, IconUser, IconLock, IconEye, IconEyeOff } from '../../Icons';
 
 const FEATURES = [
-  { icon: '⚔', title: 'Walka',       desc: 'Pokonuj potwory i innych graczy' },
-  { icon: '👥', title: 'Społeczność', desc: 'Twórz gildie i zawieraj przyjaźnie' },
-  { icon: '🧭', title: 'Eksploracja', desc: 'Odkrywaj nieznane krainy' },
-  { icon: '📈', title: 'Rozwój',      desc: 'Zdobywaj poziomy i legendarny ekwipunek' },
+  { Icon: IconSword,      title: 'Walka',       desc: 'Pokonuj potwory i innych graczy' },
+  { Icon: IconUsers,      title: 'Społeczność', desc: 'Twórz gildie i zawieraj przyjaźnie' },
+  { Icon: IconCompass,    title: 'Eksploracja', desc: 'Odkrywaj nieznane krainy' },
+  { Icon: IconTrendingUp, title: 'Rozwój',      desc: 'Zdobywaj poziomy i legendarny ekwipunek' },
 ];
 
 function useNarrow(bp = 980) {
@@ -19,7 +20,7 @@ function useNarrow(bp = 980) {
   return n;
 }
 
-function Field({ icon, type = 'text', value, onChange, placeholder, autoComplete, onEnter, autoFocus }) {
+function Field({ Icon, type = 'text', value, onChange, placeholder, autoComplete, onEnter, autoFocus }) {
   const [focus, setFocus] = useState(false);
   const [show, setShow] = useState(false);
   const isPass = type === 'password';
@@ -32,7 +33,7 @@ function Field({ icon, type = 'text', value, onChange, placeholder, autoComplete
       boxShadow: focus ? `0 0 0 3px rgba(231,193,88,0.12)` : 'none',
       transition: 'border-color .15s, box-shadow .15s',
     }}>
-      <span style={{ color: focus ? S.gold : S.dim, fontSize: 14 }}>{icon}</span>
+      <span style={{ color: focus ? S.gold : S.dim, fontSize: 14 }}><Icon size={15} /></span>
       <input
         type={isPass && show ? 'text' : type}
         value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder}
@@ -47,7 +48,7 @@ function Field({ icon, type = 'text', value, onChange, placeholder, autoComplete
       {isPass && (
         <button type="button" onClick={() => setShow(v => !v)} title={show ? 'Ukryj' : 'Pokaż'} style={{
           background: 'none', border: 'none', cursor: 'pointer', color: S.dim, fontSize: 14, padding: 4,
-        }}>{show ? '🙈' : '👁'}</button>
+        }}>{show ? <IconEyeOff size={15} /> : <IconEye size={15} />}</button>
       )}
     </div>
   );
@@ -89,7 +90,7 @@ export default function AuthScreen({ mode = 'login', stats, onBack, onDone, apiF
       color: tab === id ? S.gold : S.dim,
       background: tab === id ? 'rgba(231,193,88,0.1)' : 'transparent',
       border: `1px solid ${tab === id ? S.line : 'transparent'}`, borderRadius: 9,
-    }}>{icon} {label}</button>
+    }}><Icon size={15} /> {label}</button>
   );
 
   return (
@@ -136,16 +137,16 @@ export default function AuthScreen({ mode = 'login', stats, onBack, onDone, apiF
           </p>
 
           <div style={{ display: 'flex', gap: 8, marginBottom: 18 }}>
-            {tabBtn('login', 'Logowanie', '👤')}
-            {tabBtn('register', 'Rejestracja', '⚔')}
+            {tabBtn('login', 'Logowanie', <IconUser size={14} />)}
+            {tabBtn('register', 'Rejestracja', <IconSword size={14} />)}
           </div>
 
-          <Field icon="👤" value={login} onChange={setLogin} placeholder="Nazwa użytkownika"
+          <Field Icon={IconUser} value={login} onChange={setLogin} placeholder="Nazwa użytkownika"
                  autoComplete="username" autoFocus onEnter={submit} />
-          <Field icon="🔒" type="password" value={pass} onChange={setPass} placeholder="Hasło"
+          <Field Icon={IconLock} type="password" value={pass} onChange={setPass} placeholder="Hasło"
                  autoComplete={tab === 'login' ? 'current-password' : 'new-password'} onEnter={submit} />
           {tab === 'register' && (
-            <Field icon="🔒" type="password" value={pass2} onChange={setPass2} placeholder="Powtórz hasło"
+            <Field Icon={IconLock} type="password" value={pass2} onChange={setPass2} placeholder="Powtórz hasło"
                    autoComplete="new-password" onEnter={submit} />
           )}
 
@@ -170,7 +171,7 @@ export default function AuthScreen({ mode = 'login', stats, onBack, onDone, apiF
           <button onClick={submit} disabled={busy} style={{
             ...goldBtn(true), width: '100%', opacity: busy ? 0.7 : 1, cursor: busy ? 'wait' : 'pointer',
           }}>
-            {busy ? 'Chwileczkę…' : tab === 'login' ? '⚔ Zaloguj się do Veldorii →' : '⚔ Załóż konto →'}
+            {busy ? 'Chwileczkę…' : <><IconSword size={15} /> {tab === 'login' ? 'Zaloguj się do Veldorii →' : 'Załóż konto →'}</>}
           </button>
 
           <div style={{ textAlign: 'center', marginTop: 16, color: S.muted, fontSize: 12.5 }}>
@@ -195,8 +196,8 @@ export default function AuthScreen({ mode = 'login', stats, onBack, onDone, apiF
                   <span style={{
                     width: 44, height: 44, flexShrink: 0, display: 'grid', placeItems: 'center',
                     borderRadius: '50%', border: `1px solid ${S.line}`, background: 'rgba(8,12,22,0.7)',
-                    fontSize: 19,
-                  }}>{f.icon}</span>
+                    color: S.gold,
+                  }}><f.Icon size={19} /></span>
                   <div>
                     <div style={{ fontFamily: S.serif, fontSize: 16, color: S.gold }}>{f.title}</div>
                     <div style={{ color: S.muted, fontSize: 12.5, marginTop: 2 }}>{f.desc}</div>

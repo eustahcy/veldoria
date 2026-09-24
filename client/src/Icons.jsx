@@ -338,3 +338,190 @@ export function IconCastle({ size }) {
     </Svg>
   );
 }
+
+// ── Uzupełnienie zestawu: ikony w miejsce emoji ──────────────────────────────
+export function IconMapPin({ size }) {
+  return (
+    <Svg size={size}>
+      <path d="M12 21s7-5.5 7-11a7 7 0 10-14 0c0 5.5 7 11 7 11z" />
+      <circle cx="12" cy="10" r="2.5" />
+    </Svg>
+  );
+}
+export function IconCompass({ size }) {
+  return (
+    <Svg size={size}>
+      <circle cx="12" cy="12" r="9" />
+      <polygon points="15.5 8.5 10.5 10.5 8.5 15.5 13.5 13.5" />
+    </Svg>
+  );
+}
+export function IconBow({ size }) {
+  return (
+    <Svg size={size}>
+      <path d="M4 20L20 4" />
+      <path d="M14 4h6v6" />
+      <path d="M6 4a14 14 0 0114 14" />
+    </Svg>
+  );
+}
+export function IconDagger({ size }) {
+  return (
+    <Svg size={size}>
+      <path d="M12 2l3 6-3 9-3-9 3-6z" />
+      <line x1="7" y1="17" x2="17" y2="17" />
+      <line x1="12" y1="17" x2="12" y2="22" />
+    </Svg>
+  );
+}
+export function IconHammer({ size }) {
+  return (
+    <Svg size={size}>
+      <path d="M14 4l6 6-3 3-6-6 3-3z" />
+      <path d="M11 7L3 15v6h6l8-8" />
+    </Svg>
+  );
+}
+export function IconCrown({ size }) {
+  return (
+    <Svg size={size}>
+      <path d="M3 18h18l-1.5-9-4.5 4-3-6-3 6-4.5-4L3 18z" />
+      <line x1="3" y1="21" x2="21" y2="21" />
+    </Svg>
+  );
+}
+export function IconLock({ size }) {
+  return (
+    <Svg size={size}>
+      <rect x="4" y="10" width="16" height="11" rx="2" />
+      <path d="M8 10V7a4 4 0 118 0v3" />
+    </Svg>
+  );
+}
+export function IconUnlock({ size }) {
+  return (
+    <Svg size={size}>
+      <rect x="4" y="10" width="16" height="11" rx="2" />
+      <path d="M8 10V7a4 4 0 017-2.6" />
+    </Svg>
+  );
+}
+export function IconEye({ size }) {
+  return (
+    <Svg size={size}>
+      <path d="M2 12s3.6-6.5 10-6.5S22 12 22 12s-3.6 6.5-10 6.5S2 12 2 12z" />
+      <circle cx="12" cy="12" r="3" />
+    </Svg>
+  );
+}
+export function IconEyeOff({ size }) {
+  return (
+    <Svg size={size}>
+      <path d="M4.5 7.5C2.9 9.2 2 12 2 12s3.6 6.5 10 6.5c1.9 0 3.5-.6 4.9-1.4" />
+      <path d="M9.9 5.7A9.8 9.8 0 0112 5.5c6.4 0 10 6.5 10 6.5s-1 1.8-2.8 3.5" />
+      <line x1="3" y1="3" x2="21" y2="21" />
+    </Svg>
+  );
+}
+export function IconGem({ size }) {
+  return (
+    <Svg size={size}>
+      <path d="M6 3h12l4 6-10 12L2 9l4-6z" />
+      <path d="M2 9h20M9 3l3 18M15 3l-3 18" />
+    </Svg>
+  );
+}
+export function IconStore({ size }) {
+  return (
+    <Svg size={size}>
+      <path d="M3 9l1.5-5h15L21 9" />
+      <path d="M4 9v11h16V9" />
+      <path d="M3 9a3 3 0 006 0 3 3 0 006 0 3 3 0 006 0" />
+      <path d="M10 20v-6h4v6" />
+    </Svg>
+  );
+}
+export function IconSettings({ size }) {
+  return (
+    <Svg size={size}>
+      <circle cx="12" cy="12" r="3" />
+      <path d="M19.4 15a1.6 1.6 0 00.3 1.8l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.6 1.6 0 00-1.8-.3 1.6 1.6 0 00-1 1.5V21a2 2 0 11-4 0v-.1A1.6 1.6 0 009 19.4a1.6 1.6 0 00-1.8.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.6 1.6 0 00.3-1.8 1.6 1.6 0 00-1.5-1H3a2 2 0 110-4h.1A1.6 1.6 0 004.6 9a1.6 1.6 0 00-.3-1.8l-.1-.1a2 2 0 112.8-2.8l.1.1a1.6 1.6 0 001.8.3H9a1.6 1.6 0 001-1.5V3a2 2 0 114 0v.1a1.6 1.6 0 001 1.5 1.6 1.6 0 001.8-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.6 1.6 0 00-.3 1.8V9a1.6 1.6 0 001.5 1H21a2 2 0 110 4h-.1a1.6 1.6 0 00-1.5 1z" />
+    </Svg>
+  );
+}
+export function IconFish({ size }) {
+  return (
+    <Svg size={size}>
+      <path d="M2 12c3-4 7-6 11-6 3 0 6 2 9 6-3 4-6 6-9 6-4 0-8-2-11-6z" />
+      <circle cx="16" cy="11" r="1" />
+      <path d="M7 9l-3-3v12l3-3" />
+    </Svg>
+  );
+}
+export function IconFlask({ size }) {
+  return (
+    <Svg size={size}>
+      <path d="M10 3h4v6l5 8a2 2 0 01-1.7 3H6.7A2 2 0 015 17l5-8V3z" />
+      <line x1="9" y1="3" x2="15" y2="3" />
+      <line x1="7.5" y1="14" x2="16.5" y2="14" />
+    </Svg>
+  );
+}
+export function IconPalette({ size }) {
+  return (
+    <Svg size={size}>
+      <path d="M12 3a9 9 0 100 18c1.1 0 2-.9 2-2 0-.5-.2-1-.6-1.4-.3-.4-.4-.8-.4-1.1 0-.8.7-1.5 1.5-1.5H16a5 5 0 005-5c0-3.9-4-7-9-7z" />
+      <circle cx="7.5" cy="12" r="1" />
+      <circle cx="10" cy="8" r="1" />
+      <circle cx="15" cy="8" r="1" />
+    </Svg>
+  );
+}
+export function IconMegaphone({ size }) {
+  return (
+    <Svg size={size}>
+      <path d="M3 10v4a1 1 0 001 1h3l8 5V4L7 9H4a1 1 0 00-1 1z" />
+      <path d="M18 9a3 3 0 010 6" />
+    </Svg>
+  );
+}
+export function IconPlay({ size }) {
+  return (
+    <Svg size={size}>
+      <polygon points="6 4 20 12 6 20 6 4" />
+    </Svg>
+  );
+}
+export function IconRefresh({ size }) {
+  return (
+    <Svg size={size}>
+      <path d="M20 11a8 8 0 10-2.3 6.3" />
+      <polyline points="20 4 20 11 13 11" />
+    </Svg>
+  );
+}
+export function IconMuscle({ size }) {
+  return (
+    <Svg size={size}>
+      <path d="M4 18v-4a4 4 0 014-4h2.5a2.5 2.5 0 000-5H8" />
+      <path d="M10.5 10c3.5 0 6.5 1.8 6.5 4.5S14.5 21 11 21H4" />
+    </Svg>
+  );
+}
+export function IconAnvil({ size }) {
+  return (
+    <Svg size={size}>
+      <path d="M4 8h9l3 3h4l-2 4H8l-4-4V8z" />
+      <path d="M9 15v3H6l-1 3h14l-1-3h-3v-3" />
+    </Svg>
+  );
+}
+export function IconSkull({ size }) {
+  return (
+    <Svg size={size}>
+      <path d="M12 3a8 8 0 00-8 8c0 2.6 1.3 4.4 3 5.5V20a1 1 0 001 1h8a1 1 0 001-1v-3.5c1.7-1.1 3-2.9 3-5.5a8 8 0 00-8-8z" />
+      <circle cx="9" cy="12" r="1.5" />
+      <circle cx="15" cy="12" r="1.5" />
+    </Svg>
+  );
+}

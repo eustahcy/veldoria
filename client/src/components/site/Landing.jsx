@@ -1,6 +1,10 @@
 // Strona główna Veldorii — ekran powitalny przed logowaniem.
 import { useEffect, useState } from 'react';
 import { S, pageBg, vignette, goldBtn, ghostBtn, Diamond, Ornament, Logo, OnlineBadge } from './siteStyle';
+import {
+  IconSword, IconShield, IconDagger, IconBow, IconCompass, IconSparkles, IconHammer,
+  IconUser, IconUsers, IconGlobe, IconMuscle, IconCrosshair, IconBrain,
+} from '../../Icons';
 
 // Tylko pozycje, które naprawdę gdzieś prowadzą
 const NAV = [
@@ -9,14 +13,14 @@ const NAV = [
 ];
 
 const CLASS_ICON = {
-  Wojownik: '⚔', Paladyn: '🛡', 'Tancerz Ostrzy': '🗡',
-  Lowca: '🏹', Tropiciel: '🧭', Mag: '🔮',
+  Wojownik: IconSword, Paladyn: IconShield, 'Tancerz Ostrzy': IconDagger,
+  Lowca: IconBow, Tropiciel: IconCompass, Mag: IconSparkles,
 };
 
 const PILLS = [
-  { icon: '⚔', label: 'Walka',       color: '#e5624c' },
-  { icon: '🧭', label: 'Eksploracja', color: '#4b9cff' },
-  { icon: '⚒', label: 'Crafting',    color: '#5fd07a' },
+  { Icon: IconSword,   label: 'Walka',       color: '#e5624c' },
+  { Icon: IconCompass, label: 'Eksploracja', color: '#4b9cff' },
+  { Icon: IconHammer,  label: 'Crafting',    color: '#5fd07a' },
 ];
 
 function useNarrow(bp = 860) {
@@ -29,10 +33,12 @@ function useNarrow(bp = 860) {
   return n;
 }
 
-function Stat({ icon, value, label, sub, compact }) {
+function Stat({ Icon, value, label, sub, compact }) {
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: compact ? 9 : 12, padding: compact ? 0 : '0 22px', minWidth: 0 }}>
-      <span style={{ fontSize: compact ? 18 : 22, opacity: 0.85, flexShrink: 0 }}>{icon}</span>
+      <span style={{ color: S.gold, opacity: 0.9, flexShrink: 0, display: 'flex' }}>
+        <Icon size={compact ? 18 : 22} />
+      </span>
       <div style={{ minWidth: 0 }}>
         <div style={{ fontFamily: S.serif, fontSize: compact ? 16 : 20, color: S.text, lineHeight: 1.15, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{value}</div>
         <div style={{ fontSize: compact ? 10.5 : 11, color: S.muted, fontFamily: S.sans, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{label}</div>
@@ -79,7 +85,7 @@ export default function Landing({ stats, classes = [], onPlay, onLogin, onSectio
             Zaloguj się
           </button>
           <button onClick={onPlay} style={{ ...goldBtn(), whiteSpace: 'nowrap', padding: narrow ? '9px 14px' : undefined }}>
-            ⚔ {narrow ? 'Graj' : 'Graj teraz'}
+            <IconSword size={12} /> {narrow ? 'Graj' : 'Graj teraz'}
           </button>
         </div>
       </header>
@@ -113,8 +119,8 @@ export default function Landing({ stats, classes = [], onPlay, onLogin, onSectio
           }}>Odkryj świat pełen przygód, magii i niebezpieczeństw.</p>
 
           <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', justifyContent: 'center' }}>
-            <button onClick={onPlay} style={goldBtn(true)}>⚔ Rozpocznij przygodę →</button>
-            <button onClick={onLogin} style={ghostBtn(true)}>👤 Zaloguj się</button>
+            <button onClick={onPlay} style={goldBtn(true)}><IconSword size={15} /> Rozpocznij przygodę →</button>
+            <button onClick={onLogin} style={ghostBtn(true)}><IconUser size={15} /> Zaloguj się</button>
           </div>
 
           <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginTop: 20, justifyContent: 'center' }}>
@@ -125,7 +131,7 @@ export default function Landing({ stats, classes = [], onPlay, onLogin, onSectio
                 background: 'rgba(8,12,22,0.78)', border: `1px solid ${S.lineSoft}`,
                 color: S.text, fontSize: 13,
               }}>
-                <span style={{ color: p.color }}>{p.icon}</span>{p.label}
+                <span style={{ color: p.color, display: 'inline-flex' }}><p.Icon size={15} /></span>{p.label}
               </span>
             ))}
           </div>
@@ -140,13 +146,13 @@ export default function Landing({ stats, classes = [], onPlay, onLogin, onSectio
           background: 'rgba(7,10,20,0.8)', border: `1px solid ${S.lineSoft}`, backdropFilter: 'blur(6px)',
           boxShadow: '0 20px 50px rgba(0,0,0,0.6)',
         }}>
-          <Stat compact={narrow} icon="👥" value={stats?.online ?? 0} label="Graczy online" />
+          <Stat compact={narrow} Icon={IconUsers} value={stats?.online ?? 0} label="Graczy online" />
           {!narrow && <span style={{ width: 1, background: S.lineSoft, margin: '4px 0' }} />}
-          <Stat compact={narrow} icon="⚔" value={stats?.total ?? 0} label="Założonych kont" />
+          <Stat compact={narrow} Icon={IconSword} value={stats?.total ?? 0} label="Założonych kont" />
           {!narrow && <span style={{ width: 1, background: S.lineSoft, margin: '4px 0' }} />}
-          <Stat compact={narrow} icon="🛡" value={`${classes.length || 6} klas`} label="Wybierz swoją drogę" />
+          <Stat compact={narrow} Icon={IconShield} value={`${classes.length || 6} klas`} label="Wybierz swoją drogę" />
           {!narrow && <span style={{ width: 1, background: S.lineSoft, margin: '4px 0' }} />}
-          <Stat compact={narrow} icon="🌍" value="Rozległy świat" label={narrow ? 'Miasta i lochy' : 'Miasta • Lochy • Dzikie tereny'} />
+          <Stat compact={narrow} Icon={IconGlobe} value="Rozległy świat" label={narrow ? 'Miasta i lochy' : 'Miasta • Lochy • Dzikie tereny'} />
         </div>
       </main>
 
@@ -172,20 +178,22 @@ export default function Landing({ stats, classes = [], onPlay, onLogin, onSectio
               }}>
                 <div style={{
                   width: 52, height: 52, flexShrink: 0, display: 'grid', placeItems: 'center',
-                  borderRadius: 10, border: `1px solid ${S.line}`, background: 'rgba(4,7,14,0.7)', fontSize: 22,
-                }}>{CLASS_ICON[c.name] || '✦'}</div>
+                  borderRadius: 10, border: `1px solid ${S.line}`, background: 'rgba(4,7,14,0.7)', color: S.gold,
+                }}>{(() => { const I = CLASS_ICON[c.name] || IconSparkles; return <I size={24} />; })()}</div>
                 <div>
                   <div style={{ fontFamily: S.serif, fontSize: 18, color: S.gold }}>{c.name}</div>
                   <div style={{ color: S.muted, fontSize: 12.5, margin: '3px 0 8px' }}>{c.opis}</div>
                   <div style={{ display: 'flex', gap: 10, fontSize: 11, color: S.dim }}>
-                    <span>💪 siła {c.sila}</span><span>🏹 zręczność {c.zrecznosc}</span><span>🧠 intelekt {c.intelekt}</span>
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><IconMuscle size={12} /> siła {c.sila}</span>
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><IconCrosshair size={12} /> zręczność {c.zrecznosc}</span>
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><IconBrain size={12} /> intelekt {c.intelekt}</span>
                   </div>
                 </div>
               </div>
             ))}
           </div>
           <div style={{ display: 'flex', justifyContent: 'center', marginTop: 26 }}>
-            <button onClick={onPlay} style={goldBtn(true)}>⚔ Rozpocznij przygodę →</button>
+            <button onClick={onPlay} style={goldBtn(true)}><IconSword size={15} /> Rozpocznij przygodę →</button>
           </div>
         </section>
       )}
