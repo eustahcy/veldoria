@@ -379,7 +379,7 @@ export default function Login({ onLogin }) {
 
   if (screen === 'charselect') return (
     <CharacterSelect
-      chars={chars} me={me} stats={stats} mapNames={mapNames}
+      chars={chars} me={me} stats={stats} mapNames={mapNames} classes={classes}
       onEnterGame={enterGame}
       onCreate={() => setScreen('create')}
       onDelete={deleteChar}

@@ -143,6 +143,229 @@ function CharCard({ ch, mapName, onEnter, onDelete, busy, narrow }) {
 }
 
 
+
+// ── Scena wyboru postaci (desktop) ──────────────────────────────────────────
+// Po lewej opis klasy wybranej postaci, na środku bohaterowie na podeście,
+// po prawej lista postaci i wolne sloty.
+const IKONA_KLASY = {
+  Wojownik: '⚔', Paladyn: '✚', 'Tancerz Ostrzy': '⚡', Lowca: '🏹', Tropiciel: '🧭', Mag: '✦',
+};
+
+function PasekStatu({ etykieta, pct, wartosc, kolor, glow }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 7 }}>
+      <span style={{ color: S.muted, fontSize: 11, width: 42, letterSpacing: 1 }}>{etykieta}</span>
+      <Bar pct={pct} color={kolor} glow={glow} />
+      <span style={{ color: S.text, fontSize: 12, width: 58, textAlign: 'right' }}>{wartosc}</span>
+    </div>
+  );
+}
+
+function Scena({ chars, slots, classes, mapNames, onEnter, onDelete, onCreate, busy, canCreate }) {
+  const [wybrany, setWybrany] = useState(0);
+  const [confirm, setConfirm] = useState(false);
+  const idx = Math.min(wybrany, Math.max(0, chars.length - 1));
+  const ch = chars[idx];
+  const puste = Math.max(0, slots - chars.length);
+  const klasa = classes?.find(c => c.name === ch?.profesja);
+  const kolor = ch ? (PROF_COLOR[ch.profesja] || S.gold) : S.gold;
+
+  useEffect(() => { setConfirm(false); }, [idx]);
+
+  const maks = ch ? Math.max(ch.sila || 0, ch.zrecznosc || 0, ch.intelekt || 0, 10) : 10;
+
+  return (
+    <div style={{ display: 'flex', gap: 18, alignItems: 'stretch', width: '100%', minHeight: 520 }}>
+
+      {/* ── Lewa kolumna: klasa wybranej postaci ── */}
+      <div style={{ ...panel, width: 300, flexShrink: 0, padding: 18, display: 'flex', flexDirection: 'column' }}>
+        {ch ? (
+          <>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
+              <span style={{ fontSize: 22, color: kolor }}>{IKONA_KLASY[ch.profesja] || '◆'}</span>
+              <span style={{ fontFamily: S.serif, fontSize: 21, letterSpacing: 2, color: S.gold, textTransform: 'uppercase' }}>
+                {ch.profesja}
+              </span>
+            </div>
+            <div style={{ color: S.muted, fontSize: 12.5, lineHeight: 1.6, marginBottom: 16, minHeight: 72 }}>
+              {klasa?.opis || 'Bohater Veldorii, gotowy na własną historię.'}
+            </div>
+            <PasekStatu etykieta="PŻ" pct={ch.zycie_max > 0 ? Math.round((ch.zycie / ch.zycie_max) * 100) : 0}
+              wartosc={`${ch.zycie}/${ch.zycie_max}`} kolor="linear-gradient(90deg,#8e2f22,#e5624c)" glow="rgba(229,98,76,0.5)" />
+            <PasekStatu etykieta="EXP" pct={expPct(ch)} wartosc={`${expPct(ch)}%`}
+              kolor="linear-gradient(90deg,#2f6a3a,#5fd07a)" glow="rgba(95,208,122,0.45)" />
+            <PasekStatu etykieta="SIŁA" pct={Math.round(((ch.sila || 0) / maks) * 100)} wartosc={ch.sila ?? '—'}
+              kolor="linear-gradient(90deg,#2b5c8f,#4b9cff)" glow="rgba(75,156,255,0.45)" />
+            <PasekStatu etykieta="ZRĘ" pct={Math.round(((ch.zrecznosc || 0) / maks) * 100)} wartosc={ch.zrecznosc ?? '—'}
+              kolor="linear-gradient(90deg,#3f7a44,#7ad07a)" glow="rgba(122,208,122,0.4)" />
+            <PasekStatu etykieta="INT" pct={Math.round(((ch.intelekt || 0) / maks) * 100)} wartosc={ch.intelekt ?? '—'}
+              kolor="linear-gradient(90deg,#6b3f9a,#c07ae0)" glow="rgba(192,122,224,0.45)" />
+
+            {mapNames[ch.mapa] && (
+              <div style={{ marginTop: 'auto', paddingTop: 14, color: S.muted, fontSize: 12 }}>
+                📍 {mapNames[ch.mapa]}
+              </div>
+            )}
+          </>
+        ) : (
+          <div style={{ margin: 'auto', textAlign: 'center', color: S.muted, fontSize: 13 }}>
+            <div style={{ fontSize: 34, marginBottom: 10 }}>🛡</div>
+            Nie masz jeszcze żadnej postaci.<br />Wybierz wolny slot po prawej.
+          </div>
+        )}
+      </div>
+
+      {/* ── Środek: podest z bohaterami ── */}
+      <div style={{
+        flex: 1, minWidth: 0, position: 'relative', borderRadius: 16, overflow: 'hidden',
+        border: `1px solid ${S.lineSoft}`, background: 'linear-gradient(180deg, rgba(4,7,14,0.25), rgba(4,7,14,0.72))',
+        display: 'flex', alignItems: 'flex-end', justifyContent: 'center', padding: '28px 20px 34px',
+      }}>
+        {/* poświata podestu */}
+        <div style={{
+          position: 'absolute', left: '50%', bottom: 18, transform: 'translateX(-50%)',
+          width: 'min(88%, 620px)', height: 118, borderRadius: '50%',
+          background: 'radial-gradient(ellipse at 50% 50%, rgba(231,193,88,0.22), rgba(231,193,88,0.06) 55%, transparent 72%)',
+          pointerEvents: 'none',
+        }} />
+        <div style={{
+          position: 'absolute', left: '50%', bottom: 44, transform: 'translateX(-50%)',
+          width: 'min(80%, 560px)', height: 3,
+          background: 'linear-gradient(90deg, transparent, rgba(231,193,88,0.5), transparent)',
+        }} />
+
+        <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'center', gap: 'clamp(18px, 5vw, 64px)', position: 'relative', zIndex: 1 }}>
+          {chars.length === 0 && (
+            <div style={{ color: S.muted, fontSize: 14, paddingBottom: 40 }}>Pusta arena — stwórz pierwszego bohatera</div>
+          )}
+          {chars.map((c, i) => {
+            const akt = i === idx;
+            return (
+              <button key={c.id} onClick={() => setWybrany(i)} title={c.nazwa}
+                style={{
+                  background: 'none', border: 'none', padding: 0, cursor: 'pointer',
+                  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10,
+                  transition: 'transform .18s, opacity .18s',
+                  opacity: akt ? 1 : 0.55, transform: akt ? 'translateY(-6px)' : 'none',
+                }}
+              >
+                <div style={{
+                  width: 32, height: 48, transform: `scale(${akt ? 3.4 : 2.6})`, transformOrigin: 'bottom center',
+                  marginBottom: akt ? 96 : 66,
+                  backgroundImage: `url(/assets/${c.obrazek})`, backgroundPosition: '0 0',
+                  backgroundRepeat: 'no-repeat', imageRendering: 'pixelated',
+                  filter: akt ? 'drop-shadow(0 12px 16px rgba(0,0,0,0.85))' : 'drop-shadow(0 8px 12px rgba(0,0,0,0.8)) saturate(0.75)',
+                }} />
+                {/* banner z imieniem */}
+                <div style={{
+                  padding: '6px 16px', borderRadius: 8, minWidth: 130, textAlign: 'center',
+                  background: akt ? 'linear-gradient(180deg, rgba(231,193,88,0.16), rgba(4,7,14,0.88))' : 'rgba(4,7,14,0.7)',
+                  border: `1px solid ${akt ? 'rgba(231,193,88,0.55)' : S.lineSoft}`,
+                  boxShadow: akt ? '0 0 22px rgba(231,193,88,0.18)' : 'none',
+                }}>
+                  <div style={{ fontFamily: S.serif, fontSize: 15, color: akt ? S.gold : S.text }}>{c.nazwa}</div>
+                  <div style={{ color: S.muted, fontSize: 11 }}>Lv. {c.poziom}</div>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* ── Prawa kolumna: lista postaci ── */}
+      <div style={{ ...panel, width: 316, flexShrink: 0, padding: 16, display: 'flex', flexDirection: 'column' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, marginBottom: 14, color: S.gold }}>
+          <span style={{ opacity: 0.6 }}>⟶</span>
+          <span style={{ fontFamily: S.serif, fontSize: 13, letterSpacing: 3 }}>TWOJE POSTACIE</span>
+          <span style={{ opacity: 0.6 }}>⟵</span>
+        </div>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          {chars.map((c, i) => {
+            const akt = i === idx;
+            const kol = PROF_COLOR[c.profesja] || S.gold;
+            return (
+              <button key={c.id} onClick={() => setWybrany(i)}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 12, padding: '10px 12px', minHeight: 62,
+                  borderRadius: 10, cursor: 'pointer', textAlign: 'left',
+                  background: akt ? 'rgba(231,193,88,0.09)' : 'rgba(6,9,18,0.55)',
+                  border: `1px solid ${akt ? 'rgba(231,193,88,0.6)' : S.lineSoft}`,
+                  boxShadow: akt ? '0 0 18px rgba(231,193,88,0.12)' : 'none',
+                  transition: 'background .15s, border-color .15s',
+                }}
+              >
+                <span style={{
+                  width: 38, height: 44, flexShrink: 0, borderRadius: 7, overflow: 'hidden',
+                  background: 'radial-gradient(ellipse at 50% 95%, rgba(231,193,88,0.16), rgba(4,7,14,0.9) 70%)',
+                  border: `1px solid ${S.lineSoft}`, display: 'grid', placeItems: 'center',
+                }}>
+                  <span style={{
+                    width: 32, height: 48, transform: 'scale(0.86)', transformOrigin: 'center',
+                    backgroundImage: `url(/assets/${c.obrazek})`, backgroundPosition: '0 0',
+                    backgroundRepeat: 'no-repeat', imageRendering: 'pixelated',
+                  }} />
+                </span>
+                <span style={{ flex: 1, minWidth: 0 }}>
+                  <span style={{ display: 'block', fontFamily: S.serif, fontSize: 15, color: akt ? S.gold : S.text, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {c.nazwa}
+                  </span>
+                  <span style={{ display: 'block', color: S.muted, fontSize: 11 }}>Lv. {c.poziom}</span>
+                </span>
+                <span style={{ color: kol, fontSize: 16, flexShrink: 0 }}>{IKONA_KLASY[c.profesja] || '◆'}</span>
+                {!!c.zalogowany && <span style={{ color: S.green, fontSize: 10, flexShrink: 0 }}>●</span>}
+              </button>
+            );
+          })}
+
+          {Array.from({ length: puste }, (_, i) => (
+            <button key={`p${i}`} onClick={canCreate ? onCreate : undefined} disabled={!canCreate}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 12, padding: '10px 12px', minHeight: 62,
+                borderRadius: 10, cursor: canCreate ? 'pointer' : 'default', textAlign: 'left',
+                background: 'rgba(6,9,18,0.35)', border: `1px dashed ${S.line}`, color: S.muted,
+                opacity: canCreate ? 1 : 0.55,
+              }}
+            >
+              <span style={{
+                width: 38, height: 44, flexShrink: 0, borderRadius: 7, display: 'grid', placeItems: 'center',
+                border: `1px dashed ${S.line}`, color: S.gold, fontSize: 20,
+              }}>+</span>
+              <span style={{ fontFamily: S.serif, fontSize: 14 }}>Pusty slot</span>
+            </button>
+          ))}
+        </div>
+
+        <div style={{ marginTop: 'auto', paddingTop: 16 }}>
+          {confirm && ch ? (
+            <>
+              <div style={{ color: '#ffb3a6', fontSize: 12, textAlign: 'center', marginBottom: 8 }}>
+                Usunąć „{ch.nazwa}" bezpowrotnie?
+              </div>
+              <div style={{ display: 'flex', gap: 8 }}>
+                <button onClick={() => { onDelete(ch.id); setConfirm(false); }}
+                  style={{ ...ghostBtn(), flex: 1, minHeight: 46, color: '#ff8b78', borderColor: 'rgba(229,98,76,0.5)' }}>Tak, usuń</button>
+                <button onClick={() => setConfirm(false)} style={{ ...ghostBtn(), flex: 1, minHeight: 46 }}>Anuluj</button>
+              </div>
+            </>
+          ) : (
+            <>
+              <button onClick={() => ch && onEnter(ch.id)} disabled={!ch || busy}
+                style={{ ...goldBtn(), width: '100%', minHeight: 52, fontSize: 15, opacity: (!ch || busy) ? 0.55 : 1 }}>
+                ▶ Wejdź do gry
+              </button>
+              <div style={{ display: 'flex', justifyContent: 'center', marginTop: 10 }}>
+                <button onClick={() => ch && setConfirm(true)} disabled={!ch} title="Usuń postać" aria-label="Usuń postać"
+                  style={{ ...ghostBtn(), minHeight: 44, padding: '0 22px', opacity: ch ? 1 : 0.45 }}>🗑</button>
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ── Karuzela postaci (telefon) ───────────────────────────────────────────────
 // Trzy karty jedna pod drugą to na telefonie 1000 px przewijania, więc
 // pokazujemy jedną postać naraz: strzałki, kropki i przesuwanie palcem.
@@ -343,7 +566,7 @@ function EmptySlot({ onCreate, narrow }) {
 }
 
 export default function CharacterSelect({
-  chars = [], me, stats, mapNames = {}, onEnterGame, onCreate, onDelete, onLogout, onHome, onAdmin, loading, error,
+  chars = [], me, stats, mapNames = {}, classes = [], onEnterGame, onCreate, onDelete, onLogout, onHome, onAdmin, loading, error,
 }) {
   const narrow = useNarrow();
   const medium = useNarrow(1100);
@@ -428,19 +651,12 @@ export default function CharacterSelect({
               />
             </div>
           ) : (
-            <div style={{
-              // trzy kafelki obok siebie
-              flex: 1, minWidth: 0, display: 'grid', gap: 18,
-              gridTemplateColumns: `repeat(${medium ? 2 : 3}, minmax(0, 1fr))`,
-              justifyContent: 'stretch', justifyItems: 'center',
-            }}>
-              {chars.map(ch => (
-                <CharCard key={ch.id} ch={ch} mapName={mapNames[ch.mapa]} narrow={narrow}
-                          onEnter={onEnterGame} onDelete={onDelete} busy={loading} />
-              ))}
-              {Array.from({ length: Math.max(0, slots - chars.length) }, (_, i) => (
-                <EmptySlot key={`e${i}`} narrow={narrow} onCreate={canCreate ? onCreate : undefined} />
-              ))}
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <Scena
+                chars={chars} slots={slots} classes={classes} mapNames={mapNames}
+                busy={loading} canCreate={canCreate}
+                onEnter={onEnterGame} onDelete={onDelete} onCreate={onCreate}
+              />
             </div>
           )}
         </div>
