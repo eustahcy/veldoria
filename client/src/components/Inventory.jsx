@@ -1,6 +1,10 @@
 // Ekran ekwipunku: pasek zakładek, lalka postaci, plecak, karta przedmiotu.
 // Nakładka jest lekko przezroczysta — HUD gry (czat, kule, minimapa) zostaje widoczny.
 import { useState, useEffect, useCallback, useMemo } from 'react';
+import {
+  IconCoin, IconGem, IconBag, IconMap, IconUser, IconStar, IconScroll, IconBanner,
+  IconStore, IconSword, IconShield, IconMuscle, IconBow, IconBrain, IconCrosshair,
+} from '../Icons';
 import { api } from '../api';
 import { rarityOf, typeLabel, itemStats, headline, fmtNum, useIsNarrow, WEAPON_TYPES } from '../ui/kit';
 import { Ornate, hudColors as G } from './hud/GameHud';
@@ -210,7 +214,7 @@ export function ItemDetails({ item, compare, postac }) {
       )}
 
       {item.wartosc_sprzedazy > 0 && (
-        <div style={{ color: G.gold, fontSize: 12.5 }}>🪙 Wartość sprzedaży: <b>{fmtNum(item.wartosc_sprzedazy)}</b></div>
+        <div style={{ color: G.gold, fontSize: 12.5 }}><IconCoin size={12} /> Wartość sprzedaży: <b>{fmtNum(item.wartosc_sprzedazy)}</b></div>
       )}
     </div>
   );
@@ -218,13 +222,13 @@ export function ItemDetails({ item, compare, postac }) {
 
 // ── Pasek zakładek u góry ────────────────────────────────────────────────────
 const NAV = [
-  { id: 'mapa',     icon: '🗺', label: 'Mapa' },
-  { id: 'postac',   icon: '🧍', label: 'Postać' },
-  { id: 'ekwipunek', icon: '🎒', label: 'Ekwipunek' },
-  { id: 'talenty',  icon: '⭐', label: 'Talenty' },
-  { id: 'zadania',  icon: '📜', label: 'Zadania' },
-  { id: 'gildia',   icon: '⚜', label: 'Gildia' },
-  { id: 'aukcja',   icon: '🏪', label: 'Aukcja' },
+  { id: 'mapa',     icon: <IconMap size={14} />, label: 'Mapa' },
+  { id: 'postac',   icon: <IconUser size={14} />, label: 'Postać' },
+  { id: 'ekwipunek', icon: <IconBag size={14} />, label: 'Ekwipunek' },
+  { id: 'talenty',  icon: <IconStar size={14} />, label: 'Talenty' },
+  { id: 'zadania',  icon: <IconScroll size={14} />, label: 'Zadania' },
+  { id: 'gildia',   icon: <IconBanner size={14} />, label: 'Gildia' },
+  { id: 'aukcja',   icon: <IconStore size={14} />, label: 'Aukcja' },
 ];
 
 function TopNav({ postac, onNavigate, onClose, narrow }) {
@@ -417,12 +421,12 @@ export default function Inventory({ onClose, onRefresh, postac, onNavigate }) {
       <div style={{ marginTop: 16 }}>
         <Title>Statystyki</Title>
         {[
-          ['⚔', 'Atak', `${postac.obrazenia_min} – ${postac.obrazenia_max}`],
-          ['🛡', 'Obrona', postac.ac ?? 0],
-          ['💪', 'Siła', postac.sila ?? 0],
-          ['🏹', 'Zręczność', postac.zrecznosc ?? 0],
-          ['🧠', 'Inteligencja', postac.intelekt ?? 0],
-          ['🎯', 'Celność', postac.sa ?? 0],
+          [<IconSword size={13} />, 'Atak', `${postac.obrazenia_min} – ${postac.obrazenia_max}`],
+          [<IconShield size={13} />, 'Obrona', postac.ac ?? 0],
+          [<IconMuscle size={13} />, 'Siła', postac.sila ?? 0],
+          [<IconBow size={13} />, 'Zręczność', postac.zrecznosc ?? 0],
+          [<IconBrain size={13} />, 'Inteligencja', postac.intelekt ?? 0],
+          [<IconCrosshair size={13} />, 'Celność', postac.sa ?? 0],
         ].map(([ic, l, v]) => (
           <div key={l} style={{ display: 'flex', alignItems: 'center', gap: 9, fontSize: 13, padding: '3px 0' }}>
             <span style={{ width: 16, textAlign: 'center', opacity: 0.8 }}>{ic}</span>
@@ -456,7 +460,7 @@ export default function Inventory({ onClose, onRefresh, postac, onNavigate }) {
             }}>{c.label} <span style={{ opacity: 0.6, fontSize: 11 }}>{n}</span></button>
           );
         })}
-        <span style={{ marginLeft: 'auto', color: G.muted, fontSize: 12.5 }}>🎒 {bag.length} przedm.</span>
+        <span style={{ marginLeft: 'auto', color: G.muted, fontSize: 12.5 }}><IconBag size={13} /> {bag.length} przedm.</span>
         <select value={sort} onChange={e => setSort(e.target.value)} style={{
           padding: '7px 8px', borderRadius: 3, background: '#0c0a08', color: G.goldHi,
           border: `1px solid ${G.bronze}`, fontFamily: G.serif, fontSize: 12.5,
@@ -480,8 +484,8 @@ export default function Inventory({ onClose, onRefresh, postac, onNavigate }) {
         display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap', marginTop: 16, paddingTop: 14,
         borderTop: `1px solid ${G.bronze}66`,
       }}>
-        <span style={{ color: G.goldHi, fontSize: 14, whiteSpace: 'nowrap' }}>🪙 {fmtNum(postac.zloto)}</span>
-        {postac.event_tokeny > 0 && <span style={{ color: '#e88ad8', fontSize: 14 }}>💎 {fmtNum(postac.event_tokeny)}</span>}
+        <span style={{ color: G.goldHi, fontSize: 14, whiteSpace: 'nowrap' }}><IconCoin size={13} /> {fmtNum(postac.zloto)}</span>
+        {postac.event_tokeny > 0 && <span style={{ color: '#e88ad8', fontSize: 14 }}><IconGem size={13} /> {fmtNum(postac.event_tokeny)}</span>}
         {msg && <span style={{ fontSize: 12, color: msg.ok ? '#9be8ac' : '#ff8b78' }}>{msg.text}</span>}
         <div style={{ marginLeft: 'auto', display: 'flex', gap: 8, flexWrap: 'wrap' }}>
           <ActionBtn onClick={actUse} disabled={!canUse} tone="green">{useLabel}</ActionBtn>

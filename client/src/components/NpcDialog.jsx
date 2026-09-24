@@ -1,6 +1,10 @@
 // Okno rozmowy z NPC: menu z kartami, sklep, zadania, świątynia i tablica gildii.
 // Oprawa: ozdobna złota rama, scena z tłem mapy i dymek z wypowiedzią.
 import { useState, useEffect, useCallback } from 'react';
+import {
+  IconCoin, IconSword, IconShield, IconRing, IconFlask, IconBox, IconCart,
+  IconScroll, IconSparkles, IconBanner, IconChat, IconHome, IconLogout, IconBag, IconSearch,
+} from '../Icons';
 import { api } from '../api';
 import { hudColors as G } from './hud/GameHud';
 import { rarityOf, typeLabel, fmtNum } from '../ui/kit';
@@ -31,10 +35,10 @@ const SLOT_TYPES = {
 };
 // ikonka kategorii towaru w sklepie
 const CAT_ICON = (typ) => (
-  /Bron|Laska|Rozdzka/.test(typ) ? '⚔'
-    : /Zbroja|Helm|Tarcza|Rekawice|Buty/.test(typ) ? '🛡'
-      : /Pierscien|Naszyjnik|Talizman/.test(typ) ? '💍'
-        : typ === 'Konsupcyjne' ? '🧪' : '📦');
+  /Bron|Laska|Rozdzka/.test(typ) ? <IconSword size={13} />
+    : /Zbroja|Helm|Tarcza|Rekawice|Buty/.test(typ) ? <IconShield size={13} />
+      : /Pierscien|Naszyjnik|Talizman/.test(typ) ? <IconRing size={13} />
+        : typ === 'Konsupcyjne' ? <IconFlask size={13} /> : <IconBox size={13} />);
 
 const getStats = (item) => STAT_KEYS.map(([k, label, fmt]) => (item[k] ? { label, val: fmt(item) } : null)).filter(Boolean);
 
@@ -128,7 +132,7 @@ function ShopCard({ item, selected, canAfford, onClick }) {
     }}>
       <span style={{ width: 40, height: 40, backgroundImage: `url(/assets/${item.obrazek})`, backgroundSize: 'contain', backgroundPosition: 'center', backgroundRepeat: 'no-repeat', imageRendering: 'pixelated' }} />
       <span style={{ fontSize: 11, color: r.color, width: '100%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.nazwa}</span>
-      <span style={{ fontSize: 12, color: canAfford ? G.goldHi : '#ff8b78', fontFamily: G.serif }}>🪙 {fmtNum(item.wartosc_kupna || 0)}</span>
+      <span style={{ fontSize: 12, color: canAfford ? G.goldHi : '#ff8b78', fontFamily: G.serif }}><IconCoin size={11} /> {fmtNum(item.wartosc_kupna || 0)}</span>
     </button>
   );
 }
@@ -196,7 +200,7 @@ function ShopDetail({ item, equippedItem, gold, onBuy, buying, msg, msgType, nar
       )}
 
       <div style={{ padding: narrow ? 10 : 14, borderTop: `1px solid ${G.bronze}55`, flexShrink: 0 }}>
-        {[['Cena', `🪙 ${fmtNum(price)}`], ['Razem', `🪙 ${fmtNum(price * qty)}`]].map(([k, v]) => (
+        {[['Cena', `${fmtNum(price)} zł.`], ['Razem', `${fmtNum(price * qty)} zł.`]].map(([k, v]) => (
           <div key={k} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '5px 0', fontSize: 13 }}>
             <span style={{ color: G.muted, width: 62 }}>{k}:</span>
             <span style={{ flex: 1, height: 1, background: 'repeating-linear-gradient(90deg, rgba(231,193,88,0.14) 0 2px, transparent 2px 5px)' }} />
@@ -212,7 +216,7 @@ function ShopDetail({ item, equippedItem, gold, onBuy, buying, msg, msgType, nar
           </div>
         </div>
         <Gold onClick={onBuy} disabled={!canAll || buying} style={{ width: '100%', padding: '12px 18px', fontSize: 15 }}>
-          🛒 {buying ? 'Kupuję…' : canAll ? (qty > 1 ? `Kup ${qty} szt.` : 'Kup') : `Brakuje ${fmtNum(price * qty - gold)} złota`}
+          <IconCart size={13} /> {buying ? 'Kupuję…' : canAll ? (qty > 1 ? `Kup ${qty} szt.` : 'Kup') : `Brakuje ${fmtNum(price * qty - gold)} złota`}
         </Gold>
       </div>
     </div>
@@ -343,21 +347,21 @@ export default function NpcDialog({ npc, postac, mapa, onClose, onBought, onQues
   const W = (mapa?.maks_x ?? 0) + 1, H = (mapa?.maks_y ?? 0) + 1;
 
   const nav = [
-    ['menu', '🏠', 'Menu'],
-    npc.shop > 0 && ['shop', '🛒', 'Sklep'],
-    hasQuests && ['quests', '📜', 'Zadania'],
-    isTemple && ['temple', '✦', 'Uzdrowienie'],
-    isGuildBoard && ['guild', '⚜', 'Gildie'],
-    ['talk', '💬', 'Rozmowa'],
+    ['menu', <IconHome size={14} />, 'Menu'],
+    npc.shop > 0 && ['shop', <IconCart size={14} />, 'Sklep'],
+    hasQuests && ['quests', <IconScroll size={14} />, 'Zadania'],
+    isTemple && ['temple', <IconSparkles size={14} />, 'Uzdrowienie'],
+    isGuildBoard && ['guild', <IconBanner size={14} />, 'Gildie'],
+    ['talk', <IconChat size={14} />, 'Rozmowa'],
   ].filter(Boolean);
 
   const menuCards = [
-    npc.shop > 0 && { icon: '🧰', label: 'Sklep', sub: 'Przeglądaj towary', desc: 'Sprawdź dostępne przedmioty i zaopatrz się w najlepszy sprzęt.', fn: () => setView('shop') },
-    hasQuests && { icon: '📜', label: 'Zadania', sub: `${npcQuests.give.length} nowych · ${npcQuests.turnin.length} do oddania`, desc: 'Przyjmij nowe zlecenia albo odbierz nagrodę za wykonane.', fn: () => setView('quests') },
-    isTemple && { icon: '✦', label: 'Uzdrowienie', sub: templeData?.canHeal ? 'Dostępne teraz' : `Za ${templeData?.cooldownMins ?? '?'} min`, desc: 'Poproś o przywrócenie pełni życia mocą Światła.', fn: () => setView('temple') },
-    isGuildBoard && { icon: '⚜', label: 'Tablica gildii', sub: 'Rankingi i wojny', desc: 'Sprawdź najsilniejsze gildie świata i trwające wojny.', fn: () => setView('guild') },
-    { icon: '💬', label: 'Rozmowa', sub: 'Pogadaj z NPC', desc: 'Dowiedz się więcej, posłuchaj plotek lub zapytaj o okolicę.', fn: () => setView('talk') },
-    { icon: '👋', label: 'Do widzenia', sub: 'Zamknij dialog', desc: 'Na razie to wszystko. Do zobaczenia!', fn: onClose },
+    npc.shop > 0 && { icon: <IconBag size={18} />, label: 'Sklep', sub: 'Przeglądaj towary', desc: 'Sprawdź dostępne przedmioty i zaopatrz się w najlepszy sprzęt.', fn: () => setView('shop') },
+    hasQuests && { icon: <IconScroll size={18} />, label: 'Zadania', sub: `${npcQuests.give.length} nowych · ${npcQuests.turnin.length} do oddania`, desc: 'Przyjmij nowe zlecenia albo odbierz nagrodę za wykonane.', fn: () => setView('quests') },
+    isTemple && { icon: <IconSparkles size={18} />, label: 'Uzdrowienie', sub: templeData?.canHeal ? 'Dostępne teraz' : `Za ${templeData?.cooldownMins ?? '?'} min`, desc: 'Poproś o przywrócenie pełni życia mocą Światła.', fn: () => setView('temple') },
+    isGuildBoard && { icon: <IconBanner size={18} />, label: 'Tablica gildii', sub: 'Rankingi i wojny', desc: 'Sprawdź najsilniejsze gildie świata i trwające wojny.', fn: () => setView('guild') },
+    { icon: <IconChat size={18} />, label: 'Rozmowa', sub: 'Pogadaj z NPC', desc: 'Dowiedz się więcej, posłuchaj plotek lub zapytaj o okolicę.', fn: () => setView('talk') },
+    { icon: <IconLogout size={18} />, label: 'Do widzenia', sub: 'Zamknij dialog', desc: 'Na razie to wszystko. Do zobaczenia!', fn: onClose },
   ].filter(Boolean);
 
   return (
@@ -403,7 +407,7 @@ export default function NpcDialog({ npc, postac, mapa, onClose, onBought, onQues
           </div>
           {view === 'shop' && !narrow && (
             <span style={{ padding: '8px 14px', borderRadius: 999, border: `1px solid ${G.bronze}`, background: 'linear-gradient(180deg,#191510,#0d0b08)', color: G.goldHi, fontSize: 14, whiteSpace: 'nowrap' }}>
-              🪙 {fmtNum(gold)}
+              <IconCoin size={12} /> {fmtNum(gold)}
             </span>
           )}
           <button onClick={onClose} aria-label="Zamknij" style={{
@@ -491,7 +495,7 @@ export default function NpcDialog({ npc, postac, mapa, onClose, onBought, onQues
 
                 <div style={{ display: 'flex', gap: 8, padding: narrow ? 12 : '14px 16px 8px', flexShrink: 0, alignItems: 'center' }}>
                   <div style={{ flex: 1, minWidth: 0, position: 'relative' }}>
-                    <span style={{ position: 'absolute', left: 11, top: '50%', transform: 'translateY(-50%)', color: G.goldDim, fontSize: 13 }}>🔍</span>
+                    <span style={{ position: 'absolute', left: 11, top: '50%', transform: 'translateY(-50%)', color: G.goldDim }}><IconSearch size={12} /></span>
                     <input value={filter} onChange={e => setFilter(e.target.value)} placeholder="Szukaj przedmiotu…" style={{
                       width: '100%', boxSizing: 'border-box', padding: '10px 12px 10px 32px', borderRadius: 4, background: '#0b0907',
                       color: G.text, border: `1px solid ${G.bronze}`, fontSize: 13, outline: 'none', fontFamily: FONT,
@@ -507,7 +511,7 @@ export default function NpcDialog({ npc, postac, mapa, onClose, onBought, onQues
                     <option value="poziom">Wymagany poziom</option>
                     <option value="nazwa">Nazwa A–Z</option>
                   </select>
-                  {narrow && <span style={{ color: G.goldHi, fontSize: 13, whiteSpace: 'nowrap' }}>🪙 {fmtNum(gold)}</span>}
+                  {narrow && <span style={{ color: G.goldHi, fontSize: 13, whiteSpace: 'nowrap' }}><IconCoin size={12} /> {fmtNum(gold)}</span>}
                 </div>
 
                 {allCats.length > 1 && (
@@ -604,7 +608,7 @@ export default function NpcDialog({ npc, postac, mapa, onClose, onBought, onQues
                       <div style={{ color: G.text, fontSize: 13, margin: '6px 0 10px', lineHeight: 1.55 }}>{q.tekst_koniec || q.opis}</div>
                       <div style={{ display: 'flex', gap: 14, fontSize: 13, marginBottom: 10 }}>
                         {q.nagroda_exp > 0 && <span style={{ color: '#67e8f9' }}>+{fmtNum(q.nagroda_exp)} EXP</span>}
-                        {q.nagroda_zloto > 0 && <span style={{ color: G.goldHi }}>🪙 {fmtNum(q.nagroda_zloto)}</span>}
+                        {q.nagroda_zloto > 0 && <span style={{ color: G.goldHi }}><IconCoin size={11} /> {fmtNum(q.nagroda_zloto)}</span>}
                       </div>
                       <Gold tone="green" onClick={() => turninQuest(q)}>Odbierz nagrody →</Gold>
                     </div>
@@ -621,7 +625,7 @@ export default function NpcDialog({ npc, postac, mapa, onClose, onBought, onQues
                       <div style={{ color: G.text, fontSize: 13, margin: '6px 0 10px', lineHeight: 1.55 }}>{q.tekst_start || q.opis}</div>
                       <div style={{ display: 'flex', gap: 14, fontSize: 13, marginBottom: 10, flexWrap: 'wrap' }}>
                         {q.nagroda_exp > 0 && <span style={{ color: '#67e8f9' }}>+{fmtNum(q.nagroda_exp)} EXP</span>}
-                        {q.nagroda_zloto > 0 && <span style={{ color: G.goldHi }}>🪙 {fmtNum(q.nagroda_zloto)}</span>}
+                        {q.nagroda_zloto > 0 && <span style={{ color: G.goldHi }}><IconCoin size={11} /> {fmtNum(q.nagroda_zloto)}</span>}
                         <span style={{ color: G.muted }}>Cel: {q.cel_ilosc}×</span>
                       </div>
                       <Gold onClick={() => acceptQuest(q)}>Przyjmij zadanie</Gold>
@@ -665,8 +669,8 @@ export default function NpcDialog({ npc, postac, mapa, onClose, onBought, onQues
                   </div>
                 </div>
                 <div style={{ display: 'flex', gap: 10, marginTop: 14, flexWrap: 'wrap' }}>
-                  {npc.shop > 0 && <Gold onClick={() => setView('shop')}>🛒 Przejdź do sklepu</Gold>}
-                  {hasQuests && <Gold onClick={() => setView('quests')}>📜 Pokaż zadania</Gold>}
+                  {npc.shop > 0 && <Gold onClick={() => setView('shop')}><IconCart size={13} /> Przejdź do sklepu</Gold>}
+                  {hasQuests && <Gold onClick={() => setView('quests')}><IconScroll size={13} /> Pokaż zadania</Gold>}
                   <Gold onClick={() => setView('menu')}>← Wróć do menu</Gold>
                 </div>
               </div>
@@ -691,7 +695,7 @@ export default function NpcDialog({ npc, postac, mapa, onClose, onBought, onQues
           {/* ── TABLICA GILDII ── */}
           {view === 'guild' && (
             <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', padding: narrow ? 12 : '18px 22px' }}>
-              <div style={{ fontFamily: G.serif, color: G.goldHi, fontSize: 16, marginBottom: 12 }}>⚜ Ranking gildii</div>
+              <div style={{ fontFamily: G.serif, color: G.goldHi, fontSize: 16, marginBottom: 12 }}><IconBanner size={14} /> Ranking gildii</div>
               {!guildData && <div style={{ color: G.dim, textAlign: 'center', padding: 30 }}>Wczytywanie…</div>}
               {guildData?.topGuilds?.length === 0 && <div style={{ color: G.dim, textAlign: 'center', padding: 30 }}>Brak gildii w świecie Veldorii.</div>}
               {(guildData?.topGuilds || []).map((g, i) => (
@@ -706,7 +710,7 @@ export default function NpcDialog({ npc, postac, mapa, onClose, onBought, onQues
               ))}
               {guildData?.recentWars?.length > 0 && (
                 <>
-                  <div style={{ fontFamily: G.serif, color: '#ff9b8b', fontSize: 15, margin: '16px 0 8px' }}>⚔ Trwające wojny</div>
+                  <div style={{ fontFamily: G.serif, color: '#ff9b8b', fontSize: 15, margin: '16px 0 8px' }}><IconSword size={13} /> Trwające wojny</div>
                   {guildData.recentWars.map((w, i) => (
                     <div key={i} style={{ padding: '9px 12px', marginBottom: 6, borderRadius: 4, background: 'rgba(58,20,16,0.4)', border: '1px solid #a8281c66', fontSize: 13 }}>
                       <b style={{ color: '#ff9b8b' }}>{w.atakujacy_nazwa}</b> przeciw <b style={{ color: '#6fb2ff' }}>{w.bronicy_nazwa}</b>

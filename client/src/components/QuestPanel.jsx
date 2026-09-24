@@ -1,17 +1,18 @@
 import { useState, useEffect, useCallback } from 'react';
-import { api } from '../api';
 import {
-  IconX, IconCheck, IconSword, IconMap, IconBag, IconZap,
-  IconScroll, IconAward, IconClock, IconTrophy, IconTrendingUp, IconChevronRight,
+  IconSword, IconMap, IconBag, IconStar, IconLink, IconRefresh, IconCalendar,
+  IconGift, IconScroll, IconCheck, IconAward, IconTrophy, IconSkull,
+  IconX, IconZap, IconClock, IconTrendingUp, IconChevronRight,
 } from '../Icons';
+import { api } from '../api';
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 const TYPE_META = {
-  kill:     { icon: '⚔', color: '#F87171', label: 'Zabij' },
-  location: { icon: '🗺', color: '#e7c158', label: 'Odwiedź' },
-  item:     { icon: '🎒', color: '#FCD34D', label: 'Zbierz' },
-  level:    { icon: '⭐', color: '#A5B4FC', label: 'Poziom' },
-  chain:    { icon: '🔗', color: '#4ADE80', label: 'Łańcuch' },
+  kill:     { icon: <IconSword size={12} />, color: '#F87171', label: 'Zabij' },
+  location: { icon: <IconMap size={12} />, color: '#e7c158', label: 'Odwiedź' },
+  item:     { icon: <IconBag size={12} />, color: '#FCD34D', label: 'Zbierz' },
+  level:    { icon: <IconStar size={12} />, color: '#A5B4FC', label: 'Poziom' },
+  chain:    { icon: <IconLink size={12} />, color: '#4ADE80', label: 'Łańcuch' },
 };
 
 const REP_COLORS = {
@@ -71,8 +72,8 @@ function QuestCard({ q, onTurnIn }) {
           <div style={{ display: 'flex', gap: 6, marginTop: 6, flexWrap: 'wrap', alignItems: 'center' }}>
             {q.nagroda_exp > 0  && pill('#06B6D4', `+${q.nagroda_exp} EXP`)}
             {q.nagroda_zloto > 0 && pill('#FCD34D', `+${q.nagroda_zloto}g`)}
-            {q.reset_typ === 'dziennie'    && pill('#A78BFA', '🔄 Dzienny')}
-            {q.reset_typ === 'tygodniowo'  && pill('#60A5FA', '📅 Tygodniowy')}
+            {q.reset_typ === 'dziennie'    && pill('#A78BFA', 'Dzienny')}
+            {q.reset_typ === 'tygodniowo'  && pill('#60A5FA', 'Tygodniowy')}
           </div>
           {/* Turn-in */}
           {done && q.status === 'aktywny' && (
@@ -128,7 +129,7 @@ function RewardChoice({ choices, questId, onChoose, onClose }) {
   return (
     <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.88)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10, borderRadius: 12 }}>
       <div style={{ background: 'rgba(20,16,12,0.99)', border: '1px solid rgba(200,150,32,0.4)', borderRadius: 10, padding: '20px 24px', minWidth: 280, maxWidth: 360 }}>
-        <div style={{ color: '#f7e3a4', fontWeight: 'bold', fontSize: 14, marginBottom: 5 }}>🎁 Wybierz nagrodę</div>
+        <div style={{ color: '#f7e3a4', fontWeight: 'bold', fontSize: 14, marginBottom: 5 }}><IconGift size={13} /> Wybierz nagrodę</div>
         <div style={{ color: '#9a9182', fontSize: 9, marginBottom: 14 }}>Wybierz jedną nagrodę za ukończenie questa:</div>
         {choices.map((c, i) => (
           <button key={i} onClick={() => onChoose(questId, i)} style={{
@@ -238,7 +239,7 @@ export default function QuestPanel({ onClose, onReward }) {
 
         {/* Header */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '9px 16px', background: 'rgba(12,10,8,0.6)', borderBottom: '1px solid rgba(200,150,32,0.12)', flexShrink: 0 }}>
-          <span style={{ fontSize: 16 }}>📜</span>
+          <span style={{ color: '#e7c158', display: 'flex' }}><IconScroll size={15} /></span>
           <span style={{ color: '#f7e3a4', fontWeight: 'bold', fontSize: 13 }}>Dziennik Questów</span>
           <span style={{ color: '#9a9182', fontSize: 9 }}>— {active.length} aktywnych</span>
           <button onClick={onClose} style={{ marginLeft: 'auto', background: 'none', border: 'none', color: '#9a9182', cursor: 'pointer', display: 'flex' }}>
@@ -288,7 +289,7 @@ export default function QuestPanel({ onClose, onReward }) {
               {/* ── ACTIVE ── */}
               {tab === 'active' && (
                 active.length === 0
-                  ? <Empty icon="📜" text="Brak aktywnych questów — porozmawiaj z NPC!" />
+                  ? <Empty icon={<IconScroll size={26} />} text="Brak aktywnych questów — porozmawiaj z NPC!" />
                   : active.map(q => <QuestCard key={q.id} q={q} onTurnIn={turnIn} />)
               )}
 
@@ -310,11 +311,11 @@ export default function QuestPanel({ onClose, onReward }) {
               {/* ── DAILY ── */}
               {tab === 'daily' && (
                 daily.length === 0
-                  ? <Empty icon="🔄" text="Brak dziennych questów" />
+                  ? <Empty icon={<IconRefresh size={26} />} text="Brak dziennych questów" />
                   : daily.map(q => (
                     <div key={q.id} style={{ padding: '10px 12px', background: 'rgba(16,13,10,0.6)', border: '1px solid rgba(167,139,250,0.18)', borderRadius: 8, marginBottom: 6, borderLeft: '3px solid #A78BFA' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 3 }}>
-                        <span style={{ color: '#e8e2d4', fontWeight: 'bold', fontSize: 11 }}>🔄 {q.nazwa}</span>
+                        <span style={{ color: '#e8e2d4', fontWeight: 'bold', fontSize: 11 }}><IconRefresh size={11} /> {q.nazwa}</span>
                         {q.doneToday && pill('#4ADE80', '✓ Dziś ukończony')}
                       </div>
                       <div style={{ color: '#9a9182', fontSize: 9, marginBottom: 6 }}>{q.opis}</div>
@@ -335,11 +336,11 @@ export default function QuestPanel({ onClose, onReward }) {
               {/* ── WEEKLY ── */}
               {tab === 'weekly' && (
                 weekly.length === 0
-                  ? <Empty icon="📅" text="Brak tygodniowych questów" />
+                  ? <Empty icon={<IconCalendar size={26} />} text="Brak tygodniowych questów" />
                   : weekly.map(q => (
                     <div key={q.id} style={{ padding: '10px 12px', background: 'rgba(16,13,10,0.6)', border: '1px solid rgba(96,165,250,0.18)', borderRadius: 8, marginBottom: 6, borderLeft: '3px solid #60A5FA' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 3 }}>
-                        <span style={{ color: '#e8e2d4', fontWeight: 'bold', fontSize: 11 }}>📅 {q.nazwa}</span>
+                        <span style={{ color: '#e8e2d4', fontWeight: 'bold', fontSize: 11 }}><IconCalendar size={11} /> {q.nazwa}</span>
                         {q.doneThisWeek && pill('#4ADE80', '✓ Ten tydzień')}
                       </div>
                       <div style={{ color: '#9a9182', fontSize: 9, marginBottom: 6 }}>{q.opis}</div>
@@ -360,14 +361,14 @@ export default function QuestPanel({ onClose, onReward }) {
               {/* ── CHAINS ── */}
               {tab === 'chains' && (
                 chains.length === 0
-                  ? <Empty icon="🔗" text="Brak łańcuchów questów" />
+                  ? <Empty icon={<IconLink size={26} />} text="Brak łańcuchów questów" />
                   : chains.map(c => (
                     <div key={c.id} style={{ padding: '10px 12px', background: 'rgba(16,13,10,0.6)', border: '1px solid rgba(200,150,32,0.15)', borderRadius: 8, marginBottom: 6 }}>
-                      <div style={{ color: '#f7e3a4', fontWeight: 'bold', fontSize: 11, marginBottom: 3 }}>🔗 {c.nazwa}</div>
+                      <div style={{ color: '#f7e3a4', fontWeight: 'bold', fontSize: 11, marginBottom: 3 }}><IconLink size={11} /> {c.nazwa}</div>
                       {c.opis && <div style={{ color: '#9a9182', fontSize: 9, marginBottom: 6 }}>{c.opis}</div>}
                       <Bar pct={c.done / c.total} color='#e7c158' />
                       <div style={{ color: '#9a9182', fontSize: 8, marginTop: 3 }}>{c.done}/{c.total} questów ukończonych</div>
-                      {c.nagroda_tytul && <div style={{ color: '#FCD34D', fontSize: 9, marginTop: 5 }}>Nagroda: 🏅 {c.nagroda_tytul}</div>}
+                      {c.nagroda_tytul && <div style={{ color: '#FCD34D', fontSize: 9, marginTop: 5 }}>Nagroda: <IconAward size={10} /> {c.nagroda_tytul}</div>}
                     </div>
                   ))
               )}
@@ -375,11 +376,11 @@ export default function QuestPanel({ onClose, onReward }) {
               {/* ── HISTORY ── */}
               {tab === 'history' && (
                 history.length === 0
-                  ? <Empty icon="📖" text="Brak historii questów" />
+                  ? <Empty icon={<IconScroll size={26} />} text="Brak historii questów" />
                   : history.map(h => (
                     <div key={h.id} style={{ display: 'flex', gap: 10, alignItems: 'center', padding: '7px 10px', background: 'rgba(20,16,12,0.4)', border: '1px solid rgba(34,197,94,0.08)', borderRadius: 6, marginBottom: 4 }}>
                       <span style={{ fontSize: 16, flexShrink: 0 }}>
-                        {h.zakonczenie === 'dobre' ? '😊' : h.zakonczenie === 'zle' ? '💀' : '✓'}
+                        {h.zakonczenie === 'dobre' ? <IconCheck size={12} /> : h.zakonczenie === 'zle' ? <IconSkull size={12} /> : <IconCheck size={12} />}
                       </span>
                       <div style={{ flex: 1 }}>
                         <div style={{ color: '#e8e2d4', fontSize: 10, fontWeight: 'bold' }}>{h.quest_nazwa}</div>
@@ -394,7 +395,7 @@ export default function QuestPanel({ onClose, onReward }) {
               {/* ── ACHIEVEMENTS ── */}
               {tab === 'achievements' && (
                 achievements.length === 0
-                  ? <Empty icon="🏆" text="Ładowanie osiągnięć..." />
+                  ? <Empty icon={<IconTrophy size={26} />} text="Ładowanie osiągnięć..." />
                   : <>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
                       <span style={{ color: '#9a9182', fontSize: 9 }}>{achievements.filter(a => a.unlocked).length}/{achievements.length} odblokowanych</span>
@@ -409,7 +410,7 @@ export default function QuestPanel({ onClose, onReward }) {
               {/* ── REPUTATION ── */}
               {tab === 'reputation' && (
                 reputation.length === 0
-                  ? <Empty icon="🏅" text="Ładowanie reputacji..." />
+                  ? <Empty icon={<IconAward size={26} />} text="Ładowanie reputacji..." />
                   : reputation.map(f => {
                     const color = REP_COLORS[f.poziom] || '#9CA3AF';
                     const pct   = Math.min(1, f.punkty / 1000);

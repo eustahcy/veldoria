@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { IconAward, IconStar } from '../Icons';
 import { api } from '../api';
 import {
   IconSword, IconShield, IconZap, IconRun, IconBrain,
@@ -391,12 +392,12 @@ export default function CharPanel({
 
       {/* Action buttons row 3: Titles + Prestige + Talents */}
       <div style={{ display:'flex', gap:3, padding:'0 8px 4px' }}>
-        <ActBtn icon={<span>🏅</span>} label="Tytuły" onClick={() => setShowTitles(v=>!v)} active={showTitles} small title="Tytuły postaci" />
+        <ActBtn icon={<IconAward size={14} />} label="Tytuły" onClick={() => setShowTitles(v=>!v)} active={showTitles} small title="Tytuły postaci" />
         {onTalents && (
           <ActBtn
             icon={
               <span style={{ position:'relative', display:'inline-flex' }}>
-                ⭐
+                <IconStar size={14} />
                 {postac.punkty_talentow > 0 && (
                   <span style={{
                     position:'absolute', top:-4, right:-6, width:8, height:8,

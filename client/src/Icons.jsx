@@ -557,3 +557,44 @@ export function IconMessages({ size }) {
     </Svg>
   );
 }
+export function IconRing({ size }) {
+  return (
+    <Svg size={size}>
+      <circle cx="12" cy="14" r="6" />
+      <path d="M9 7l3-4 3 4" />
+    </Svg>
+  );
+}
+export function IconBox({ size }) {
+  return (
+    <Svg size={size}>
+      <path d="M3 8l9-5 9 5v8l-9 5-9-5V8z" />
+      <path d="M3 8l9 5 9-5M12 13v8" />
+    </Svg>
+  );
+}
+export function IconLink({ size }) {
+  return (
+    <Svg size={size}>
+      <path d="M10 13a5 5 0 007 0l2-2a5 5 0 00-7-7l-1 1" />
+      <path d="M14 11a5 5 0 00-7 0l-2 2a5 5 0 007 7l1-1" />
+    </Svg>
+  );
+}
+export function IconCalendar({ size }) {
+  return (
+    <Svg size={size}>
+      <rect x="3" y="5" width="18" height="16" rx="2" />
+      <path d="M3 10h18M8 3v4M16 3v4" />
+    </Svg>
+  );
+}
+export function IconHome({ size }) {
+  return (
+    <Svg size={size}>
+      <path d="M3 11l9-7 9 7" />
+      <path d="M5 10v10h14V10" />
+      <path d="M10 20v-6h4v6" />
+    </Svg>
+  );
+}
