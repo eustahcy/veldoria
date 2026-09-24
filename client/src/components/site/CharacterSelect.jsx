@@ -162,6 +162,7 @@ function PasekStatu({ etykieta, pct, wartosc, kolor, glow }) {
 }
 
 function Scena({ chars, slots, classes, mapNames, onEnter, onDelete, onCreate, busy, canCreate, konto }) {
+  const ciasno = useNarrow(1280);     // mniejsze panele, żeby podest nie zginął
   const [wybrany, setWybrany] = useState(0);
   const [confirm, setConfirm] = useState(false);
   const idx = Math.min(wybrany, Math.max(0, chars.length - 1));
@@ -175,10 +176,10 @@ function Scena({ chars, slots, classes, mapNames, onEnter, onDelete, onCreate, b
   const maks = ch ? Math.max(ch.sila || 0, ch.zrecznosc || 0, ch.intelekt || 0, 10) : 10;
 
   return (
-    <div style={{ display: 'flex', gap: 18, alignItems: 'stretch', width: '100%', minHeight: 520 }}>
+    <div style={{ display: 'flex', gap: ciasno ? 12 : 18, alignItems: 'stretch', width: '100%', minHeight: 520 }}>
 
       {/* ── Lewa kolumna: klasa wybranej postaci ── */}
-      <div style={{ ...panel, width: 272, flexShrink: 0, padding: 18, display: 'flex', flexDirection: 'column' }}>
+      <div style={{ ...panel, width: ciasno ? 236 : 272, flexShrink: 0, padding: ciasno ? 14 : 18, display: 'flex', flexDirection: 'column' }}>
         {ch ? (
           <>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
@@ -253,9 +254,9 @@ function Scena({ chars, slots, classes, mapNames, onEnter, onDelete, onCreate, b
                 }}
               >
                 {/* sprite rośnie w górę od podłogi, więc pudełko ma stałą wysokość */}
-                <div style={{ height: 212, display: 'grid', alignItems: 'end', justifyItems: 'center' }}>
+                <div style={{ height: ciasno ? 178 : 212, display: 'grid', alignItems: 'end', justifyItems: 'center' }}>
                   <div style={{
-                    width: 32, height: 48, transform: `scale(${akt ? 4 : 3})`, transformOrigin: 'bottom center',
+                    width: 32, height: 48, transform: `scale(${(akt ? 4 : 3) * (ciasno ? 0.8 : 1)})`, transformOrigin: 'bottom center',
                     backgroundImage: `url(/assets/${c.obrazek})`, backgroundPosition: '0 0',
                     backgroundRepeat: 'no-repeat', imageRendering: 'pixelated',
                     filter: akt ? 'drop-shadow(0 12px 16px rgba(0,0,0,0.85))' : 'drop-shadow(0 8px 12px rgba(0,0,0,0.8)) saturate(0.7)',
@@ -263,7 +264,7 @@ function Scena({ chars, slots, classes, mapNames, onEnter, onDelete, onCreate, b
                 </div>
                 {/* banner z imieniem */}
                 <div style={{
-                  padding: '6px 16px', borderRadius: 8, minWidth: 130, textAlign: 'center',
+                  padding: ciasno ? '5px 10px' : '6px 16px', borderRadius: 8, minWidth: ciasno ? 96 : 130, textAlign: 'center',
                   background: akt ? 'linear-gradient(180deg, rgba(231,193,88,0.16), rgba(4,7,14,0.88))' : 'rgba(4,7,14,0.7)',
                   border: `1px solid ${akt ? 'rgba(231,193,88,0.55)' : S.lineSoft}`,
                   boxShadow: akt ? '0 0 22px rgba(231,193,88,0.18)' : 'none',
@@ -278,7 +279,7 @@ function Scena({ chars, slots, classes, mapNames, onEnter, onDelete, onCreate, b
       </div>
 
       {/* ── Prawa kolumna: lista postaci ── */}
-      <div style={{ ...panel, width: 296, flexShrink: 0, padding: 16, display: 'flex', flexDirection: 'column' }}>
+      <div style={{ ...panel, width: ciasno ? 252 : 296, flexShrink: 0, padding: ciasno ? 13 : 16, display: 'flex', flexDirection: 'column' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, marginBottom: 14, color: S.gold }}>
           <span style={{ opacity: 0.6 }}>⟶</span>
           <span style={{ fontFamily: S.serif, fontSize: 13, letterSpacing: 3 }}>TWOJE POSTACIE</span>
