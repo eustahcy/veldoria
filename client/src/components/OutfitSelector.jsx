@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { IconTunic, IconLock } from '../Icons';
 import { api } from '../api';
 import { IconX, IconCheck } from '../Icons';
 
@@ -47,7 +48,7 @@ export default function OutfitSelector({ postac, onClose, onChanged }) {
       }}>
         {/* Header */}
         <div style={{ display:'flex', alignItems:'center', gap:10, padding:'10px 16px', background:'rgba(14,12,9,0.6)', borderBottom:'1px solid rgba(200,150,32,0.15)' }}>
-          <span style={{ fontSize:16 }}>👘</span>
+          <span style={{ color:'#C8940A', display:'flex' }}><IconTunic size={15} /></span>
           <span style={{ color:'#f7e3a4', fontWeight:'bold', fontSize:13 }}>Wybór Wyglądu Postaci</span>
           <span style={{ color:'#6b6456', fontSize:10, marginLeft:4 }}>poz. {postac.poziom} · {postac.profesja}</span>
           <button onClick={onClose} style={{ marginLeft:'auto', background:'none', border:'none', color:'#6b6456', cursor:'pointer' }}>
@@ -127,7 +128,7 @@ export default function OutfitSelector({ postac, onClose, onChanged }) {
                       filter:'grayscale(1) brightness(0.4)',
                     }} />
                     <div style={{ color:'#6b6456', fontSize:10, textAlign:'center' }}>{outfit.label}</div>
-                    <div style={{ fontSize:8, color:'#5e584c' }}>🔒 poz. {outfit.minLevel}</div>
+                    <div style={{ fontSize:8, color:'#5e584c' }}><IconLock size={9} /> poz. {outfit.minLevel}</div>
                   </div>
                 ))}
               </div>

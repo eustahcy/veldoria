@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { IconSword, IconShield, IconDagger, IconBow, IconCompass, IconSparkles, IconScroll } from './../Icons';
 import { lazy, Suspense } from 'react';
 import Landing from './site/Landing';
 import AuthScreen from './site/AuthScreen';
@@ -31,12 +32,12 @@ function useW() {
 }
 
 const CLASS_DATA = {
-  Wojownik:         { icon: '⚔',  col: '#E05050', sila:8,  zrecznosc:4,  intelekt:2,  lore: 'Nieustraszony obrońca — stal i krew, ból i chwała.' },
-  Paladyn:          { icon: '🛡',  col: '#F0A030', sila:6,  zrecznosc:4,  intelekt:5,  lore: 'Boskie ostrze i święta tarcza. Bóg jest jego mieczem.' },
-  'Tancerz Ostrzy': { icon: '🗡',  col: '#D060B0', sila:5,  zrecznosc:9,  intelekt:2,  lore: 'Cień i ostrze. Śmierć, zanim ją zobaczysz.' },
-  Lowca:            { icon: '🏹',  col: '#50C060', sila:3,  zrecznosc:8,  intelekt:4,  lore: 'Oko sokoła, serce wilka. Strzała nie chybia.' },
-  Tropiciel:        { icon: '🌿',  col: '#30B0A0', sila:4,  zrecznosc:7,  intelekt:4,  lore: 'Las jest domem. Potwory — przeznaczeniem.' },
-  Mag:              { icon: '✨',  col: '#9070F0', sila:2,  zrecznosc:3,  intelekt:10, lore: 'Ogień, lód i piorun — żywioły śpiewają jego imię.' },
+  Wojownik:         { icon: <IconSword size={22} />,  col: '#E05050', sila:8,  zrecznosc:4,  intelekt:2,  lore: 'Nieustraszony obrońca — stal i krew, ból i chwała.' },
+  Paladyn:          { icon: <IconShield size={22} />,  col: '#F0A030', sila:6,  zrecznosc:4,  intelekt:5,  lore: 'Boskie ostrze i święta tarcza. Bóg jest jego mieczem.' },
+  'Tancerz Ostrzy': { icon: <IconDagger size={22} />,  col: '#D060B0', sila:5,  zrecznosc:9,  intelekt:2,  lore: 'Cień i ostrze. Śmierć, zanim ją zobaczysz.' },
+  Lowca:            { icon: <IconBow size={22} />,  col: '#50C060', sila:3,  zrecznosc:8,  intelekt:4,  lore: 'Oko sokoła, serce wilka. Strzała nie chybia.' },
+  Tropiciel:        { icon: <IconCompass size={22} />,  col: '#30B0A0', sila:4,  zrecznosc:7,  intelekt:4,  lore: 'Las jest domem. Potwory — przeznaczeniem.' },
+  Mag:              { icon: <IconSparkles size={22} />,  col: '#9070F0', sila:2,  zrecznosc:3,  intelekt:10, lore: 'Ogień, lód i piorun — żywioły śpiewają jego imię.' },
 };
 
 // ── Animated background ────────────────────────────────────────────────────────
@@ -212,7 +213,7 @@ function CreateCharacter({ classes, onBack, onSuccess }) {
 
       {/* Step indicator */}
       <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:sm?20:28 }}>
-        {[{n:1,l:'Klasa',i:'⚔'},{n:2,l:'Imię',i:'📜'}].map(({n,l,i})=>(
+        {[{n:1,l:'Klasa',i:<IconSword size={12} />},{n:2,l:'Imię',i:<IconScroll size={12} />}].map(({n,l,i})=>(
           <div key={n} style={{ display:'flex', alignItems:'center' }}>
             <div style={{ display:'flex', alignItems:'center', gap:6 }}>
               <div style={{ width:30, height:30, borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', fontSize:13, background:step>=n?'rgba(140,90,10,0.3)':'rgba(8,14,28,0.8)', border:`1px solid ${step>=n?'rgba(200,150,40,0.5)':'rgba(200,150,40,0.1)'}`, boxShadow:step>=n?'0 0 14px rgba(200,150,40,0.2)':'none', transition:'all .25s', flexShrink:0 }}>{step>n?'✓':i}</div>
@@ -243,7 +244,7 @@ function CreateCharacter({ classes, onBack, onSuccess }) {
                     transition:'all .18s', backdropFilter:'blur(10px)', position:'relative', overflow:'hidden',
                   }}>
                   {sel && <div style={{ position:'absolute', top:0, left:0, right:0, height:2, background:`linear-gradient(90deg,transparent,${d.col},transparent)` }} />}
-                  <div style={{ fontSize:xs?22:26, marginBottom:6, filter:active?`drop-shadow(0 0 10px ${d.col})`:'none', transition:'filter .2s' }}>{d.icon||'⚔'}</div>
+                  <div style={{ fontSize:xs?22:26, marginBottom:6, filter:active?`drop-shadow(0 0 10px ${d.col})`:'none', transition:'filter .2s' }}>{d.icon||<IconSword size={22} />}</div>
                   {c.obrazek && !xs && <div style={{ width:28, height:42, backgroundImage:`url(/assets/${c.obrazek})`, backgroundPosition:'0 0', backgroundRepeat:'no-repeat', imageRendering:'pixelated', margin:'0 auto 8px', filter:sel?`drop-shadow(0 0 7px ${d.col}90)`:'none' }} />}
                   <div style={{ color:sel?d.col:h?'rgba(200,180,130,0.9)':'rgba(160,140,100,0.7)', fontWeight:700, fontSize:xs?10:12, marginBottom:5, fontFamily:SERIF }}>{c.name}</div>
                   {!xs && <div style={{ fontSize:7.5, color:'rgba(150,130,90,0.6)', lineHeight:1.5, marginBottom:8, minHeight:xs?0:24 }}>{d.lore}</div>}
@@ -291,7 +292,7 @@ function CreateCharacter({ classes, onBack, onSuccess }) {
                 <Err msg={error} />
                 <div style={{ display:'flex', gap:8 }}>
                   <Btn onClick={()=>setStep(1)} variant="ghost" style={{ flex:'0 0 auto', width:'auto', padding:'11px 18px' }}>← Wróć</Btn>
-                  <Btn type="submit" disabled={loading} variant="gold">{loading?'Tworzenie…':'⚔ Utwórz'}</Btn>
+                  <Btn type="submit" disabled={loading} variant="gold">{loading?'Tworzenie…':<><IconSword size={13} /> Utwórz</>}</Btn>
                 </div>
               </form>
             </div>

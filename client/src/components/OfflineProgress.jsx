@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { IconClock } from '../Icons';
 import { api } from '../api';
 
 // Modal shown when offline session is done — collect rewards
@@ -41,7 +42,7 @@ export function OfflineRewardModal({ session, onCollect }) {
           background: 'linear-gradient(90deg, rgba(30,50,10,0.6), rgba(20,40,8,0.6))',
           borderBottom: '1px solid rgba(200,146,42,0.2)',
         }}>
-          <div style={{ fontSize: 22, marginBottom: 4 }}>🌾</div>
+          <div style={{ marginBottom: 4, display: 'flex', justifyContent: 'center', color: '#6CB83A' }}><IconClock size={20} /></div>
           <div style={{ color: '#E8B84B', fontSize: 14, fontWeight: 'bold', letterSpacing: '1px' }}>
             Powrót do Przygody!
           </div>
@@ -208,7 +209,7 @@ export function OfflinePanel({ postacId, addToast, onCollected }) {
     return (
       <>
         <div style={containerStyle}>
-          <div style={{ color: '#6CB83A', fontSize: 9, letterSpacing: '1px', marginBottom: 4 }}>🌾 AUTOFARMING</div>
+          <div style={{ color: '#6CB83A', fontSize: 9, letterSpacing: '1px', marginBottom: 4 }}><IconClock size={10} /> AUTOFARMING</div>
           <button
             onClick={() => setShowCollect(true)}
             style={{
@@ -219,7 +220,7 @@ export function OfflinePanel({ postacId, addToast, onCollected }) {
               animation: 'pulse 1.5s infinite',
             }}
           >
-            🌾 Odbierz wyniki!
+            Odbierz wyniki!
           </button>
         </div>
         {showCollect && (
@@ -238,7 +239,7 @@ export function OfflinePanel({ postacId, addToast, onCollected }) {
     ));
     return (
       <div style={containerStyle}>
-        <div style={{ color: 'rgba(200,146,42,0.6)', fontSize: 9, letterSpacing: '1px', marginBottom: 4 }}>🌾 AUTOFARMING AKTYWNY</div>
+        <div style={{ color: 'rgba(200,146,42,0.6)', fontSize: 9, letterSpacing: '1px', marginBottom: 4 }}><IconClock size={10} /> AUTOFARMING AKTYWNY</div>
         <div style={{ height: 6, background: 'rgba(30,50,10,0.6)', borderRadius: 3, overflow: 'hidden', marginBottom: 4, border: '1px solid rgba(74,122,42,0.2)' }}>
           <div style={{ height: '100%', width: `${progressPct}%`, background: 'linear-gradient(90deg, #2D6A1A, #4ADE80)', borderRadius: 3, transition: 'width 1s linear' }} />
         </div>
@@ -252,7 +253,7 @@ export function OfflinePanel({ postacId, addToast, onCollected }) {
 
   return (
     <div style={containerStyle}>
-      <div style={{ color: 'rgba(200,146,42,0.6)', fontSize: 9, letterSpacing: '1px', marginBottom: 6 }}>🌾 AUTOFARMING</div>
+      <div style={{ color: 'rgba(200,146,42,0.6)', fontSize: 9, letterSpacing: '1px', marginBottom: 6 }}><IconClock size={10} /> AUTOFARMING</div>
       <div style={{ display: 'flex', gap: 4, marginBottom: 4 }}>
         <select
           value={selectedHours}

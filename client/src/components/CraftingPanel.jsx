@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { IconHammer, IconBox } from '../Icons';
 import { api } from '../api';
 
 const RARITY_COLORS = {
@@ -92,14 +93,14 @@ export default function CraftingPanel({ onClose, postac }) {
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         }}>
           <span style={{ color: '#E8B84B', fontSize: 13, fontWeight: 'bold', fontFamily: '"Palatino Linotype",Palatino,serif', letterSpacing: '1px' }}>
-            ⚒ Kowal & Rzemiosło
+            <IconHammer size={14} /> Kowal & Rzemiosło
           </span>
           <button onClick={onClose} style={{ background: 'none', border: 'none', color: '#6B5530', cursor: 'pointer', fontSize: 16 }}>✕</button>
         </div>
 
         {/* Tabs */}
         <div style={{ display: 'flex', gap: 6, padding: '8px 14px 0', borderBottom: '1px solid rgba(200,146,42,0.15)' }}>
-          {[['surowce','📦 Surowce'],['receptury','📋 Receptury'],['ulepszanie','⬆ Ulepszanie']].map(([t, label]) => (
+          {[['surowce','Surowce'],['receptury','Receptury'],['ulepszanie','Ulepszanie']].map(([t, label]) => (
             <button key={t} onClick={() => setTab(t)} style={{
               ...TAB_STYLE_BASE,
               background: tab === t ? 'rgba(200,146,42,0.15)' : 'transparent',
@@ -134,7 +135,7 @@ export default function CraftingPanel({ onClose, postac }) {
                     background: 'rgba(200,146,42,0.04)', border: `1px solid ${RARITY_COLORS[m.rzadkosc] || '#444'}`,
                     borderRadius: 4, padding: '8px 6px', textAlign: 'center', position: 'relative',
                   }}>
-                    <div style={{ fontSize: 24, marginBottom: 4 }}>🪨</div>
+                    <div style={{ marginBottom: 4, display: 'flex', justifyContent: 'center', color: '#9a9182' }}><IconBox size={22} /></div>
                     <div style={{ fontSize: 9, color: '#e8e2d4', lineHeight: 1.3 }}>{m.nazwa}</div>
                     <div style={{ fontSize: 8, color: RARITY_COLORS[m.rzadkosc], marginTop: 2 }}>{RARITY_LABELS[m.rzadkosc]}</div>
                     <div style={{
@@ -243,7 +244,7 @@ export default function CraftingPanel({ onClose, postac }) {
                         Koszt: {Math.max(1, Math.floor((selectedItem.wartosc_sprzedazy || 50) / 25))}x Kryształ Magii
                       </div>
                       <div style={{ color: '#F87171', fontSize: 8, marginBottom: 8 }}>
-                        ⚠ Materiały przepadają nawet przy niepowodzeniu!
+                        Materiały przepadają nawet przy niepowodzeniu!
                       </div>
                       <button onClick={handleUpgrade} style={{
                         padding: '5px 16px', background: 'rgba(200,146,42,0.15)', color: '#E8B84B',

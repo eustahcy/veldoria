@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { IconBox, IconUsers, IconCoin, IconCheck } from '../Icons';
 
 const KLASA_COLOR = {
   unique:    '#DAA520',
@@ -30,7 +31,7 @@ function ItemIcon({ item, onRemove, size = 40 }) {
           onError={e => { e.target.style.display = 'none'; }}
         />
       ) : (
-        <span style={{ fontSize: 18 }}>📦</span>
+        <span style={{ color:'#9a9182', display:'flex' }}><IconBox size={17} /></span>
       )}
       {onRemove && (
         <div onClick={onRemove} style={{
@@ -183,7 +184,7 @@ export default function TradeModal({ socket, postacId, myInventory = [], onClose
           borderBottom: '1px solid rgba(200,150,32,0.2)',
           display: 'flex', alignItems: 'center', gap: 8,
         }}>
-          <span style={{ fontSize: 14 }}>🤝</span>
+          <span style={{ color:'#C8940A', display:'flex' }}><IconUsers size={14} /></span>
           <span style={{ color: '#E8B84B', fontWeight: 'bold', fontSize: 12 }}>
             Handel z {partner?.nazwa || '...'}
           </span>
@@ -202,7 +203,7 @@ export default function TradeModal({ socket, postacId, myInventory = [], onClose
             />
             {/* Gold row */}
             <div style={{ marginTop: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
-              <span style={{ color: '#e7c158', fontSize: 10 }}>💰</span>
+              <span style={{ color: '#e7c158', display:'flex' }}><IconCoin size={10} /></span>
               <input
                 type="number" min="0"
                 value={goldInput}
@@ -215,7 +216,7 @@ export default function TradeModal({ socket, postacId, myInventory = [], onClose
             </div>
             {/* Confirm indicator */}
             <div style={{ marginTop: 8, display: 'flex', alignItems: 'center', gap: 5 }}>
-              <span style={{ fontSize: 14 }}>{myConfirmed ? '✅' : '⬜'}</span>
+              <span style={{ fontSize: 14 }}>{myConfirmed ? <IconCheck size={13} /> : '—'}</span>
               <span style={{ fontSize: 9, color: myConfirmed ? '#4ADE80' : '#9a9182' }}>
                 {myConfirmed ? 'Potwierdzono' : 'Nie potwierdzone'}
               </span>
@@ -232,13 +233,13 @@ export default function TradeModal({ socket, postacId, myInventory = [], onClose
             />
             {/* Gold */}
             <div style={{ marginTop: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
-              <span style={{ color: '#e7c158', fontSize: 10 }}>💰</span>
+              <span style={{ color: '#e7c158', display:'flex' }}><IconCoin size={10} /></span>
               <span style={{ color: '#f7e3a4', fontSize: 11 }}>{hisOffer?.gold || 0}</span>
               <span style={{ fontSize: 9, color: '#9a9182' }}>złota</span>
             </div>
             {/* Confirm indicator */}
             <div style={{ marginTop: 8, display: 'flex', alignItems: 'center', gap: 5 }}>
-              <span style={{ fontSize: 14 }}>{partnerConfirmed ? '✅' : '⬜'}</span>
+              <span style={{ fontSize: 14 }}>{partnerConfirmed ? <IconCheck size={13} /> : '—'}</span>
               <span style={{ fontSize: 9, color: partnerConfirmed ? '#4ADE80' : '#9a9182' }}>
                 {partnerConfirmed ? 'Potwierdził' : 'Czeka na potwierdzenie'}
               </span>
@@ -288,7 +289,7 @@ export default function TradeModal({ socket, postacId, myInventory = [], onClose
                       style={{ width: 36, height: 36, imageRendering: 'pixelated', objectFit: 'contain' }}
                       onError={e => { e.target.style.display = 'none'; }}
                     />
-                  ) : <span style={{ fontSize: 16 }}>📦</span>}
+                  ) : <span style={{ color:'#9a9182', display:'flex' }}><IconBox size={15} /></span>}
                 </div>
               ))}
             </div>

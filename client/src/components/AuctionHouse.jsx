@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { IconBox, IconCoin, IconStore } from '../Icons';
 import { api } from '../api';
 
 const KLASA_COLOR = {
@@ -49,7 +50,7 @@ function AuctionCard({ a, onBuy, canBuy }) {
             style={{ width: 32, height: 32, imageRendering: 'pixelated', objectFit: 'contain' }}
             onError={e => { e.target.style.display = 'none'; }}
           />
-        ) : <span style={{ fontSize: 18 }}>📦</span>}
+        ) : <span style={{ color: '#9a9182', display: 'flex' }}><IconBox size={17} /></span>}
       </div>
 
       <div style={{ flex: 1, minWidth: 0 }}>
@@ -64,7 +65,7 @@ function AuctionCard({ a, onBuy, canBuy }) {
 
       <div style={{ textAlign: 'right', flexShrink: 0 }}>
         <div style={{ color: '#f7e3a4', fontWeight: 'bold', fontSize: 11 }}>
-          {fmtGold(a.cena)} 💰
+          {fmtGold(a.cena)}
         </div>
         {canBuy && (
           <button onClick={() => onBuy(a.id)} style={{
@@ -195,8 +196,8 @@ export default function AuctionHouse({ onClose, postac, socket }) {
   const selectSt = { ...inputSt, cursor: 'pointer' };
 
   const TABS = [
-    { key: 'browse', label: '🔍 Przeglądaj' },
-    { key: 'my',     label: '📜 Moje aukcje' },
+    { key: 'browse', label: 'Przeglądaj' },
+    { key: 'my',     label: 'Moje aukcje' },
     { key: 'list',   label: '+ Wystaw' },
   ];
 
@@ -209,7 +210,7 @@ export default function AuctionHouse({ onClose, postac, socket }) {
           borderBottom: '1px solid rgba(200,150,32,0.2)',
           display: 'flex', alignItems: 'center', gap: 8,
         }}>
-          <span style={{ fontSize: 16 }}>🏪</span>
+          <span style={{ color: '#C8940A', display: 'flex' }}><IconStore size={15} /></span>
           <span style={{ color: '#E8B84B', fontWeight: 'bold', fontSize: 13 }}>Dom Aukcyjny</span>
           <button onClick={onClose} style={{ marginLeft: 'auto', background: 'none', border: 'none', color: '#9a9182', cursor: 'pointer', fontSize: 18 }}>✕</button>
         </div>
@@ -303,7 +304,7 @@ export default function AuctionHouse({ onClose, postac, socket }) {
                     <div style={{ flex: 1 }}>
                       <div style={{ color, fontSize: 10, fontWeight: 'bold' }}>{item.nazwa}</div>
                       <div style={{ fontSize: 8, color: '#9a9182' }}>
-                        {fmtGold(a.cena)} 💰 · wygasa: {fmtTime(a.data_wygasniecia)}
+                        {fmtGold(a.cena)} · wygasa: {fmtTime(a.data_wygasniecia)}
                         {' · '}<span style={{ color: a.status === 'aktywna' ? '#4ADE80' : '#F87171' }}>{a.status}</span>
                       </div>
                     </div>
@@ -351,7 +352,7 @@ export default function AuctionHouse({ onClose, postac, socket }) {
                           style={{ width: 36, height: 36, imageRendering: 'pixelated', objectFit: 'contain' }}
                           onError={e => { e.target.style.display = 'none'; }}
                         />
-                      ) : <span style={{ fontSize: 16 }}>📦</span>}
+                      ) : <span style={{ color: '#9a9182', display: 'flex' }}><IconBox size={15} /></span>}
                     </div>
                   );
                 })}

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
+import { IconMap } from '../Icons';
 
 const CELL = 3;   // px per tile
 const TILE = 28;  // game tile size
@@ -230,7 +231,7 @@ export default function Minimap({ state, size = 72, right = 8 }) {
             borderBottom: `1px solid ${GOLDDIM}`,
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-              <span style={{ fontSize: 11 }}>🗺</span>
+              <span style={{ display: 'flex' }}><IconMap size={11} /></span>
               <span style={{ fontSize: 9, color: GOLD, letterSpacing: '0.5px', maxWidth: 150, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                 {mapa.nazwa}
               </span>

@@ -1,5 +1,6 @@
 // Wspólne elementy okien: ramka z nagłówkiem, slot na przedmiot, karta przedmiotu, pasek.
 import { C, rarityOf, typeLabel, itemStats, headline, fmtNum } from './kit';
+import { IconCoin } from '../Icons';
 
 // ── Okno z ozdobną ramką ─────────────────────────────────────────────────────
 export function Frame({ title, icon, onClose, right, children, width = 880, narrow, style }) {
@@ -202,7 +203,7 @@ export function ItemCard({ item, compare, postac, actions, style }) {
 
         {item.wartosc_sprzedazy > 0 && (
           <div style={{ marginTop: 8, color: C.gold, fontSize: 11 }}>
-            🪙 Wartość sprzedaży: <strong>{fmtNum(item.wartosc_sprzedazy)}</strong>
+            <IconCoin size={11} /> Wartość sprzedaży: <strong>{fmtNum(item.wartosc_sprzedazy)}</strong>
           </div>
         )}
       </div>

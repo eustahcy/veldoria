@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { IconSkull, IconSword, IconTrendingUp } from '../Icons';
 import { api } from '../api';
 import WorldBossBattleModal from './WorldBossBattleModal';
 
@@ -97,7 +98,7 @@ export default function WorldBossUI({ boss, postac, socket, onBossUpdate, onBoss
           borderBottom: '1px solid rgba(200,50,50,0.25)',
           display: 'flex', alignItems: 'center', gap: 6,
         }}>
-          <span style={{ fontSize: 12 }}>💀</span>
+          <span style={{ color:'#F87171', display:'flex' }}><IconSkull size={12} /></span>
           <span style={{ color: '#E8B84B', fontSize: 10, fontWeight: 'bold', letterSpacing: '0.5px', flex: 1 }}>WORLD BOSS</span>
           <span style={{ color: '#FF4444', fontSize: 8, fontWeight: 'bold' }}>AKTYWNY</span>
         </div>
@@ -134,7 +135,7 @@ export default function WorldBossUI({ boss, postac, socket, onBossUpdate, onBoss
             )}
             {isShield && <span style={{ fontSize: 7, padding: '1px 5px', borderRadius: 8, background: 'rgba(165,180,252,0.12)', border: '1px solid rgba(165,180,252,0.35)', color: '#A5B4FC' }}>◈ Tarcza</span>}
             {isRegen  && <span style={{ fontSize: 7, padding: '1px 5px', borderRadius: 8, background: 'rgba(74,222,128,0.08)', border: '1px solid rgba(74,222,128,0.3)', color: '#4ADE80' }}>↑ Regen</span>}
-            {isSluzy  && <span style={{ fontSize: 7, padding: '1px 5px', borderRadius: 8, background: 'rgba(248,113,113,0.08)', border: '1px solid rgba(248,113,113,0.3)', color: '#F87171' }}>☠ Sługi</span>}
+            {isSluzy  && <span style={{ fontSize: 7, padding: '1px 5px', borderRadius: 8, background: 'rgba(248,113,113,0.08)', border: '1px solid rgba(248,113,113,0.3)', color: '#F87171' }}>Sługi</span>}
           </div>
 
           {/* Moje obrażenia + rank */}
@@ -163,7 +164,7 @@ export default function WorldBossUI({ boss, postac, socket, onBossUpdate, onBoss
               boxShadow: '0 0 12px rgba(200,30,30,0.2)',
             }}
           >
-            ⚔ Walcz z bossem
+            <IconSword size={13} /> Walcz z bossem
           </button>
 
           {/* Ranking toggle */}
@@ -172,7 +173,7 @@ export default function WorldBossUI({ boss, postac, socket, onBossUpdate, onBoss
             color: 'rgba(200,100,100,0.55)', border: '1px solid rgba(150,30,30,0.18)',
             borderRadius: 3, fontFamily: '"Palatino Linotype",Palatino,serif', fontSize: 9,
           }}>
-            {showLeaderboard ? '▲ Ukryj ranking' : '📊 Top 10'}
+            {showLeaderboard ? '▲ Ukryj ranking' : 'Top 10'}
           </button>
 
           {showLeaderboard && (
@@ -182,7 +183,7 @@ export default function WorldBossUI({ boss, postac, socket, onBossUpdate, onBoss
                 : leaderboard.map((row, i) => (
                   <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '2px 0', borderBottom: '1px solid rgba(150,30,30,0.1)' }}>
                     <span style={{ color: i < 3 ? '#E8B84B' : 'rgba(200,100,100,0.4)', fontSize: 8, width: 16, textAlign: 'right', flexShrink: 0 }}>
-                      {i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `#${i + 1}`}
+                      {`#${i + 1}`}
                     </span>
                     <span style={{ color: '#CDD4AA', fontSize: 9, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{row.postac_nazwa}</span>
                     {row.gildia_nazwa && <span style={{ color: 'rgba(200,150,32,0.45)', fontSize: 7, flexShrink: 0 }}>[{row.gildia_nazwa.slice(0,8)}]</span>}

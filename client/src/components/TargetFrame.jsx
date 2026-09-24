@@ -1,5 +1,6 @@
 // Karta zaznaczonego przeciwnika: portret, poziom, typ, dystans, życie i atak.
 import { useState, useEffect } from 'react';
+import { IconMapPin, IconSword } from '../Icons';
 import { hudColors as G } from './hud/GameHud';
 
 const PATTERN = {
@@ -62,7 +63,7 @@ export default function TargetFrame({ mob, liveMob, dist, onAttack, onClose }) {
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 7, fontSize: 12, flexWrap: 'wrap' }}>
             <span style={{ color: G.muted }}>Typ: <span style={{ color: G.text }}>{typ}</span></span>
-            {kraty && <span style={{ color: G.muted }}>📍 Dystans: <span style={{ color: dist <= 1 ? '#9be8ac' : G.text }}>{kraty}</span></span>}
+            {kraty && <span style={{ color: G.muted }}><IconMapPin size={10} /> Dystans: <span style={{ color: dist <= 1 ? '#9be8ac' : G.text }}>{kraty}</span></span>}
           </div>
           {mob.obr_min > 0 && (
             <div style={{ color: G.dim, fontSize: 11.5, marginTop: 3 }}>
@@ -106,7 +107,7 @@ export default function TargetFrame({ mob, liveMob, dist, onAttack, onClose }) {
           fontFamily: G.serif, fontSize: 16, letterSpacing: 0.5,
           boxShadow: dead ? 'none' : '0 0 14px rgba(231,193,88,0.2), inset 0 1px 0 rgba(255,255,255,0.12)',
         }}>
-          <span style={{ fontSize: 17 }}>⚔️</span> {dead ? 'Pokonany' : 'Atakuj'}
+          <span style={{ display: 'flex' }}><IconSword size={15} /></span> {dead ? 'Pokonany' : 'Atakuj'}
         </button>
       </div>
     </div>

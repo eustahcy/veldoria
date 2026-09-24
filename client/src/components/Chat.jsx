@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { IconChevronRight } from '../Icons';
 import { api } from '../api';
 import { T } from '../theme';
 
@@ -200,7 +201,7 @@ export default function Chat({ socket, isMobile, onMessage, mode='floating', pla
               <button type="submit" style={{
                 width: 38, borderRadius: 3, cursor: 'pointer', background: 'linear-gradient(180deg,#5a4520,#2d2210)',
                 color: '#f7e3a4', border: '1px solid #e7c158', fontSize: 13,
-              }}>➤</button>
+              }}><IconChevronRight size={13} /></button>
             </form>
           )}
         </>}
@@ -278,7 +279,7 @@ export default function Chat({ socket, isMobile, onMessage, mode='floating', pla
                 padding:'0 14px', borderRadius:3, cursor:'pointer',
                 background:'linear-gradient(180deg,#2c2418,#171208)', color:'#e7c158',
                 border:'1px solid #7a5f2a', fontSize:12, fontWeight:'bold',
-              }}>➤</button>
+              }}><IconChevronRight size={13} /></button>
             </form>
           )}
         </>}
@@ -346,7 +347,7 @@ export default function Chat({ socket, isMobile, onMessage, mode='floating', pla
               background:'rgba(74,122,42,0.25)', color:'#C8940A',
               border:'none', borderLeft:'1px solid rgba(200,150,32,0.15)',
               cursor:'pointer', fontSize:isMobile?14:11,
-            }}>➤</button>
+            }}><IconChevronRight size={13} /></button>
           </form>
         </div>
       )}

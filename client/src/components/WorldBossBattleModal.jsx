@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { IconZap, IconSkull, IconHeart, IconSword, IconFlask, IconTrophy, IconSparkles } from '../Icons';
 import { api } from '../api';
 import { T } from '../theme';
 
@@ -43,7 +44,7 @@ function fmtLog(e) {
 }
 
 const EFFECT_META = {
-  atk:         { label: 'ATK+',    color: '#FDE047', icon: '⚡' },
+  atk:         { label: 'ATK+',    color: '#FDE047', icon: <IconZap size={11} /> },
   def:         { label: 'DEF+',    color: '#C8940A', icon: '▣' },
   absorb_next: { label: 'Absorb',  color: '#A5B4FC', icon: '◈' },
   next_crit:   { label: 'Kryt×',   color: '#FCD34D', icon: '★' },
@@ -327,7 +328,7 @@ export default function WorldBossBattleModal({ boss: initBoss, postac, socket, o
           borderBottom: '1px solid rgba(200,50,50,0.25)',
           display: 'flex', alignItems: 'center', gap: 8,
         }}>
-          <span style={{ fontSize: 14 }}>💀</span>
+          <span style={{ color:'#F87171', display:'flex' }}><IconSkull size={13} /></span>
           <span style={{ color: '#FF6B6B', fontWeight: 'bold', fontSize: 12, flex: 1 }}>
             WORLD BOSS · Tura {turn}
           </span>
@@ -357,11 +358,11 @@ export default function WorldBossBattleModal({ boss: initBoss, postac, socket, o
             </div>
 
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 6 }}>
-              <HpBar value={heroHp} max={heroHpMax} color={heroColor} label="❤ Twoje HP" />
-              <HpBar value={bossHp} max={bossHpMax} color={hpColor} label={`💀 ${initBoss.nazwa}`} />
+              <HpBar value={heroHp} max={heroHpMax} color={heroColor} label="Twoje HP" />
+              <HpBar value={bossHp} max={bossHpMax} color={hpColor} label={initBoss.nazwa} />
               {/* Moje obrażenia + rank */}
               <div style={{ display: 'flex', gap: 6, fontSize: 9 }}>
-                <span style={{ color: '#E8B84B' }}>⚔ DMG: <b>{Number(myDmg).toLocaleString()}</b></span>
+                <span style={{ color: '#E8B84B' }}><IconSword size={11} /> DMG: <b>{Number(myDmg).toLocaleString()}</b></span>
                 {myRank > 0 && <span style={{ color: 'rgba(200,100,100,0.6)' }}>#{myRank}</span>}
               </div>
             </div>
@@ -375,7 +376,7 @@ export default function WorldBossBattleModal({ boss: initBoss, postac, socket, o
                 fontSize: 32,
                 filter: flashBoss ? 'drop-shadow(0 0 10px #E53E3E)' : 'none',
                 transition: 'filter 0.2s',
-              }}>💀</div>
+              }}><IconSkull size={30} /></div>
               <span style={{ color: '#FF6B6B', fontSize: 9 }}>{initBoss.nazwa}</span>
             </div>
           </div>
@@ -390,7 +391,7 @@ export default function WorldBossBattleModal({ boss: initBoss, postac, socket, o
                   border: `1px solid ${typ === 'tarcza' ? 'rgba(165,180,252,0.4)' : typ === 'regeneracja' ? 'rgba(74,222,128,0.35)' : 'rgba(248,113,113,0.35)'}`,
                   color: typ === 'tarcza' ? '#A5B4FC' : typ === 'regeneracja' ? '#4ADE80' : '#F87171',
                 }}>
-                  {typ === 'tarcza' ? '◈ TARCZA' : typ === 'regeneracja' ? '↑ REGEN' : '☠ SŁUGI'}
+                  {typ === 'tarcza' ? '◈ TARCZA' : typ === 'regeneracja' ? '↑ REGEN' : 'SŁUGI'}
                 </span>
               ))}
               {initBoss.aktywna_tarcza ? (
@@ -466,7 +467,7 @@ export default function WorldBossBattleModal({ boss: initBoss, postac, socket, o
                     border: '1px solid rgba(74,122,42,0.35)',
                     borderRadius: 10, cursor: 'pointer', color: '#4ADE80',
                   }}>
-                  🧪 {item.pelne_leczenie ? 'Pełne' : `+${item.mikstura_leczenie} HP`}
+                  <IconFlask size={12} /> {item.pelne_leczenie ? 'Pełne' : `+${item.mikstura_leczenie} HP`}
                 </button>
               ))}
             </div>
@@ -475,7 +476,7 @@ export default function WorldBossBattleModal({ boss: initBoss, postac, socket, o
           {/* ── PRZYCISKI AKCJI ── */}
           {status === 'ongoing' && (
             <div style={{ display: 'flex', gap: 6 }}>
-              <ActionBtn onClick={doAttack} disabled={loading} color="#FF6B6B">⚔ Atak</ActionBtn>
+              <ActionBtn onClick={doAttack} disabled={loading} color="#FF6B6B"><IconSword size={12} /> Atak</ActionBtn>
               <ActionBtn onClick={() => setShowSkills(s => !s)} disabled={loading || skillsList.length === 0} color="#A5B4FC">✦ Skill</ActionBtn>
               <ActionBtn onClick={doFlee} disabled={loading} color="#F59E0B">→ Uciekaj</ActionBtn>
             </div>
@@ -489,7 +490,7 @@ export default function WorldBossBattleModal({ boss: initBoss, postac, socket, o
               borderRadius: 8, padding: 12, textAlign: 'center',
             }}>
               <div style={{ fontSize: 20, marginBottom: 4 }}>
-                {status === 'boss_dead' ? '🏆' : status === 'fled' ? '🚀' : '💀'}
+                {status === 'boss_dead' ? <IconTrophy size={26} /> : status === 'fled' ? <IconRun size={26} /> : <IconSkull size={26} />}
               </div>
               <div style={{
                 color: status === 'boss_dead' ? '#4ADE80' : status === 'fled' ? '#E8D070' : '#F87171',
@@ -506,7 +507,7 @@ export default function WorldBossBattleModal({ boss: initBoss, postac, socket, o
               )}
               {lootRelic && (
                 <div style={{ color: '#FFD700', fontSize: 10, marginBottom: 4 }}>
-                  ✨ {lootRelic.postac_nazwa} zdobył Relikwię bossa!
+                  <IconSparkles size={11} /> {lootRelic.postac_nazwa} zdobył Relikwię bossa!
                 </div>
               )}
               {/* Ranking po śmierci */}
@@ -516,7 +517,7 @@ export default function WorldBossBattleModal({ boss: initBoss, postac, socket, o
                   {postKillRanking.slice(0, 5).map((r, i) => (
                     <div key={i} style={{ display: 'flex', gap: 6, fontSize: 9, padding: '1px 0', borderBottom: '1px solid rgba(150,30,30,0.12)' }}>
                       <span style={{ color: i < 3 ? '#E8B84B' : 'rgba(200,100,100,0.5)', width: 20 }}>
-                        {i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `#${i + 1}`}
+                        {`#${i + 1}`}
                       </span>
                       <span style={{ color: '#CDD4AA', flex: 1 }}>{r.postac_nazwa}</span>
                       <span style={{ color: '#E8B84B' }}>{Number(r.obrazenia_zadane).toLocaleString()}</span>

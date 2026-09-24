@@ -833,7 +833,7 @@ function questMark(q, tab) {
 }
 
 function questLine(q, tab) {
-  if (tab === 'avail') return `Od poziomu ${q.wymagany_poziom || 1}${q.nagroda_exp ? ` · +${fmtNum(q.nagroda_exp)} EXP` : ''}${q.nagroda_zloto ? ` · 🪙 ${fmtNum(q.nagroda_zloto)}` : ''}`;
+  if (tab === 'avail') return `Od poziomu ${q.wymagany_poziom || 1}${q.nagroda_exp ? ` · +${fmtNum(q.nagroda_exp)} EXP` : ''}${q.nagroda_zloto ? ` · ${fmtNum(q.nagroda_zloto)} zł.` : ''}`;
   if (q.status === 'ukonczone') return 'Gotowe — wróć po nagrodę';
   if ((q.typ === 'kill' || q.typ === 'item') && q.cel_ilosc) return `${q.typ === 'kill' ? 'Pokonaj' : 'Zbierz'} (${q.postep}/${q.cel_ilosc})`;
   return q.opis ? q.opis.slice(0, 60) : 'W toku';

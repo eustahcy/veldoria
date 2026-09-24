@@ -1,5 +1,11 @@
 // Veldoria UI — wspólne kolory i dane dla nowych okien (ciemny grafit + brąz + złoto).
 import { useEffect, useState } from 'react';
+import { createElement as h } from 'react';
+import {
+  IconSparkles, IconSkull, IconShield, IconHeart, IconMuscle, IconBow, IconBrain,
+  IconStar, IconCrosshair, IconBurst, IconDagger, IconBox, IconRun, IconFlask,
+  IconZap, IconSword,
+} from '../Icons';
 
 export const C = {
   bg:        '#14161b',
@@ -52,26 +58,26 @@ export const WEAPON_TYPES = ['BronJednoreczna', 'BronDwureczna', 'BronPomocnicza
 const plus = (k) => (i) => `+${i[k]}`;
 const pct = (k) => (i) => `+${i[k]}%`;
 export const STAT_DEFS = [
-  ['obr_mag',  'Obrażenia magiczne', '🔮', plus('obr_mag')],
-  ['obr_poi',  'Obrażenia trucizną', '☠', plus('obr_poi')],
-  ['ac',       'Pancerz',            '🛡', plus('ac')],
-  ['acm',      'Odporność magiczna', '✨', plus('acm')],
-  ['zycie',    'Życie',              '❤', plus('zycie')],
-  ['sila',     'Siła',               '💪', plus('sila')],
-  ['zrecznosc','Zręczność',          '🏹', plus('zrecznosc')],
-  ['intelekt', 'Intelekt',           '🧠', plus('intelekt')],
-  ['wszystkie_cechy', 'Wszystkie cechy', '⭐', plus('wszystkie_cechy')],
-  ['sa',       'Celność',            '🎯', plus('sa')],
-  ['ck',       'Szansa na krytyk',   '💥', pct('ck')],
-  ['przebicie','Przebicie pancerza', '🗡', pct('przebicie')],
-  ['absorbcja','Absorpcja obrażeń',  '🧱', plus('absorbcja')],
-  ['mabsorbcja','Absorpcja magii',   '🌀', plus('mabsorbcja')],
-  ['unik',     'Unik',               '💨', pct('unik')],
-  ['blok',     'Blok',               '🛡', pct('blok')],
-  ['leczenie', 'Leczenie',           '💚', plus('leczenie')],
-  ['mana',     'Mana',               '💧', plus('mana')],
-  ['energia',  'Energia',            '⚡', plus('energia')],
-  ['mikstura_leczenie', 'Leczy',     '🧪', (i) => `${i.mikstura_leczenie} HP`],
+  ['obr_mag',  'Obrażenia magiczne', h(IconSparkles, { size: 11 }), plus('obr_mag')],
+  ['obr_poi',  'Obrażenia trucizną', h(IconSkull, { size: 11 }), plus('obr_poi')],
+  ['ac',       'Pancerz',            h(IconShield, { size: 11 }), plus('ac')],
+  ['acm',      'Odporność magiczna', h(IconSparkles, { size: 11 }), plus('acm')],
+  ['zycie',    'Życie',              h(IconHeart, { size: 11 }), plus('zycie')],
+  ['sila',     'Siła',               h(IconMuscle, { size: 11 }), plus('sila')],
+  ['zrecznosc','Zręczność',          h(IconBow, { size: 11 }), plus('zrecznosc')],
+  ['intelekt', 'Intelekt',           h(IconBrain, { size: 11 }), plus('intelekt')],
+  ['wszystkie_cechy', 'Wszystkie cechy', h(IconStar, { size: 11 }), plus('wszystkie_cechy')],
+  ['sa',       'Celność',            h(IconCrosshair, { size: 11 }), plus('sa')],
+  ['ck',       'Szansa na krytyk',   h(IconBurst, { size: 11 }), pct('ck')],
+  ['przebicie','Przebicie pancerza', h(IconDagger, { size: 11 }), pct('przebicie')],
+  ['absorbcja','Absorpcja obrażeń',  h(IconBox, { size: 11 }), plus('absorbcja')],
+  ['mabsorbcja','Absorpcja magii',   h(IconSparkles, { size: 11 }), plus('mabsorbcja')],
+  ['unik',     'Unik',               h(IconRun, { size: 11 }), pct('unik')],
+  ['blok',     'Blok',               h(IconShield, { size: 11 }), pct('blok')],
+  ['leczenie', 'Leczenie',           h(IconHeart, { size: 11 }), plus('leczenie')],
+  ['mana',     'Mana',               h(IconFlask, { size: 11 }), plus('mana')],
+  ['energia',  'Energia',            h(IconZap, { size: 11 }), plus('energia')],
+  ['mikstura_leczenie', 'Leczy',     h(IconFlask, { size: 11 }), (i) => `${i.mikstura_leczenie} HP`],
 ];
 
 export function itemStats(item) {
@@ -80,9 +86,9 @@ export function itemStats(item) {
     .map(([k, label, icon, fmt]) => ({ key: k, label, icon, value: fmt(item), num: Number(item[k]) }));
   // Siła krytyka pokazujemy tylko gdy różni się od domyślnych 120%
   if (item?.ckf && Number(item.ckf) !== 120 && Number(item.ckf) > 0) {
-    rows.push({ key: 'ckf', label: 'Siła krytyka', icon: '💥', value: `${item.ckf}%`, num: Number(item.ckf) });
+    rows.push({ key: 'ckf', label: 'Siła krytyka', icon: h(IconBurst, { size: 11 }), value: `${item.ckf}%`, num: Number(item.ckf) });
   }
-  if (item?.pelne_leczenie) rows.push({ key: 'pelne', label: 'Leczy', icon: '🧪', value: 'całe HP', num: 1 });
+  if (item?.pelne_leczenie) rows.push({ key: 'pelne', label: 'Leczy', icon: h(IconFlask, { size: 11 }), value: 'całe HP', num: 1 });
   return rows;
 }
 

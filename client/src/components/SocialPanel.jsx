@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { api } from '../api';
-import { IconX, IconCheck, IconUsers, IconChat } from '../Icons';
+import { IconX, IconCheck, IconUsers, IconChat, IconMail } from '../Icons';
 
 // ── Friends tab ───────────────────────────────────────────────────────────────
 function FriendsTab({ onViewProfile, onSendMsg }) {
@@ -34,7 +34,7 @@ function FriendsTab({ onViewProfile, onSendMsg }) {
               <div style={{ color: f.zalogowany ? '#22C55E' : '#374151', fontSize:8, marginTop:1 }}>{f.zalogowany ? 'Online' : 'Offline'}</div>
             </div>
             <button onClick={() => onViewProfile(f.id)} style={btnStyle('#e7c158')}>Profil</button>
-            <button onClick={() => onSendMsg(f)} style={btnStyle('#A5B4FC')}>✉</button>
+            <button onClick={() => onSendMsg(f)} style={btnStyle('#A5B4FC')}><IconMail size={12} /></button>
             <button onClick={() => remove(f.id)} style={btnStyle('#F87171')}>✕</button>
           </div>
         ))
@@ -149,7 +149,7 @@ export default function SocialPanel({ onClose, onViewProfile, defaultTab = 'frie
           <span style={{ color:'#e7c158' }}><IconUsers size={14}/></span>
           <span style={{ color:'#f7e3a4', fontWeight:'bold', fontSize:13 }}>Społeczność</span>
           <div style={{ display:'flex', gap:2, marginLeft:8 }}>
-            {[['friends','👥 Znajomi'],['messages','✉ Wiadomości']].map(([t,l])=>(
+            {[['friends','Znajomi'],['messages','Wiadomości']].map(([t,l])=>(
               <button key={t} onClick={()=>setTab(t)} style={{
                 padding:'3px 12px', background:'none', border:'none', cursor:'pointer', fontSize:10,
                 color:tab===t?'#f7e3a4':'#9a9182',

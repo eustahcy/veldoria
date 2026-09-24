@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { IconStar } from '../Icons';
 import { api } from '../api';
 
 function TalentCard({ talent, onInvest, canSpend }) {
@@ -29,7 +30,7 @@ function TalentCard({ talent, onInvest, canSpend }) {
         boxShadow: isAvail && canSpend ? `0 0 8px ${borderColor}50` : 'none',
       }}
     >
-      <div style={{ fontSize: 18, lineHeight: 1, marginBottom: 3 }}>{talent.ikona || '⭐'}</div>
+      <div style={{ fontSize: 18, lineHeight: 1, marginBottom: 3 }}>{talent.ikona || <IconStar size={16} />}</div>
       <div style={{ fontSize: 7, color: '#e8e2d4', lineHeight: 1.3, marginBottom: 2 }}>{talent.nazwa}</div>
       <div style={{ fontSize: 7, color: isMaxed ? '#e7c158' : '#6B5530' }}>
         {talent.myLevel}/{talent.max_poziom}
@@ -98,7 +99,7 @@ export default function TalentTree({ postac, onClose }) {
         <div style={{ padding: '10px 14px', borderBottom: '1px solid rgba(200,146,42,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div>
             <span style={{ color: '#E8B84B', fontSize: 13, fontWeight: 'bold', fontFamily: '"Palatino Linotype",Palatino,serif', letterSpacing: '1px' }}>
-              ⭐ Drzewko Talentów
+              <IconStar size={14} /> Drzewko Talentów
             </span>
             {data && (
               <span style={{ color: '#6B5530', fontSize: 9, marginLeft: 10 }}>{data.klasa}</span>
@@ -175,7 +176,7 @@ export default function TalentTree({ postac, onClose }) {
             border: `1px solid ${resetting ? 'rgba(248,113,113,0.5)' : 'rgba(80,50,20,0.3)'}`,
             borderRadius: 3, fontFamily: 'Verdana,sans-serif',
           }}>
-            {resetting ? '⚠ Potwierdź reset (500g+)' : 'Reset talentów'}
+            {resetting ? 'Potwierdź reset (500g+)' : 'Reset talentów'}
           </button>
         </div>
       </div>
