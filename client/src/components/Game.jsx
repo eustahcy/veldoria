@@ -831,7 +831,9 @@ export default function Game({ onLogout, onDisconnect }) {
 
   const targetDist = target ? Math.max(Math.abs(target.x - state.postac.x), Math.abs(target.y - state.postac.y)) : null;
 
-  // ── MOBILE LAYOUT (portrait only — landscape uses desktop layout) ────────────
+  // ── MOBILE LAYOUT — pion i poziom ────────────────────────────────────────────
+  // Telefon dostaje pełnoekranową mapę i pływający HUD; układ HUD-u zmienia się
+  // z orientacją przez prop `landscape`.
   // Telefon (pionowo i poziomo) — mapa na cały ekran i pływający HUD
   if (isMobile) {
     const lastLog = combatLog.length > 0 ? combatLog[combatLog.length-1] : null;
@@ -841,7 +843,7 @@ export default function Game({ onLogout, onDisconnect }) {
       ? `-${lastLog.dmg} HP`
       : null;
 
-    // ── PORTRAIT LAYOUT — full-screen map, floating HUD ──────────────────────
+    // ── UKŁAD MOBILNY — mapa na cały ekran + pływający HUD ───────────────────
     return (
       <div style={{ position:'relative', width:'100vw', height:'100vh', overflow:'hidden', background:'#2A1A08' }}>
         {/* Full-screen map */}

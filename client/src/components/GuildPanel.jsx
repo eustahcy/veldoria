@@ -1103,11 +1103,85 @@ export default function GuildPanel({ onClose, socket, postacId }) {
 
   const onlineCount = guild && guild !== false ? (guild.members?.filter(m => m.zalogowany).length || 0) : 0;
 
+  const styleGildii = `
+    .veldoria-guild-overlay { overscroll-behavior: contain; -webkit-tap-highlight-color: transparent; }
+    .veldoria-guild-panel { min-width: 0; }
+    .veldoria-guild-my-layout, .veldoria-guild-main, .veldoria-guild-sidebar { min-width: 0; min-height: 0; }
+
+    .veldoria-guild-nav::-webkit-scrollbar, .veldoria-guild-list::-webkit-scrollbar { height: 4px; width: 4px; }
+    .veldoria-guild-nav::-webkit-scrollbar-thumb, .veldoria-guild-list::-webkit-scrollbar-thumb {
+      background: rgba(200,150,32,.3); border-radius: 10px;
+    }
+
+    @media (max-width: 720px) {
+      /* na telefonie panel zajmuje cały ekran, bez ramki i marginesów */
+      .veldoria-guild-overlay {
+        align-items: stretch !important; justify-content: stretch !important;
+        background: rgba(0,0,0,.94) !important; backdrop-filter: blur(8px) !important;
+      }
+      .veldoria-guild-panel {
+        width: 100vw !important; max-width: none !important;
+        height: 100dvh !important; max-height: none !important;
+        border-radius: 0 !important; border-left: 0 !important; border-right: 0 !important;
+      }
+
+      /* boczne menu zamienia się w pasek zakładek nad treścią */
+      .veldoria-guild-my-layout { flex-direction: column !important; overflow: hidden !important; }
+      .veldoria-guild-sidebar {
+        width: 100% !important; height: auto !important; flex: 0 0 auto !important;
+        flex-direction: row !important; border-right: 0 !important;
+        border-bottom: 1px solid rgba(200,150,32,.14) !important; background: rgba(8,7,5,.95) !important;
+      }
+      .veldoria-guild-mini-card, .veldoria-guild-leave { display: none !important; }
+      .veldoria-guild-nav {
+        display: flex !important; flex: 1 !important; min-width: 0;
+        overflow-x: auto !important; overflow-y: hidden !important;
+        padding: 4px !important; gap: 3px; -webkit-overflow-scrolling: touch;
+      }
+      .veldoria-guild-nav button {
+        width: auto !important; min-width: max-content !important; min-height: 42px;
+        padding: 7px 10px !important; border-left: 0 !important;
+        border-bottom: 2px solid transparent !important; border-radius: 5px;
+        justify-content: center; white-space: nowrap;
+      }
+      .veldoria-guild-nav button > span:last-child { display: none; }
+
+      .veldoria-guild-main { width: 100% !important; min-width: 0 !important; flex: 1 1 auto !important; overflow: hidden !important; }
+      .veldoria-guild-list { padding: 8px !important; -webkit-overflow-scrolling: touch; }
+      .veldoria-guild-list-card { padding: 10px !important; }
+      .veldoria-guild-list-card > div:first-child { flex-wrap: wrap !important; }
+      .veldoria-guild-list-card > div:first-child > div:nth-child(2) { flex: 1 1 calc(100% - 58px) !important; min-width: 0 !important; }
+      .veldoria-guild-list-card > div:last-child { flex-wrap: wrap !important; }
+      .veldoria-guild-main input, .veldoria-guild-main textarea { max-width: 100%; font-size: 12px !important; }
+
+      /* siatki, które na telefonie nie mieszczą się w szerokości */
+      .veldoria-guild-main [style*="repeat(4,1fr)"], .veldoria-guild-main [style*="repeat(4, 1fr)"] {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+      }
+      .veldoria-guild-main [style*="1fr auto 1fr"] { grid-template-columns: 1fr 1fr !important; }
+      .veldoria-guild-main [style*="10px 34px 1fr 55px 90px 80px"] {
+        grid-template-columns: 8px 26px minmax(0,1fr) 40px 62px 54px !important; gap: 4px !important; padding: 5px 8px !important;
+      }
+      .veldoria-guild-main [style*="36px 1fr 70px 52px 44px"] {
+        grid-template-columns: 28px minmax(0,1fr) 54px 42px 38px !important; gap: 4px !important; padding: 5px 8px !important;
+      }
+    }
+
+    @media (max-height: 620px) and (orientation: landscape) {
+      .veldoria-guild-nav button { min-height: 38px; padding: 5px 9px !important; }
+      .veldoria-guild-list { padding: 6px !important; }
+      .veldoria-guild-list-card { margin-bottom: 6px !important; }
+    }
+  `;
+
   return (
-    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.82)', backdropFilter: 'blur(5px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 200 }}
+    <>
+    <style>{styleGildii}</style>
+    <div className="veldoria-guild-overlay"
+      style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.82)', backdropFilter: 'blur(5px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 200 }}
       onClick={e => e.target === e.currentTarget && onClose()}>
 
-      <div style={{
+      <div className="veldoria-guild-panel" style={{
         width: 780, maxWidth: '99vw', height: '90vh', maxHeight: 820,
         background: 'linear-gradient(160deg,rgba(20,16,12,0.99),rgba(12,10,8,0.99))',
         border: '1px solid rgba(200,150,32,0.2)', borderRadius: 12,
@@ -1183,12 +1257,12 @@ export default function GuildPanel({ onClose, socket, postacId }) {
                 </div>
               )
               : (
-                <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
+                <div className="veldoria-guild-my-layout" style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
 
                   {/* ── LEFT SIDEBAR: nav ── */}
-                  <div style={{ width: 168, flexShrink: 0, display: 'flex', flexDirection: 'column', borderRight: '1px solid rgba(200,150,32,0.1)', background: 'rgba(12,10,8,0.5)' }}>
+                  <div className="veldoria-guild-sidebar" style={{ width: 168, flexShrink: 0, display: 'flex', flexDirection: 'column', borderRight: '1px solid rgba(200,150,32,0.1)', background: 'rgba(12,10,8,0.5)' }}>
                     {/* Guild mini-card */}
-                    <div style={{ padding: '12px 12px 8px', borderBottom: '1px solid rgba(200,150,32,0.08)' }}>
+                    <div className="veldoria-guild-mini-card" style={{ padding: '12px 12px 8px', borderBottom: '1px solid rgba(200,150,32,0.08)' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
                         <div style={{ width: 36, height: 36, flexShrink: 0, borderRadius: 7, background: 'linear-gradient(135deg,rgba(200,150,32,0.2),rgba(0,0,0,0.6))', border: '1px solid rgba(200,150,32,0.35)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, color: '#FCD34D', fontWeight: 'bold' }}>
                           {(guild.tag || 'G')[0].toUpperCase()}
@@ -1207,7 +1281,7 @@ export default function GuildPanel({ onClose, socket, postacId }) {
                     </div>
 
                     {/* Nav tabs */}
-                    <div style={{ flex: 1, overflowY: 'auto', padding: '6px 0' }}>
+                    <div className="veldoria-guild-nav" style={{ flex: 1, overflowY: 'auto', padding: '6px 0' }}>
                       {TABS.map(({ id, Icon, label }) => {
                         const active = innerTab === id;
                         return (
@@ -1229,13 +1303,13 @@ export default function GuildPanel({ onClose, socket, postacId }) {
                     </div>
 
                     {/* Leave button */}
-                    <div style={{ padding: '8px 10px', borderTop: '1px solid rgba(200,150,32,0.08)', flexShrink: 0 }}>
+                    <div className="veldoria-guild-leave" style={{ padding: '8px 10px', borderTop: '1px solid rgba(200,150,32,0.08)', flexShrink: 0 }}>
                       <Btn onClick={leave} danger wide small><IconX size={10} /> Opuść gildię</Btn>
                     </div>
                   </div>
 
                   {/* ── MAIN CONTENT ── */}
-                  <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+                  <div className="veldoria-guild-main" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
                     {/* Tab header */}
                     <div style={{ padding: '10px 16px', borderBottom: '1px solid rgba(200,150,32,0.08)', flexShrink: 0, display: 'flex', alignItems: 'center', gap: 8 }}>
                       {(() => { const t = TABS.find(t => t.id === innerTab); return t ? <><t.Icon size={14} style={{ color: '#e7c158' }} /><span style={{ color: '#e7c158', fontWeight: 'bold', fontSize: 11 }}>{t.label}</span></> : null; })()}
@@ -1254,11 +1328,11 @@ export default function GuildPanel({ onClose, socket, postacId }) {
 
         {/* ── LIST TAB ── */}
         {mainTab === 'list' && (
-          <div style={{ flex: 1, overflowY: 'auto', padding: '10px 14px' }}>
+          <div className="veldoria-guild-list" style={{ flex: 1, overflowY: 'auto', padding: '10px 14px' }}>
             {guildList.length === 0
               ? <div style={{ color: '#374151', textAlign: 'center', paddingTop: 40, fontSize: 11 }}>Brak gildii — bądź pierwszym Mistrzem!</div>
               : guildList.map(g => (
-                <div key={g.id} style={{ padding: '12px 14px', background: 'rgba(16,13,10,0.5)', border: '1px solid rgba(59,130,246,0.12)', borderRadius: 8, marginBottom: 8 }}>
+                <div key={g.id} className="veldoria-guild-list-card" style={{ padding: '12px 14px', background: 'rgba(16,13,10,0.5)', border: '1px solid rgba(59,130,246,0.12)', borderRadius: 8, marginBottom: 8 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: g.otwarta ? 0 : 8 }}>
                     {/* Emblem */}
                     <div style={{ width: 42, height: 42, flexShrink: 0, borderRadius: 7, background: 'linear-gradient(135deg,rgba(200,150,32,0.15),rgba(0,0,0,0.5))', border: '1px solid rgba(200,150,32,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, color: '#FCD34D', fontWeight: 'bold' }}>
@@ -1287,5 +1361,6 @@ export default function GuildPanel({ onClose, socket, postacId }) {
         )}
       </div>
     </div>
+    </>
   );
 }

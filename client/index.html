@@ -2,14 +2,28 @@
 <html lang="pl">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <title>Veldoria MMORPG</title>
     <style>
       * { margin: 0; padding: 0; box-sizing: border-box; }
-      body { background: #040810; color: #CBD5E1; font-family: Verdana, sans-serif; font-size: 11px; overflow: hidden; }
+
+      /* Gra zajmuje cały ekran i nie daje się „odciągnąć" gestem przewijania
+         — na telefonie bez tego mapa skacze przy przesuwaniu palcem. */
+      html, body, #root { width: 100%; min-width: 0; height: 100%; min-height: 100%; }
+      html { background: #040810; overscroll-behavior: none; }
+      body {
+        background: #040810; color: #CBD5E1;
+        font-family: Verdana, sans-serif; font-size: 11px;
+        overflow: hidden; overscroll-behavior: none;
+        -webkit-text-size-adjust: 100%;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      button, input, textarea { font: inherit; }
+      button { -webkit-tap-highlight-color: transparent; }
     </style>
   </head>
   <body>

@@ -236,7 +236,7 @@ function Joystick({ onMove, landscape = false }) {
   const timer = useRef(null);
   const dirRef = useRef(null);
   const [knob, setKnob] = useState({ x: 0, y: 0 });
-  const R = landscape ? 68 : 56;
+  const R = landscape ? 64 : 56;   // w poziomie joystick nie może zjadać pół ekranu
 
   const stop = useCallback(() => {
     clearInterval(timer.current); timer.current = null; dirRef.current = null; setKnob({ x: 0, y: 0 });
@@ -304,7 +304,7 @@ function RoundMinimap({ state, size, onClick }) {
 function BottomSlot({ children, label, onClick, active, count, disabled }) {
   return (
     <button onClick={onClick} disabled={disabled} style={{
-      flex: 1, minWidth: 0, height: 58, position: 'relative', padding: 0, cursor: disabled ? 'default' : 'pointer',
+      flex: 1, minWidth: 0, height: landscape ? 54 : 58, position: 'relative', padding: 0, cursor: disabled ? 'default' : 'pointer',
       display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 2,
       background: active ? 'linear-gradient(180deg,#4a3818,#1d160b)' : 'linear-gradient(180deg,#221c14,#0c0a08)',
       border: `1px solid ${active ? G.gold : G.bronze}`, borderRadius: 4,
@@ -360,7 +360,7 @@ export function MobileHud({
       <div style={{
         position: 'fixed', top: landscape ? `calc(${SAFE_T} + 60px)` : `calc(${SAFE_T} + 54px)`,
         left: `calc(${SAFE_L} + ${landscape ? 12 : 8}px)`, zIndex: 480,
-        width: landscape ? 'min(31vw, 285px)' : 'min(58vw, 230px)',
+        width: landscape ? 'clamp(220px, 31vw, 285px)' : 'min(58vw, 230px)',
         display: 'flex', gap: landscape ? 9 : 7, padding: landscape ? 8 : 6, borderRadius: 5,
         background: 'linear-gradient(180deg,rgba(26,21,15,0.88),rgba(10,8,6,0.88))', border: `1px solid ${G.bronze}`,
         boxShadow: '0 6px 16px rgba(0,0,0,0.6)',
