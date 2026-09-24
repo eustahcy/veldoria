@@ -1172,6 +1172,18 @@ export default function GuildPanel({ onClose, socket, postacId }) {
       .veldoria-guild-list { padding: 6px !important; }
       .veldoria-guild-list-card { margin-bottom: 6px !important; }
     }
+
+    /* Telefon w poziomie: pełny ekran, ale boczne menu zostaje — przy 390 px
+       wysokości pasek zakładek nad treścią zjadałby zbyt dużo miejsca. */
+    @media (max-height: 520px) and (orientation: landscape) {
+      .veldoria-guild-overlay { align-items: stretch !important; justify-content: stretch !important; }
+      .veldoria-guild-panel {
+        width: 100vw !important; max-width: none !important;
+        height: 100dvh !important; max-height: none !important; border-radius: 0 !important;
+      }
+      .veldoria-guild-sidebar { width: 132px !important; }
+      .veldoria-guild-mini-card { display: none !important; }
+    }
   `;
 
   return (
