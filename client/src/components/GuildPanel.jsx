@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { api } from '../api';
 import {
   IconX, IconCheck, IconPlus, IconUsers, IconCastle, IconCoin, IconChat,
+  IconLock, IconUnlock, IconSearch, IconHeart, IconZap,
   IconScroll, IconShield, IconSword, IconTrophy, IconFlag, IconGift,
   IconTrendingUp, IconAward, IconChevronRight, IconEdit, IconSave,
   IconArrowUp, IconArrowDown, IconClock, IconSparkles,
@@ -20,7 +21,7 @@ function fmtDate(d) {
 }
 
 const RANGA_COLOR = { mistrz: '#FCD34D', oficer: '#e7c158', czlonek: '#8A9A6A' };
-const RANGA_LABEL = { mistrz: '★ Mistrz', oficer: '◈ Oficer', czlonek: '· Członek' };
+const RANGA_LABEL = { mistrz: 'Mistrz', oficer: 'Oficer', czlonek: 'Członek' };
 
 // ── Micro helpers ─────────────────────────────────────────────────────────────
 function pill(color, text) {
@@ -137,7 +138,7 @@ function GuildChat({ socket }) {
         <input value={input} onChange={e => setInput(e.target.value)}
           placeholder="Napisz do gildii..." maxLength={250}
           style={{ flex: 1, background: 'transparent', color: '#e8e2d4', border: 'none', padding: '5px 10px', fontSize: 10, outline: 'none', fontFamily: 'Verdana,sans-serif' }} />
-        <button type="submit" style={{ padding: '5px 12px', background: 'rgba(231,193,88,0.2)', color: '#e7c158', border: 'none', borderLeft: '1px solid rgba(200,150,32,0.12)', cursor: 'pointer', fontSize: 13 }}>➤</button>
+        <button type="submit" style={{ padding: '5px 12px', background: 'rgba(231,193,88,0.2)', color: '#e7c158', border: 'none', borderLeft: '1px solid rgba(200,150,32,0.12)', cursor: 'pointer', fontSize: 13 }}><IconChevronRight size={13} /></button>
       </form>
     </div>
   );
@@ -184,7 +185,7 @@ function OverviewTab({ guild, onUpdate, flashMsg, socket }) {
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
                 <span style={{ color: '#FCD34D', fontSize: 11, fontWeight: 'bold' }}>[{guild.tag}]</span>
                 <span style={{ color: '#f7e3a4', fontSize: 16, fontWeight: 'bold' }}>{guild.nazwa}</span>
-                {pill(guild.otwarta ? '#22C55E' : '#F87171', guild.otwarta ? '🔓 Otwarta' : '🔒 Zamknięta')}
+                {pill(guild.otwarta ? '#22C55E' : '#F87171', guild.otwarta ? <><IconUnlock size={9} /> Otwarta</> : <><IconLock size={9} /> Zamknięta</>)}
               </div>
               {guild.opis && <div style={{ color: '#9a9182', fontSize: 9, marginTop: 3, fontStyle: 'italic' }}>{guild.opis}</div>}
               <div style={{ display: 'flex', gap: 12, marginTop: 6 }}>
@@ -207,7 +208,7 @@ function OverviewTab({ guild, onUpdate, flashMsg, socket }) {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 8 }}>
           {[
             { icon: <IconUsers size={16} />, label: 'Członkowie', value: total, color: '#60A5FA' },
-            { icon: <span style={{ fontSize: 14 }}>🟢</span>, label: 'Online', value: online, color: '#22C55E' },
+            { icon: <span style={{ width: 9, height: 9, borderRadius: '50%', background: '#22C55E', display: 'inline-block' }} />, label: 'Online', value: online, color: '#22C55E' },
             { icon: <IconCoin size={16} />, label: 'Skarbiec', value: fmtNum(guild.skarbiec || 0) + 'g', color: '#FCD34D' },
             { icon: <IconTrophy size={16} />, label: 'Poziom', value: `Lv${guild.lvl}`, color: '#e7c158' },
           ].map(({ icon, label, value, color }) => (
@@ -223,7 +224,7 @@ function OverviewTab({ guild, onUpdate, flashMsg, socket }) {
         <Card>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: '#e7c158', fontSize: 10, fontWeight: 'bold' }}>
-              <IconEdit size={12} /> 📌 Ogłoszenie
+              <IconEdit size={12} /> Ogłoszenie
             </div>
             {guild.myRanga === 'mistrz' && (
               editing
@@ -292,7 +293,7 @@ function OverviewTab({ guild, onUpdate, flashMsg, socket }) {
 function TerritoryBox({ territory }) {
   const [income, setIncome] = useState(null);
   useEffect(() => { api.social.guildTerritoryIncome().then(r => r.ok && setIncome(r)).catch(() => {}); }, []);
-  const ZRODLO = { aukcja: '🏪 Aukcja', sklep_npc: '🛒 Sklep', handel: '🤝 Handel' };
+  const ZRODLO = { aukcja: 'Aukcja', sklep_npc: 'Sklep', handel: 'Handel' };
 
   return (
     <Card color='#3B82F6'>
@@ -353,7 +354,7 @@ function MembersTab({ guild, postacId, onUpdate, flashMsg }) {
   const FILTERS = [
     { id: 'all', label: 'Wszyscy' },
     { id: 'online', label: `Online (${online})` },
-    { id: 'mistrz', label: '★ Mistrz' },
+    { id: 'mistrz', label: 'Mistrz' },
     { id: 'oficer', label: '◈ Oficer' },
     { id: 'czlonek', label: 'Członek' },
   ];
@@ -376,7 +377,7 @@ function MembersTab({ guild, postacId, onUpdate, flashMsg }) {
         <div style={{ position: 'relative' }}>
           <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Szukaj..."
             style={{ padding: '4px 8px 4px 24px', background: 'rgba(20,16,12,0.7)', color: '#e8e2d4', border: '1px solid rgba(200,150,32,0.2)', borderRadius: 5, fontSize: 9, outline: 'none', width: 130, fontFamily: 'Verdana,sans-serif' }} />
-          <span style={{ position: 'absolute', left: 7, top: 5, color: '#9a9182', fontSize: 11 }}>🔍</span>
+          <span style={{ position: 'absolute', left: 7, top: 5, color: '#9a9182', fontSize: 11 }}><IconSearch size={11} /></span>
         </div>
       </div>
 
@@ -415,9 +416,9 @@ function MembersTab({ guild, postacId, onUpdate, flashMsg }) {
                   </div>
                   <div style={{ color: '#9a9182', fontSize: 8 }}>{m.profesja}</div>
                   <div style={{ display: 'flex', gap: 8, marginTop: 1 }}>
-                    <span style={{ color: '#374151', fontSize: 7 }}>💰{fmtNum(m.wklad_gold || 0)}</span>
-                    <span style={{ color: '#374151', fontSize: 7 }}>⚔{fmtNum(m.wklad_kills || 0)}</span>
-                    <span style={{ color: '#374151', fontSize: 7 }}>✨{fmtNum(m.wklad_exp || 0)}</span>
+                    <span style={{ color: '#374151', fontSize: 7 }}><IconCoin size={8} /> {fmtNum(m.wklad_gold || 0)}</span>
+                    <span style={{ color: '#374151', fontSize: 7 }}><IconSword size={8} /> {fmtNum(m.wklad_kills || 0)}</span>
+                    <span style={{ color: '#374151', fontSize: 7 }}><IconSparkles size={8} /> {fmtNum(m.wklad_exp || 0)}</span>
                   </div>
                 </div>
 
@@ -433,8 +434,8 @@ function MembersTab({ guild, postacId, onUpdate, flashMsg }) {
                     ? <div style={{ display: 'flex', gap: 2 }}>
                         <input value={customVal} onChange={e => setCustomVal(e.target.value)} maxLength={30}
                           style={{ width: 55, padding: '2px 4px', background: 'rgba(20,16,12,0.8)', color: '#e8e2d4', border: '1px solid rgba(200,150,32,0.3)', borderRadius: 3, fontSize: 8, outline: 'none', fontFamily: 'Verdana,sans-serif' }} />
-                        <button onClick={() => saveCustom(m.member_row_id)} style={{ padding: '2px 4px', background: 'rgba(34,197,94,0.2)', color: '#4ADE80', border: '1px solid rgba(34,197,94,0.4)', borderRadius: 3, cursor: 'pointer', fontSize: 10 }}>✓</button>
-                        <button onClick={() => setCustomEdit(null)} style={{ padding: '2px 4px', background: 'rgba(239,68,68,0.15)', color: '#F87171', border: '1px solid rgba(239,68,68,0.3)', borderRadius: 3, cursor: 'pointer', fontSize: 10 }}>✕</button>
+                        <button onClick={() => saveCustom(m.member_row_id)} style={{ padding: '2px 4px', background: 'rgba(34,197,94,0.2)', color: '#4ADE80', border: '1px solid rgba(34,197,94,0.4)', borderRadius: 3, cursor: 'pointer', fontSize: 10 }}><IconCheck size={11} /></button>
+                        <button onClick={() => setCustomEdit(null)} style={{ padding: '2px 4px', background: 'rgba(239,68,68,0.15)', color: '#F87171', border: '1px solid rgba(239,68,68,0.3)', borderRadius: 3, cursor: 'pointer', fontSize: 10 }}><IconX size={11} /></button>
                       </div>
                     : <span style={{ color: RANGA_COLOR[m.ranga] || '#e8e2d4', fontSize: 9 }}>{displayRank}</span>
                   }
@@ -479,13 +480,13 @@ function MembersTab({ guild, postacId, onUpdate, flashMsg }) {
 function ContributionsTab({ guild }) {
   const [sort, setSort] = useState('gold');
   const SORTS = [
-    { id: 'gold',  icon: '💰', label: 'Złoto' },
-    { id: 'kills', icon: '⚔',  label: 'Zabójstwa' },
-    { id: 'exp',   icon: '✨', label: 'EXP' },
+    { id: 'gold',  icon: <IconCoin size={11} />, label: 'Złoto' },
+    { id: 'kills', icon: <IconSword size={11} />, label: 'Zabójstwa' },
+    { id: 'exp',   icon: <IconSparkles size={11} />, label: 'EXP' },
   ];
   const members = [...(guild.members || [])].sort((a, b) => (b[`wklad_${sort}`] || 0) - (a[`wklad_${sort}`] || 0));
   const maxVal = members[0]?.[`wklad_${sort}`] || 1;
-  const MEDALS = ['🥇', '🥈', '🥉'];
+  const MEDALS = ['1', '2', '3'];   // miejsca na podium
 
   return (
     <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
@@ -527,9 +528,9 @@ function ContributionsTab({ guild }) {
                 </div>
                 <ProgressBar pct={pct} color={i === 0 ? '#FCD34D' : i === 1 ? '#C0C0C0' : i === 2 ? '#CD7F32' : '#e7c158'} height={5} />
                 <div style={{ display: 'flex', gap: 10, marginTop: 3 }}>
-                  <span style={{ color: '#374151', fontSize: 7 }}>💰{fmtNum(m.wklad_gold || 0)}</span>
-                  <span style={{ color: '#374151', fontSize: 7 }}>⚔{fmtNum(m.wklad_kills || 0)}</span>
-                  <span style={{ color: '#374151', fontSize: 7 }}>✨{fmtNum(m.wklad_exp || 0)}</span>
+                  <span style={{ color: '#374151', fontSize: 7 }}><IconCoin size={8} /> {fmtNum(m.wklad_gold || 0)}</span>
+                  <span style={{ color: '#374151', fontSize: 7 }}><IconSword size={8} /> {fmtNum(m.wklad_kills || 0)}</span>
+                  <span style={{ color: '#374151', fontSize: 7 }}><IconSparkles size={8} /> {fmtNum(m.wklad_exp || 0)}</span>
                 </div>
               </div>
             </div>
@@ -566,7 +567,7 @@ function TreasuryTab({ guild, onUpdate, flashMsg }) {
       <Card color='#FCD34D' glow>
         <div style={{ textAlign: 'center', padding: '6px 0 10px' }}>
           <div style={{ color: '#FCD34D', fontSize: 32, fontWeight: 'bold', lineHeight: 1 }}>{fmtNum(guild.skarbiec || 0)}</div>
-          <div style={{ color: '#9a9182', fontSize: 9, marginTop: 4, letterSpacing: '2px', textTransform: 'uppercase' }}>💰 Złoto w Skarbcu</div>
+          <div style={{ color: '#9a9182', fontSize: 9, marginTop: 4, letterSpacing: '2px', textTransform: 'uppercase' }}><IconCoin size={9} /> Złoto w Skarbcu</div>
         </div>
       </Card>
 
@@ -654,7 +655,7 @@ function RecruitmentTab({ guild, onUpdate, flashMsg }) {
               <div style={{ color: '#9a9182', fontSize: 9, marginTop: 2 }}>Kontroluje czy gracze mogą wysyłać podania</div>
             </div>
             <Btn onClick={toggleOpen} color={guild.otwarta ? '#22C55E' : '#F87171'}>
-              {guild.otwarta ? '🔓 Otwarta' : '🔒 Zamknięta'}
+              {guild.otwarta ? <><IconUnlock size={9} /> Otwarta</> : <><IconLock size={9} /> Zamknięta</>}
             </Btn>
           </div>
         </Card>
@@ -768,7 +769,7 @@ function DiplomacyTab({ guild, onUpdate, flashMsg }) {
           const otherId = r.gildia1_id === gId ? r.gildia2_id : r.gildia1_id;
           return (
             <div key={r.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 10px', background: isAlly ? 'rgba(231,193,88,0.08)' : 'rgba(239,68,68,0.06)', border: `1px solid ${isAlly ? 'rgba(231,193,88,0.2)' : 'rgba(239,68,68,0.15)'}`, borderRadius: 6, marginBottom: 5 }}>
-              <span style={{ fontSize: 18 }}>{isAlly ? '🤝' : '⚔'}</span>
+              <span style={{ display: 'flex', color: isAlly ? '#4ADE80' : '#F87171' }}>{isAlly ? <IconUsers size={16} /> : <IconSword size={16} />}</span>
               <div style={{ flex: 1 }}>
                 <div style={{ color: '#e8e2d4', fontWeight: 'bold', fontSize: 10 }}>{other}</div>
                 <div style={{ color: isAlly ? '#4ADE80' : '#F87171', fontSize: 8 }}>{isAlly ? 'Przymierze' : 'Wrogość'}</div>
@@ -840,7 +841,7 @@ function QuestsTab({ guild, onUpdate, flashMsg }) {
           <ProgressBar pct={pct} color='#22C55E' height={8} />
           <div style={{ display: 'flex', justifyContent: 'space-between', color: '#9a9182', fontSize: 8, marginTop: 5, marginBottom: 10 }}>
             <span>{q.postep} / {q.cel_ilosc} ({pct}%)</span>
-            <span>💰 {fmtNum(q.nagroda_gold)}g · ✨ {fmtNum(q.nagroda_exp)} EXP</span>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><IconCoin size={9} /> {fmtNum(q.nagroda_gold)}g · <IconSparkles size={9} /> {fmtNum(q.nagroda_exp)} EXP</span>
           </div>
           {isDone && guild.myRanga === 'mistrz' && (
             <Btn onClick={collect} color='#FCD34D' wide><IconGift size={12} /> Odbierz nagrody dla gildii</Btn>
@@ -865,9 +866,9 @@ function QuestsTab({ guild, onUpdate, flashMsg }) {
               <Label>Typ misji</Label>
               <select value={form.typ} onChange={e => setForm(p => ({ ...p, typ: e.target.value }))}
                 style={{ width: '100%', padding: '6px 9px', background: 'rgba(20,16,12,0.7)', color: '#e8e2d4', border: '1px solid rgba(200,150,32,0.2)', borderRadius: 5, fontSize: 10, outline: 'none' }}>
-                <option value="kill">⚔ Zabójstwa</option>
-                <option value="gold_collect">💰 Zbieranie złota</option>
-                <option value="members_online">👥 Aktywni członkowie</option>
+                <option value="kill">Zabójstwa</option>
+                <option value="gold_collect">Zbieranie złota</option>
+                <option value="members_online">Aktywni członkowie</option>
               </select>
             </div>
             <Btn onClick={createQuest} color='#22C55E' wide disabled={!form.nazwa}><IconCheck size={12} /> Utwórz misję</Btn>
@@ -882,10 +883,10 @@ function QuestsTab({ guild, onUpdate, flashMsg }) {
 function BuffsTab({ guild, onUpdate, flashMsg }) {
   const b = guild.buffs || { bonus_exp: 0, bonus_healing: 0, bonus_crit: 0, bonus_defense: 0 };
   const BUFFS = [
-    { key: 'bonus_exp',     icon: '✨', name: 'Bonus EXP',   max: 15, step: 5,  color: '#A78BFA' },
-    { key: 'bonus_healing', icon: '💚', name: 'Leczenie',    max: 10, step: 5,  color: '#34D399' },
-    { key: 'bonus_crit',    icon: '⚡', name: 'Krit',       max: 5,  step: 2,  color: '#FCD34D' },
-    { key: 'bonus_defense', icon: '🛡', name: 'Obrona',     max: 10, step: 2,  color: '#60A5FA' },
+    { key: 'bonus_exp',     icon: <IconSparkles size={12} />, name: 'Bonus EXP',   max: 15, step: 5,  color: '#A78BFA' },
+    { key: 'bonus_healing', icon: <IconHeart size={12} />, name: 'Leczenie',    max: 10, step: 5,  color: '#34D399' },
+    { key: 'bonus_crit',    icon: <IconZap size={12} />, name: 'Krit',       max: 5,  step: 2,  color: '#FCD34D' },
+    { key: 'bonus_defense', icon: <IconShield size={12} />, name: 'Obrona',     max: 10, step: 2,  color: '#60A5FA' },
   ];
 
   const getCost = (cur, step) => {
@@ -919,7 +920,7 @@ function BuffsTab({ guild, onUpdate, flashMsg }) {
                   <span style={{ color: '#9a9182', fontSize: 8 }}>{cur}/{max}% maks.</span>
                   {canUpgrade
                     ? <Btn onClick={() => upgrade(key)} color={color} small><IconTrendingUp size={10} /> Ulepsz ({fmtNum(cost)}g)</Btn>
-                    : <span style={{ color: cur >= max ? color : '#374151', fontSize: 8 }}>{cur >= max ? '✓ MAX' : 'Brak uprawnień'}</span>
+                    : <span style={{ color: cur >= max ? color : '#374151', fontSize: 8 }}>{cur >= max ? 'MAX' : 'Brak uprawnień'}</span>
                   }
                 </div>
               </div>
@@ -950,11 +951,11 @@ function RankingTab() {
         {ranking.map((g, i) => (
           <div key={g.id} style={{ display: 'grid', gridTemplateColumns: '36px 1fr 70px 52px 44px', gap: 6, padding: '8px 14px', borderBottom: '1px solid rgba(200,150,32,0.04)', background: i < 3 ? `rgba(200,150,32,${0.06 - i * 0.015})` : 'transparent' }}>
             <div style={{ color: i === 0 ? '#FCD34D' : i === 1 ? '#C0C0C0' : i === 2 ? '#CD7F32' : '#9a9182', fontWeight: 'bold', fontSize: i < 3 ? 16 : 11, lineHeight: 1 }}>
-              {i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : i + 1}
+              {i + 1}
             </div>
             <div>
               <div style={{ color: '#e8e2d4', fontWeight: 'bold', fontSize: 10 }}>[{g.tag}] {g.nazwa}</div>
-              {i < 3 && pill('#e7c158', RANGA_LABEL.mistrz.replace('★ ', '') + ': ' + g.mistrz_nazwa)}
+              {i < 3 && pill('#e7c158', RANGA_LABEL.mistrz + ': ' + g.mistrz_nazwa)}
             </div>
             <div style={{ color: '#f7e3a4', fontSize: 9, alignSelf: 'center' }}>{fmtNum(g.gildia_exp || 0)}</div>
             <div style={{ color: '#4ADE80', fontSize: 9, alignSelf: 'center' }}>{g.member_count}</div>
@@ -1002,11 +1003,11 @@ function RaidsTab({ guild, postacId, onUpdate, flashMsg }) {
           </div>
           <ProgressBar pct={readyPct} color={readyPct >= 100 ? '#22C55E' : '#60A5FA'} height={6} />
           <div style={{ color: '#9a9182', fontSize: 8, marginTop: 4, marginBottom: 10 }}>
-            {uczestnicy.length >= raid.min_czlonkow ? '✓ Gotowi do rajdu!' : `Potrzeba ${raid.min_czlonkow - uczestnicy.length} więcej uczestników`}
+            {uczestnicy.length >= raid.min_czlonkow ? 'Gotowi do rajdu!' : `Potrzeba ${raid.min_czlonkow - uczestnicy.length} więcej uczestników`}
           </div>
           <div style={{ display: 'flex', gap: 6 }}>
             {!joined && <Btn onClick={joinRaid} color='#60A5FA'><IconPlus size={11} /> Dołącz</Btn>}
-            {joined && <span style={{ color: '#4ADE80', fontSize: 9, alignSelf: 'center' }}>✓ Dołączyłeś</span>}
+            {joined && <span style={{ color: '#4ADE80', fontSize: 9, alignSelf: 'center' }}><IconCheck size={9} /> Dołączyłeś</span>}
             {guild.myRanga === 'mistrz' && <Btn onClick={completeRaid} color='#FCD34D'><IconGift size={11} /> Zakończ & Rozdaj</Btn>}
           </div>
         </Card>
@@ -1242,7 +1243,7 @@ export default function GuildPanel({ onClose, socket, postacId }) {
                 <div style={{ flex: 1, overflowY: 'auto', padding: 20 }}>
                   {view === 'info' && (
                     <div style={{ textAlign: 'center', paddingTop: 40 }}>
-                      <div style={{ fontSize: 40, marginBottom: 12 }}>🏰</div>
+                      <div style={{ marginBottom: 12, display: 'flex', justifyContent: 'center', color: '#e7c158' }}><IconCastle size={34} /></div>
                       <div style={{ color: '#9a9182', fontSize: 11, marginBottom: 20 }}>Nie należysz do żadnej gildii</div>
                       <div style={{ display: 'flex', gap: 10, justifyContent: 'center' }}>
                         <Btn onClick={() => setView('create')} color='#FCD34D'><IconPlus size={12} /> Załóż gildię</Btn>
@@ -1356,7 +1357,7 @@ export default function GuildPanel({ onClose, socket, postacId }) {
                       <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
                         <span style={{ color: '#FCD34D', fontWeight: 'bold', fontSize: 10 }}>[{g.tag}]</span>
                         <span style={{ color: '#e8e2d4', fontWeight: 'bold', fontSize: 12 }}>{g.nazwa}</span>
-                        {pill(g.otwarta ? '#22C55E' : '#F87171', g.otwarta ? '🔓 Otwarta' : '🔒 Zamknięta')}
+                        {pill(g.otwarta ? '#22C55E' : '#F87171', g.otwarta ? <><IconUnlock size={9} /> Otwarta</> : <><IconLock size={9} /> Zamknięta</>)}
                       </div>
                       <div style={{ color: '#9a9182', fontSize: 8, marginTop: 3 }}>Mistrz: {g.mistrz_nazwa} · {g.czlonkowie} członków · Lv{g.lvl}</div>
                       {g.opis && <div style={{ color: '#374151', fontSize: 8, marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{g.opis}</div>}

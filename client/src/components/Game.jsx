@@ -1,4 +1,8 @@
 import { useState, useEffect, useCallback, useRef, lazy, Suspense } from 'react';
+import {
+  IconFlask, IconBag, IconScroll, IconUsers, IconBanner, IconStore, IconHammer,
+  IconFish, IconStar, IconSword, IconSkull, IconDagger, IconUser, IconCastle,
+} from '../Icons';
 import { api } from '../api';
 import { T } from '../theme';
 import { useSocket } from '../hooks/useSocket';
@@ -226,21 +230,21 @@ function Hotbar({ postac, onInventory, onHeal, onPvpToggle, onQuests, onSocial, 
       <div style={{ position:'absolute', left:0, top:0, bottom:0, width:32, background:'linear-gradient(90deg,rgba(2,5,12,0.9),transparent)', pointerEvents:'none', zIndex:2 }} />
       <div style={{ position:'absolute', right:0, top:0, bottom:0, width:32, background:'linear-gradient(270deg,rgba(2,5,12,0.9),transparent)', pointerEvents:'none', zIndex:2 }} />
 
-      <HotSlot icon="🧪" label="Eliksir" shortcut="H" onClick={onHeal} highlight={postac.zycie < postac.zycie_max * 0.4} />
-      <HotSlot icon="🎒" label="Plecak"  shortcut="I" onClick={onInventory} />
+      <HotSlot icon={<IconFlask size={16} />} label="Eliksir" shortcut="H" onClick={onHeal} highlight={postac.zycie < postac.zycie_max * 0.4} />
+      <HotSlot icon={<IconBag size={16} />} label="Plecak"  shortcut="I" onClick={onInventory} />
       <Sep />
-      <HotSlot icon="📜" label="Questy"  shortcut="Q" onClick={onQuests} />
-      <HotSlot icon="👥" label="Znajomi" shortcut="U" onClick={onSocial} />
-      <HotSlot icon="⚜" label="Gildia"  shortcut="G" onClick={onGuild} />
-      <HotSlot icon="🏪" label="Aukcje"  shortcut="B" onClick={onAuction} />
+      <HotSlot icon={<IconScroll size={16} />} label="Questy"  shortcut="Q" onClick={onQuests} />
+      <HotSlot icon={<IconUsers size={16} />} label="Znajomi" shortcut="U" onClick={onSocial} />
+      <HotSlot icon={<IconBanner size={16} />} label="Gildia"  shortcut="G" onClick={onGuild} />
+      <HotSlot icon={<IconStore size={16} />} label="Aukcje"  shortcut="B" onClick={onAuction} />
       <Sep />
-      <HotSlot icon="⚒" label="Craft"   shortcut="C" onClick={onCraft} />
-      <HotSlot icon="🎣" label="Wędka"   shortcut=""  onClick={onFishing} />
-      <HotSlot icon="⭐" label="Talenty" shortcut="T" onClick={onTalents} highlight={postac.punkty_talentow > 0} />
-      <HotSlot icon="⚔" label="Dungeon" shortcut=""  onClick={onDungeon} />
-      {hasBoss && <HotSlot icon="💀" label="Boss" shortcut="" onClick={() => {}} highlight />}
+      <HotSlot icon={<IconHammer size={16} />} label="Craft"   shortcut="C" onClick={onCraft} />
+      <HotSlot icon={<IconFish size={16} />} label="Wędka"   shortcut=""  onClick={onFishing} />
+      <HotSlot icon={<IconStar size={16} />} label="Talenty" shortcut="T" onClick={onTalents} highlight={postac.punkty_talentow > 0} />
+      <HotSlot icon={<IconSword size={16} />} label="Dungeon" shortcut=""  onClick={onDungeon} />
+      {hasBoss && <HotSlot icon={<IconSkull size={16} />} label="Boss" shortcut="" onClick={() => {}} highlight />}
       <Sep />
-      <HotSlot icon="🗡" label="PvP"    shortcut="P" onClick={onPvpToggle} active={postac.pvp} />
+      <HotSlot icon={<IconDagger size={16} />} label="PvP"    shortcut="P" onClick={onPvpToggle} active={postac.pvp} />
     </div>
   );
 }
@@ -520,7 +524,7 @@ export default function Game({ onLogout, onDisconnect }) {
     const onTradeCancelled = (d)    => { setShowTrade(false); setTradeRequest(null); addToast(`Handel anulowany: ${d.reason || ''}`, 'info'); };
     const onBossSpawned = (data) => {
       api.worldboss.active().then(b => setWorldBoss(b || null)).catch(() => {});
-      addToast(`⚔ Boss ${data.nazwa} pojawił się na mapie!`, 'warning');
+      addToast(`Boss ${data.nazwa} pojawił się na mapie!`, 'warning');
     };
     const onBossDied = (data) => {
       setWorldBoss(null);
@@ -750,19 +754,19 @@ export default function Game({ onLogout, onDisconnect }) {
   }, [target, engageNearest, openBattle, walkAdjacentTo]);
 
   const barPanels = [
-    { id: 'ekwipunek', icon: '🎒', label: 'Ekwipunek', onClick: () => setShowInv(v => !v) },
-    { id: 'postac',    icon: '🧍', label: 'Wygląd postaci', onClick: () => setShowOutfit(true) },
-    { id: 'talenty',   icon: '⭐', label: 'Talenty', onClick: () => setShowTalents(v => !v) },
-    { id: 'zadania',   icon: '📜', label: 'Zadania', onClick: () => setShowQuests(v => !v) },
-    { id: 'gildia',    icon: '⚜', label: 'Gildia', onClick: () => setShowGuild(v => !v) },
-    { id: 'znajomi',   icon: '👥', label: 'Przyjaciele i poczta', onClick: () => setShowSocial(v => !v) },
-    { id: 'aukcja',    icon: '🏪', label: 'Dom aukcyjny', onClick: () => setShowAuction(v => !v) },
-    { id: 'rzemioslo', icon: '⚒', label: 'Rzemiosło', onClick: () => setShowCraft(v => !v) },
-    { id: 'wedka',     icon: '🎣', label: 'Wędkarstwo', onClick: () => setShowFishing(v => !v) },
-    { id: 'lochy',     icon: '🏰', label: 'Lochy', onClick: () => setShowDungeon(v => !v) },
-    { id: 'pvp',       icon: '🗡', label: 'Przełącz tryb PvP', onClick: () => api.character.pvpToggle().then(loadState), active: !!state?.postac?.pvp },
+    { id: 'ekwipunek', icon: <IconBag size={15} />, label: 'Ekwipunek', onClick: () => setShowInv(v => !v) },
+    { id: 'postac',    icon: <IconUser size={15} />, label: 'Wygląd postaci', onClick: () => setShowOutfit(true) },
+    { id: 'talenty',   icon: <IconStar size={15} />, label: 'Talenty', onClick: () => setShowTalents(v => !v) },
+    { id: 'zadania',   icon: <IconScroll size={15} />, label: 'Zadania', onClick: () => setShowQuests(v => !v) },
+    { id: 'gildia',    icon: <IconBanner size={15} />, label: 'Gildia', onClick: () => setShowGuild(v => !v) },
+    { id: 'znajomi',   icon: <IconUsers size={15} />, label: 'Przyjaciele i poczta', onClick: () => setShowSocial(v => !v) },
+    { id: 'aukcja',    icon: <IconStore size={15} />, label: 'Dom aukcyjny', onClick: () => setShowAuction(v => !v) },
+    { id: 'rzemioslo', icon: <IconHammer size={15} />, label: 'Rzemiosło', onClick: () => setShowCraft(v => !v) },
+    { id: 'wedka',     icon: <IconFish size={15} />, label: 'Wędkarstwo', onClick: () => setShowFishing(v => !v) },
+    { id: 'lochy',     icon: <IconCastle size={15} />, label: 'Lochy', onClick: () => setShowDungeon(v => !v) },
+    { id: 'pvp',       icon: <IconDagger size={15} />, label: 'Przełącz tryb PvP', onClick: () => api.character.pvpToggle().then(loadState), active: !!state?.postac?.pvp },
     { id: 'auto',      icon: 'Ⓜ', label: 'Auto-polowanie', onClick: () => toggleAutoRef.current?.(), active: autoHunt },
-    ...(state?.postac?.ranga === 'GameAdmin' ? [{ id: 'admin', icon: '★', label: 'Panel administratora', onClick: () => setShowAdmin(true) }] : []),
+    ...(state?.postac?.ranga === 'GameAdmin' ? [{ id: 'admin', icon: <IconStar size={15} />, label: 'Panel administratora', onClick: () => setShowAdmin(true) }] : []),
   ];
   const toggleAutoRef = useRef(null);
 
@@ -946,7 +950,7 @@ export default function Game({ onLogout, onDisconnect }) {
         {tradeRequest && (
           <div style={{ position:'fixed', inset:0, background:'rgba(20,10,3,0.80)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:450, fontFamily:'Verdana,sans-serif' }}>
             <div style={{ padding:'16px 20px', background:'rgba(10,16,7,0.99)', border:'1px solid rgba(200,150,32,0.3)', borderRadius:8, textAlign:'center', maxWidth:'90vw' }}>
-              <div style={{ color:'#E8B84B', fontWeight:'bold', marginBottom:8 }}>🤝 {tradeRequest.from?.nazwa} proponuje handel</div>
+              <div style={{ color:'#E8B84B', fontWeight:'bold', marginBottom:8 }}><IconUsers size={13} /> {tradeRequest.from?.nazwa} proponuje handel</div>
               <div style={{ display:'flex', gap:8, justifyContent:'center' }}>
                 <button onClick={() => { socket?.emit('trade_accept', { sessionId: tradeRequest.sessionId }); setShowTrade(true); setTradeRequest(null); }} style={{ padding:'6px 16px', background:'rgba(74,122,42,0.3)', color:'#4ADE80', border:'1px solid rgba(74,122,42,0.5)', borderRadius:4, cursor:'pointer', fontFamily:'Verdana,sans-serif' }}>Tak</button>
                 <button onClick={() => { socket?.emit('trade_decline', { sessionId: tradeRequest.sessionId }); setTradeRequest(null); }} style={{ padding:'6px 16px', background:'rgba(120,30,30,0.3)', color:'#F87171', border:'1px solid rgba(180,30,30,0.5)', borderRadius:4, cursor:'pointer', fontFamily:'Verdana,sans-serif' }}>Nie</button>
@@ -1041,13 +1045,13 @@ export default function Game({ onLogout, onDisconnect }) {
         postac={state.postac}
         reserve={chatOpen ? 232 : 52}
         actions={[
-          { icon:'🧍', label:'Postać',       onClick:()=>setShowOutfit(true) },
-          { icon:'🎒', label:'Ekwipunek',    skrot:'I', onClick:()=>setShowInv(v=>!v) },
-          { icon:'⭐', label:'Talenty',      skrot:'T', onClick:()=>setShowTalents(v=>!v), uwaga: state.postac.punkty_talentow > 0 },
-          { icon:'📜', label:'Zadania',      skrot:'Q', onClick:()=>setShowQuests(v=>!v) },
-          { icon:'⚜', label:'Gildia',       skrot:'G', onClick:()=>setShowGuild(v=>!v) },
-          { icon:'👥', label:'Przyjaciele',  skrot:'U', onClick:()=>setShowSocial(v=>!v) },
-          ...(isAdmin ? [{ icon:'★', label:'Admin', onClick:()=>setShowAdmin(true) }] : []),
+          { icon:<IconUser size={15} />, label:'Postać',       onClick:()=>setShowOutfit(true) },
+          { icon:<IconBag size={15} />, label:'Ekwipunek',    skrot:'I', onClick:()=>setShowInv(v=>!v) },
+          { icon:<IconStar size={15} />, label:'Talenty',      skrot:'T', onClick:()=>setShowTalents(v=>!v), uwaga: state.postac.punkty_talentow > 0 },
+          { icon:<IconScroll size={15} />, label:'Zadania',      skrot:'Q', onClick:()=>setShowQuests(v=>!v) },
+          { icon:<IconBanner size={15} />, label:'Gildia',       skrot:'G', onClick:()=>setShowGuild(v=>!v) },
+          { icon:<IconUsers size={15} />, label:'Przyjaciele',  skrot:'U', onClick:()=>setShowSocial(v=>!v) },
+          ...(isAdmin ? [{ icon:<IconStar size={15} />, label:'Admin', onClick:()=>setShowAdmin(true) }] : []),
         ]}
       />
 
@@ -1193,7 +1197,7 @@ export default function Game({ onLogout, onDisconnect }) {
             border:'1px solid rgba(200,150,32,0.3)', borderRadius:8, textAlign:'center',
             boxShadow:'0 8px 40px rgba(0,0,0,0.8)',
           }}>
-            <div style={{ color:'#E8B84B', fontSize:13, fontWeight:'bold', marginBottom:8 }}>🤝 Propozycja handlu</div>
+            <div style={{ color:'#E8B84B', fontSize:13, fontWeight:'bold', marginBottom:8 }}><IconUsers size={13} /> Propozycja handlu</div>
             <div style={{ color:'#CDD4AA', fontSize:11, marginBottom:16 }}>
               <span style={{ color:'#C8940A', fontWeight:'bold' }}>{tradeRequest.from?.nazwa || 'Gracz'}</span> proponuje handel
             </div>
