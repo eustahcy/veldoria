@@ -118,11 +118,11 @@ function GuildChat({ socket }) {
   };
 
   return (
-    <div style={{ borderTop: '1px solid rgba(200,150,32,0.1)', display: 'flex', flexDirection: 'column' }}>
+    <div className="veldoria-guild-chat" style={{ borderTop: '1px solid rgba(200,150,32,0.1)', display: 'flex', flexDirection: 'column' }}>
       <div style={{ padding: '4px 10px', fontSize: 8, color: '#9a9182', display: 'flex', alignItems: 'center', gap: 5, background: 'rgba(20,16,12,0.3)' }}>
         <IconChat size={10} /> <span>Czat gildii</span>
       </div>
-      <div style={{ height: 100, overflowY: 'auto', padding: '4px 10px', display: 'flex', flexDirection: 'column', gap: 2 }}>
+      <div className="veldoria-guild-chat-body" style={{ height: 100, overflowY: 'auto', padding: '4px 10px', display: 'flex', flexDirection: 'column', gap: 2 }}>
         {msgs.length === 0
           ? <div style={{ color: '#6b6456', fontSize: 9, textAlign: 'center', marginTop: 10 }}>Brak wiadomości</div>
           : msgs.map((m, i) => (
@@ -1183,6 +1183,8 @@ export default function GuildPanel({ onClose, socket, postacId }) {
       }
       .veldoria-guild-sidebar { width: 132px !important; }
       .veldoria-guild-mini-card { display: none !important; }
+      /* przy 390 px wysokości czat nie może zjadać połowy panelu */
+      .veldoria-guild-chat-body { height: 54px !important; }
     }
   `;
 
