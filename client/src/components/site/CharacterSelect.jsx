@@ -161,7 +161,7 @@ function PasekStatu({ etykieta, pct, wartosc, kolor, glow }) {
   );
 }
 
-function Scena({ chars, slots, classes, mapNames, onEnter, onDelete, onCreate, busy, canCreate }) {
+function Scena({ chars, slots, classes, mapNames, onEnter, onDelete, onCreate, busy, canCreate, konto }) {
   const [wybrany, setWybrany] = useState(0);
   const [confirm, setConfirm] = useState(false);
   const idx = Math.min(wybrany, Math.max(0, chars.length - 1));
@@ -178,7 +178,7 @@ function Scena({ chars, slots, classes, mapNames, onEnter, onDelete, onCreate, b
     <div style={{ display: 'flex', gap: 18, alignItems: 'stretch', width: '100%', minHeight: 520 }}>
 
       {/* ── Lewa kolumna: klasa wybranej postaci ── */}
-      <div style={{ ...panel, width: 300, flexShrink: 0, padding: 18, display: 'flex', flexDirection: 'column' }}>
+      <div style={{ ...panel, width: 272, flexShrink: 0, padding: 18, display: 'flex', flexDirection: 'column' }}>
         {ch ? (
           <>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
@@ -202,17 +202,18 @@ function Scena({ chars, slots, classes, mapNames, onEnter, onDelete, onCreate, b
               kolor="linear-gradient(90deg,#6b3f9a,#c07ae0)" glow="rgba(192,122,224,0.45)" />
 
             {mapNames[ch.mapa] && (
-              <div style={{ marginTop: 'auto', paddingTop: 14, color: S.muted, fontSize: 12 }}>
+              <div style={{ paddingTop: 14, color: S.muted, fontSize: 12 }}>
                 📍 {mapNames[ch.mapa]}
               </div>
             )}
           </>
         ) : (
-          <div style={{ margin: 'auto', textAlign: 'center', color: S.muted, fontSize: 13 }}>
+          <div style={{ margin: '30px 0', textAlign: 'center', color: S.muted, fontSize: 13 }}>
             <div style={{ fontSize: 34, marginBottom: 10 }}>🛡</div>
             Nie masz jeszcze żadnej postaci.<br />Wybierz wolny slot po prawej.
           </div>
         )}
+        {konto && <div style={{ marginTop: 'auto', paddingTop: 16 }}>{konto}</div>}
       </div>
 
       {/* ── Środek: podest z bohaterami ── */}
@@ -234,7 +235,7 @@ function Scena({ chars, slots, classes, mapNames, onEnter, onDelete, onCreate, b
           background: 'linear-gradient(90deg, transparent, rgba(231,193,88,0.5), transparent)',
         }} />
 
-        <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'center', gap: 'clamp(18px, 5vw, 64px)', position: 'relative', zIndex: 1 }}>
+        <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'center', gap: 'clamp(10px, 3vw, 44px)', position: 'relative', zIndex: 1, maxWidth: '100%' }}>
           {chars.length === 0 && (
             <div style={{ color: S.muted, fontSize: 14, paddingBottom: 40 }}>Pusta arena — stwórz pierwszego bohatera</div>
           )}
@@ -244,18 +245,20 @@ function Scena({ chars, slots, classes, mapNames, onEnter, onDelete, onCreate, b
               <button key={c.id} onClick={() => setWybrany(i)} title={c.nazwa}
                 style={{
                   background: 'none', border: 'none', padding: 0, cursor: 'pointer',
-                  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10,
-                  transition: 'transform .18s, opacity .18s',
-                  opacity: akt ? 1 : 0.55, transform: akt ? 'translateY(-6px)' : 'none',
+                  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12,
+                  transition: 'opacity .18s',
+                  opacity: akt ? 1 : 0.6,
                 }}
               >
-                <div style={{
-                  width: 32, height: 48, transform: `scale(${akt ? 3.4 : 2.6})`, transformOrigin: 'bottom center',
-                  marginBottom: akt ? 96 : 66,
-                  backgroundImage: `url(/assets/${c.obrazek})`, backgroundPosition: '0 0',
-                  backgroundRepeat: 'no-repeat', imageRendering: 'pixelated',
-                  filter: akt ? 'drop-shadow(0 12px 16px rgba(0,0,0,0.85))' : 'drop-shadow(0 8px 12px rgba(0,0,0,0.8)) saturate(0.75)',
-                }} />
+                {/* sprite rośnie w górę od podłogi, więc pudełko ma stałą wysokość */}
+                <div style={{ height: 212, display: 'grid', alignItems: 'end', justifyItems: 'center' }}>
+                  <div style={{
+                    width: 32, height: 48, transform: `scale(${akt ? 4 : 3})`, transformOrigin: 'bottom center',
+                    backgroundImage: `url(/assets/${c.obrazek})`, backgroundPosition: '0 0',
+                    backgroundRepeat: 'no-repeat', imageRendering: 'pixelated',
+                    filter: akt ? 'drop-shadow(0 12px 16px rgba(0,0,0,0.85))' : 'drop-shadow(0 8px 12px rgba(0,0,0,0.8)) saturate(0.7)',
+                  }} />
+                </div>
                 {/* banner z imieniem */}
                 <div style={{
                   padding: '6px 16px', borderRadius: 8, minWidth: 130, textAlign: 'center',
@@ -273,7 +276,7 @@ function Scena({ chars, slots, classes, mapNames, onEnter, onDelete, onCreate, b
       </div>
 
       {/* ── Prawa kolumna: lista postaci ── */}
-      <div style={{ ...panel, width: 316, flexShrink: 0, padding: 16, display: 'flex', flexDirection: 'column' }}>
+      <div style={{ ...panel, width: 296, flexShrink: 0, padding: 16, display: 'flex', flexDirection: 'column' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, marginBottom: 14, color: S.gold }}>
           <span style={{ opacity: 0.6 }}>⟶</span>
           <span style={{ fontFamily: S.serif, fontSize: 13, letterSpacing: 3 }}>TWOJE POSTACIE</span>
@@ -574,7 +577,7 @@ export default function CharacterSelect({
   const canCreate = chars.length < MAX_SLOTS;
 
   const menu = (
-    <div style={{ ...panel, padding: 16, width: narrow ? '100%' : 230, alignSelf: 'flex-start' }}>
+    <div style={{ ...panel, padding: 14, width: '100%', alignSelf: 'flex-start', boxShadow: 'none', background: 'rgba(6,9,18,0.45)' }}>
       <div style={{ color: S.dim, fontSize: 10, letterSpacing: 3 }}>KONTO</div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, margin: '8px 0 14px' }}>
         <span style={{ fontSize: 20 }}>{me?.isAdmin ? '👑' : '🛡'}</span>
@@ -642,7 +645,7 @@ export default function CharacterSelect({
         )}
 
         <div style={{ display: 'flex', gap: 22, alignItems: 'flex-start', flexDirection: narrow ? 'column' : 'row' }}>
-          {menu}
+          {narrow && menu}
           {narrow ? (
             <div style={{ flex: 1, minWidth: 0, width: '100%' }}>
               <Karuzela
@@ -654,7 +657,7 @@ export default function CharacterSelect({
             <div style={{ flex: 1, minWidth: 0 }}>
               <Scena
                 chars={chars} slots={slots} classes={classes} mapNames={mapNames}
-                busy={loading} canCreate={canCreate}
+                busy={loading} canCreate={canCreate} konto={menu}
                 onEnter={onEnterGame} onDelete={onDelete} onCreate={onCreate}
               />
             </div>
