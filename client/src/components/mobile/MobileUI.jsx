@@ -301,7 +301,7 @@ function RoundMinimap({ state, size, onClick }) {
   );
 }
 
-function BottomSlot({ children, label, onClick, active, count, disabled }) {
+function BottomSlot({ children, label, onClick, active, count, disabled, landscape = false }) {
   return (
     <button onClick={onClick} disabled={disabled} style={{
       flex: 1, minWidth: 0, height: landscape ? 54 : 58, position: 'relative', padding: 0, cursor: disabled ? 'default' : 'pointer',
@@ -422,13 +422,13 @@ export function MobileHud({
       }}>
         <div style={{ display: 'flex', gap: landscape ? 7 : 6, padding: landscape ? '0' : '10px 8px 0',
           transform: landscape ? 'scale(0.96)' : 'none', transformOrigin: 'center bottom' }}>
-          <BottomSlot label="Czat" onClick={onChat} active={chatOpen} count={unread > 0 && !chatOpen ? unread : null}>💬</BottomSlot>
-          <BottomSlot label="Atak" onClick={onAttack}>⚔️</BottomSlot>
-          <BottomSlot label="Rozmowa" onClick={onTalk}>🗨️</BottomSlot>
-          <BottomSlot label={potion ? 'Mikstura' : 'Brak'} onClick={() => potion && onPotion(potion)} disabled={!potion} count={potion ? potionCount : null}>
+          <BottomSlot landscape={landscape} label="Czat" onClick={onChat} active={chatOpen} count={unread > 0 && !chatOpen ? unread : null}>💬</BottomSlot>
+          <BottomSlot landscape={landscape} label="Atak" onClick={onAttack}>⚔️</BottomSlot>
+          <BottomSlot landscape={landscape} label="Rozmowa" onClick={onTalk}>🗨️</BottomSlot>
+          <BottomSlot landscape={landscape} label={potion ? 'Mikstura' : 'Brak'} onClick={() => potion && onPotion(potion)} disabled={!potion} count={potion ? potionCount : null}>
             {potion ? <Icon item={potion} size={26} /> : '🧪'}
           </BottomSlot>
-          <BottomSlot label="Auto" onClick={onAuto} active={autoHunt}>Ⓜ</BottomSlot>
+          <BottomSlot landscape={landscape} label="Auto" onClick={onAuto} active={autoHunt}>Ⓜ</BottomSlot>
         </div>
       </div>
       <style>{`@keyframes mHudPulse{0%,100%{filter:none}50%{filter:brightness(1.6)}}`}</style>
