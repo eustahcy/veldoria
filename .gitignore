@@ -9,11 +9,16 @@ server/.env
 Thumbs.db
 __pycache__/
 
-# Z original/ trzymamy tylko grafiki gry (MAEGONEM_pliki) — reszta to archiwum
-original/*
-!original/MAEGONEM_pliki/
-original/.git-OldMargonem/
+# Grafiki gry nie wchodzą do tego repozytorium — patrz README, sekcja „Grafiki”.
+original/
+client/src/assets/mapy/
+client/src/assets/mob/
+client/src/assets/npc/
+client/src/assets/avatar/
+client/src/assets/obrazki/
+client/src/assets/przedmiot/
+tools/atlas/zrodlo/
 
-# Projekty poboczne trzymane obok gry (nie wchodzą do repozytorium serwera)
+# Projekty poboczne trzymane obok gry
 Veldoria-Unity2D/
 VeldoriaMapEditor/

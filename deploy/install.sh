@@ -19,11 +19,16 @@ mv "$BASE/app.new" "$BASE/app"
 
 echo "== 2/6 Grafiki gry (/assets)"
 if [ ! -d "$BASE/data/assets" ]; then
-  cp -a "$BASE/app/original/MAEGONEM_pliki" "$BASE/data/assets"
+  if [ -d "$BASE/app/original/MAEGONEM_pliki" ]; then
+    cp -a "$BASE/app/original/MAEGONEM_pliki" "$BASE/data/assets"
+  else
+    mkdir -p "$BASE/data/assets"
+    echo "UWAGA: repo nie zawiera grafik — wgraj je do $BASE/data/assets (patrz README)."
+  fi
   echo "   skopiowano"
 else
   # Nowe pliki z paczki dokładamy, istniejących (w tym wgranych przez panel admina) nie ruszamy
-  cp -an "$BASE/app/original/MAEGONEM_pliki/." "$BASE/data/assets/"
+  [ -d "$BASE/app/original/MAEGONEM_pliki" ] && cp -an "$BASE/app/original/MAEGONEM_pliki/." "$BASE/data/assets/" || true
   echo "   uzupełniono brakujące"
 fi
 chown -R 1000:1000 "$BASE/data/assets"   # użytkownik "node" w kontenerze

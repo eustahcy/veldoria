@@ -17,13 +17,20 @@ git log --oneline HEAD..origin/main
 # --ff-only: nigdy nie nadpisuje lokalnych zmian na serwerze — jeśli jakieś są, zatrzymuje się
 git merge --ff-only origin/main
 
-# Nowe grafiki z repo dokładamy do wolumenu (istniejących i wgranych w grze nie ruszamy)
-cp -an "$DIR/app/original/MAEGONEM_pliki/." "$DIR/data/assets/"
-# Atlas kafli jest generowany z repo (a nie wgrywany w grze), wiec ten jeden
-# katalog nadpisujemy zawsze — inaczej gra zostaje ze stara grafika.
-mkdir -p "$DIR/data/assets/kafle"
-cp -a "$DIR/app/original/MAEGONEM_pliki/kafle/." "$DIR/data/assets/kafle/"
-chown -R 1000:1000 "$DIR/data/assets"
+# Grafiki: publiczne repo ich nie zawiera, więc kopiujemy tylko jeśli są w drzewie.
+# Wgranych w grze nie ruszamy (-n), a atlas kafli nadpisujemy zawsze, bo jest
+# generowany razem z kodem i musi pasować do wersji silnika.
+GRAFIKI="$DIR/app/original/MAEGONEM_pliki"
+if [ -d "$GRAFIKI" ]; then
+  cp -an "$GRAFIKI/." "$DIR/data/assets/"
+  if [ -d "$GRAFIKI/kafle" ]; then
+    mkdir -p "$DIR/data/assets/kafle"
+    cp -a "$GRAFIKI/kafle/." "$DIR/data/assets/kafle/"
+  fi
+  chown -R 1000:1000 "$DIR/data/assets"
+else
+  echo "Repo bez grafik — zostawiam zawartość $DIR/data/assets bez zmian."
+fi
 
 docker compose -f "$DIR/app/deploy/docker-compose.yml" --env-file "$DIR/.env" up -d --build app
 echo "Zaktualizowano: $OLD → $(git rev-parse --short HEAD)"
