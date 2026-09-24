@@ -261,7 +261,9 @@ export default function CharacterSelect({
               <CharCard key={ch.id} ch={ch} mapName={mapNames[ch.mapa]} narrow={narrow}
                         onEnter={onEnterGame} onDelete={onDelete} busy={loading} />
             ))}
-            {Array.from({ length: Math.max(0, slots - chars.length) }, (_, i) => (
+            {/* na telefonie jeden kafel „nowa postać" wystarczy — reszta to tylko szum,
+                a na dole i tak jest przycisk tworzenia */}
+            {Array.from({ length: Math.max(0, narrow ? Math.min(1, slots - chars.length) : slots - chars.length) }, (_, i) => (
               <EmptySlot key={`e${i}`} narrow={narrow} onCreate={canCreate ? onCreate : undefined} />
             ))}
           </div>
