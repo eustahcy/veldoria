@@ -237,6 +237,8 @@ const NPC = [
   { obrazek: 'npc/unil.gif',         x: 24, y: 21, shop: 0,  nazwa: 'Unil Wędrowiec',    poziom: 4,  typ: 0 },
   { obrazek: 'npc/sir-galien.gif',   x: 39, y: 21, shop: 0,  nazwa: 'Sir Galien',        poziom: 15, typ: 0 },
   { obrazek: 'npc/teleporter.gif',   x: 31, y: 33, shop: 0,  nazwa: 'Mistrz Portali',    poziom: 20, typ: 0 },
+  // typ 3 = świątynia: ten NPC leczy (patrz routes/items.js)
+  { obrazek: 'npc/makatara.gif',     x: 35, y: 27, shop: 0,  nazwa: 'Kapłanka Elara',    poziom: 10, typ: 3 },
 ];
 
 // Potwory 1–5 lv: im dalej od bramy, tym mocniejsze
