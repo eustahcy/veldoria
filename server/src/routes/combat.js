@@ -121,11 +121,15 @@ async function recordKillProgress(postac, mob) {
      WHERE status='aktywna' AND typ='kill' AND postep>=cel_ilosc`
   )).catch(log);
 
+  // Cel zadania: gatunek (cel_wartosc = nazwa moba), konkretna sztuka (cel_id)
+  // albo cokolwiek, gdy oba pola puste.
   const [killQuests] = await db.query(
     `SELECT pq.quest_id FROM postac_questy pq JOIN questy q ON pq.quest_id=q.id
      WHERE pq.postac_id=? AND pq.status='aktywny' AND q.typ='kill'
-       AND (q.cel_id=0 OR q.cel_id=?) AND pq.postep < q.cel_ilosc`,
-    [postac.id, mob.id]
+       AND pq.postep < q.cel_ilosc
+       AND ( (COALESCE(q.cel_wartosc,'')='' AND (q.cel_id=0 OR q.cel_id=?))
+             OR q.cel_wartosc=? )`,
+    [postac.id, mob.id, mob.nazwa]
   );
   for (const kq of killQuests) {
     await db.query(
