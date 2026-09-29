@@ -205,7 +205,7 @@ router.post('/action', requireSession, combatLimit, async (req, res, next) => {
     let mobHp  = mob.zycie;
     let status = 'ongoing';
     let loot   = null;
-    let expGained = 0;
+    let expGained = 0, goldGained = 0;
     let levelUp   = false;
     let deathXpLoss = 0;
 
@@ -291,7 +291,7 @@ router.post('/action', requireSession, combatLimit, async (req, res, next) => {
         await db.query('UPDATE postac SET zycie=zycie_max, mapa=?, x=?, y=?, exp=?, deaths=COALESCE(deaths,0)+1 WHERE id=?',
           [dm.dead_map||1, dm.dead_x||35, dm.dead_y||37, newExpAfterDeath, postac.id]);
         log.push({ type: 'hero_dead', xpLoss });
-        return res.json({ ok: true, status: 'lost', log, heroHp: 1, mobHp, heroMaxHp: postac.zycie_max, xpLoss });
+        return res.json({ ok: true, status: 'lost', log, heroHp: postac.zycie_max, mobHp, heroMaxHp: postac.zycie_max, xpLoss });
       }
       await db.query('UPDATE postac SET zycie=? WHERE id=?', [heroHp, postac.id]);
       return res.json({ ok: true, status: 'ongoing', log, heroHp, mobHp, heroMaxHp: postac.zycie_max });
@@ -336,7 +336,7 @@ router.post('/action', requireSession, combatLimit, async (req, res, next) => {
       const reward = await awardMobKill({ postac, mob, expMult: xpMult, now });
       fx.clearBattleEffects(req.session);
       if (!reward) return res.json(MOB_ALREADY_DEAD);
-      ({ expGained, levelUp, loot } = reward);
+      ({ expGained, levelUp, loot, goldGained } = reward);
       if (reward.newZycieMax) heroHp = reward.newZycieMax;
       log.push({ type: 'mob_dead', mob: mob.nazwa, exp: expGained });
       status = 'won';
@@ -380,7 +380,7 @@ router.post('/action', requireSession, combatLimit, async (req, res, next) => {
       ? fx.tickAndSave(req.session, mob.id, heroEffects, mobEffects)
       : { hero: [], mob: [] };
 
-    res.json({ ok: true, status, log, heroHp, mobHp, loot, expGained, levelUp,
+    res.json({ ok: true, status, log, heroHp, mobHp, loot, expGained, levelUp, goldGained,
       heroMaxHp: postac.zycie_max, mobMaxHp: mob.zycie_max,
       effects: remainingEffects, xpLoss: deathXpLoss || undefined });
   } catch(e) { next(e); }
@@ -430,14 +430,14 @@ router.post('/skill', requireSession, combatLimit, async (req, res, next) => {
 
     const log = result.log;
     let status = 'ongoing';
-    let loot = null, expGained = 0, levelUp = false;
+    let loot = null, expGained = 0, levelUp = false, goldGained = 0;
 
     if (mobHp <= 0) {
       const xpMult2 = serverConfig.getNum('xp_multiplier', 1) * heroMods2.expBonus;
       const reward = await awardMobKill({ postac, mob, expMult: xpMult2, now });
       fx.clearBattleEffects(req.session);
       if (!reward) return res.json(MOB_ALREADY_DEAD);
-      ({ expGained, levelUp, loot } = reward);
+      ({ expGained, levelUp, loot, goldGained } = reward);
       // Po awansie pełne HP — wcześniej nadpisywało je zycie sprzed awansu
       if (reward.newZycieMax) heroHp = reward.newZycieMax;
       log.push({ type:'mob_dead', mob:mob.nazwa, exp:expGained });
@@ -466,7 +466,7 @@ router.post('/skill', requireSession, combatLimit, async (req, res, next) => {
         const xpLoss = Math.round(rawPostac.exp * xpLossPct / 100);
         const minXpForLevel = rawPostac.poziom > 1 ? Math.pow(rawPostac.poziom - 1, 4) + 10 : 0;
         const newExpAfterDeath = Math.max(minXpForLevel, rawPostac.exp - xpLoss);
-        await db.query('UPDATE postac SET zycie=1,mapa=?,x=?,y=?,exp=?,deaths=COALESCE(deaths,0)+1 WHERE id=?',
+        await db.query('UPDATE postac SET zycie=zycie_max,mapa=?,x=?,y=?,exp=?,deaths=COALESCE(deaths,0)+1 WHERE id=?',
           [dm?.dead_map||1, dm?.dead_x||35, dm?.dead_y||37, newExpAfterDeath, postac.id]);
         log.push({ type:'hero_dead', xpLoss });
         status = 'lost'; heroHp = 1;
@@ -480,7 +480,7 @@ router.post('/skill', requireSession, combatLimit, async (req, res, next) => {
       ? fx.tickAndSave(req.session, mob.id, heroEffects2, mobEffects2)
       : { hero: [], mob: [] };
 
-    res.json({ ok:true, status, log, heroHp, mobHp, loot, expGained, levelUp,
+    res.json({ ok:true, status, log, heroHp, mobHp, loot, expGained, levelUp, goldGained,
       heroMaxHp: postac.zycie_max, mobMaxHp: mob.zycie_max, effects: remainingEffects2 });
   } catch(e) { next(e); }
 });
@@ -518,9 +518,9 @@ router.post('/pvp', requireSession, combatLimit, async (req, res, next) => {
     const targetWon = heroHp <= 0 && targetHp > 0;
     const heroWon   = targetHp <= 0;
 
-    if (targetHp<=0) { await db.query('UPDATE postac SET zycie=1,mapa=1,x=31,y=47 WHERE id=?',[target.id]); log.push({type:'pvp_win',loser:target.nazwa}); }
+    if (targetHp<=0) { await db.query('UPDATE postac SET zycie=zycie_max,mapa=1,x=31,y=47 WHERE id=?',[target.id]); log.push({type:'pvp_win',loser:target.nazwa}); }
     else await db.query('UPDATE postac SET zycie=? WHERE id=?',[targetHp,target.id]);
-    if (heroHp<=0) { await db.query('UPDATE postac SET zycie=1,mapa=1,x=31,y=47 WHERE id=?',[postac.id]); log.push({type:'pvp_loss'}); }
+    if (heroHp<=0) { await db.query('UPDATE postac SET zycie=zycie_max,mapa=1,x=31,y=47 WHERE id=?',[postac.id]); log.push({type:'pvp_loss'}); }
     else await db.query('UPDATE postac SET zycie=? WHERE id=?',[heroHp,postac.id]);
 
     // Record PvP history
@@ -800,12 +800,12 @@ router.post('/turn2', requireSession, turnLimit, async (req, res, next) => {
         xpLoss = Math.round(rawPostac.exp * xpLossPct / 100);
         const minXp = rawPostac.poziom > 1 ? Math.pow(rawPostac.poziom - 1, 4) + 10 : 0;
         await db.query(
-          'UPDATE postac SET zycie=1, mapa=?, x=?, y=?, exp=?, deaths=COALESCE(deaths,0)+1 WHERE id=?',
+          'UPDATE postac SET zycie=zycie_max, mapa=?, x=?, y=?, exp=?, deaths=COALESCE(deaths,0)+1 WHERE id=?',
           [dm?.dead_map || 1, dm?.dead_x || 35, dm?.dead_y || 37, Math.max(minXp, rawPostac.exp - xpLoss), postac.id]
         );
         log.push({ type: 'hero_dead', xpLoss });
         await clearCS(db, postac.id);
-        return res.json({ ok: true, status: 'lost', log, heroHp: 1, mobHp: mob_hp, heroMaxHp: postac.zycie_max, mobMaxHp: mob.zycie_max, heroEn: 0, heroFuria: 0, heroEffects: [], mobEffects: mob_effects, turn, cooldowns, xpLoss });
+        return res.json({ ok: true, status: 'lost', log, heroHp: postac.zycie_max, mobHp: mob_hp, heroMaxHp: postac.zycie_max, mobMaxHp: mob.zycie_max, heroEn: 0, heroFuria: 0, heroEffects: [], mobEffects: mob_effects, turn, cooldowns, xpLoss });
       }
     }
 
@@ -892,6 +892,7 @@ router.post('/turn2', requireSession, turnLimit, async (req, res, next) => {
         heroEn: hero_en, heroFuria: Math.min(100, hero_furia),
         heroEffects: hero_effects, mobEffects: [], turn: turn + 1, cooldowns,
         loot: reward.loot, expGained: reward.expGained, levelUp: reward.levelUp,
+        goldGained: reward.goldGained,
       });
     };
 
@@ -929,7 +930,7 @@ router.post('/turn2', requireSession, turnLimit, async (req, res, next) => {
       xpLoss = Math.round(rawPostac.exp * xpLossPct / 100);
       const minXp = rawPostac.poziom > 1 ? Math.pow(rawPostac.poziom - 1, 4) + 10 : 0;
       await db.query(
-        'UPDATE postac SET zycie=1, mapa=?, x=?, y=?, exp=?, deaths=COALESCE(deaths,0)+1 WHERE id=?',
+        'UPDATE postac SET zycie=zycie_max, mapa=?, x=?, y=?, exp=?, deaths=COALESCE(deaths,0)+1 WHERE id=?',
         [dm?.dead_map||1, dm?.dead_x||35, dm?.dead_y||37, Math.max(minXp, rawPostac.exp - xpLoss), postac.id]
       );
       log.push({ type: 'hero_dead', xpLoss });
@@ -955,7 +956,7 @@ router.post('/turn2', requireSession, turnLimit, async (req, res, next) => {
       const xpl = Math.max(2,10-Math.floor((rawPostac.poziom-1)/10));
       xpLoss = Math.round(rawPostac.exp*xpl/100);
       const minXp2 = rawPostac.poziom>1?Math.pow(rawPostac.poziom-1,4)+10:0;
-      await db.query('UPDATE postac SET zycie=1,mapa=?,x=?,y=?,exp=?,deaths=COALESCE(deaths,0)+1 WHERE id=?',
+      await db.query('UPDATE postac SET zycie=zycie_max,mapa=?,x=?,y=?,exp=?,deaths=COALESCE(deaths,0)+1 WHERE id=?',
         [dm2?.dead_map||1,dm2?.dead_x||35,dm2?.dead_y||37,Math.max(minXp2,rawPostac.exp-xpLoss),postac.id]);
       log.push({type:'hero_dead',xpLoss});
       await clearCS(db,postac.id);

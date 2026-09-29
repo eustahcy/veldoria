@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import {
   IconHeart, IconZap, IconFlame, IconBurst, IconMute, IconDagger, IconShield,
-  IconFlask, IconRun, IconSword, IconGift,
+  IconFlask, IconRun, IconSword, IconGift, IconCoin,
 } from '../Icons';
 import { api } from '../api';
 
@@ -210,6 +210,7 @@ export default function BattleModal2({ mob: initMob, postac: initPostac, mapa, o
   const [lastInit,    setLastInit]    = useState(null);
   const [loot,        setLoot]        = useState(null);
   const [expGained,   setExpGained]   = useState(0);
+  const [goldGained,  setGoldGained]  = useState(0);
   const [levelUp,     setLevelUp]     = useState(false);
   const [xpLoss,      setXpLoss]      = useState(0);
   const [particles,   setParticles]   = useState([]);
@@ -321,6 +322,7 @@ export default function BattleModal2({ mob: initMob, postac: initPostac, mapa, o
       setPanel(null);
       if (r.loot)      setLoot(r.loot);
       if (r.expGained) setExpGained(r.expGained);
+      if (r.goldGained) setGoldGained(r.goldGained);
       if (r.levelUp)   setLevelUp(true);
       if (r.xpLoss)    setXpLoss(r.xpLoss);
       onEnd?.();
@@ -599,6 +601,7 @@ export default function BattleModal2({ mob: initMob, postac: initPostac, mapa, o
                     {expGained > 0 && <div style={{ color: '#67e8f9', fontSize: 15, fontWeight: 700, marginTop: 6 }}>+{expGained} EXP</div>}
                     {levelUp && <div style={{ color: '#fcd34d', fontSize: 15, fontWeight: 700, marginTop: 4 }}>★ Awans na poziom {initPostac.poziom + 1}!</div>}
                     {xpLoss > 0 && <div style={{ color: '#f87171', fontSize: 13, marginTop: 4 }}>−{xpLoss} EXP utracone</div>}
+                    {goldGained > 0 && <div style={{ color: B.goldHi, fontSize: 14, fontWeight: 700, marginTop: 4, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}><IconCoin size={13} /> +{goldGained} złota</div>}
                     {loot && <div style={{ marginTop: 8, fontSize: 13 }}><IconGift size={12} /> Zdobyto: <b style={{ color: B.goldHi }}>{loot.nazwa}</b></div>}
                   </div>
                 </div>
