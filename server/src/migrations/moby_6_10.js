@@ -41,6 +41,25 @@ async function main() {
   const [npc] = await db.query('SELECT x,y FROM npc WHERE mapa=?', [mapa.id]);
   const [moby] = await db.query('SELECT x,y FROM mob WHERE mapa=?', [mapa.id]);
   const zajete = new Set([...blok, ...npc, ...moby].map(r => `${r.x},${r.y}`));
+  const sciana = new Set(blok.map(r => `${r.x},${r.y}`));
+
+  // pola osiągalne ze spawnu — bez tego mob potrafi wylądować w zamkniętej kieszeni
+  const [[cfg]] = await db.query("SELECT config_value v FROM server_config WHERE config_key='starting_x'");
+  const [[cfgY]] = await db.query("SELECT config_value v FROM server_config WHERE config_key='starting_y'");
+  const start = [Number(cfg?.v) || 32, Number(cfgY?.v) || 26];
+  const osiagalne = new Set([start.join(',')]);
+  const kolejka = [start];
+  while (kolejka.length) {
+    const [x, y] = kolejka.shift();
+    for (const [dx, dy] of [[0, 1], [0, -1], [1, 0], [-1, 0]]) {
+      const nx = x + dx, ny = y + dy, k = `${nx},${ny}`;
+      if (nx < 0 || ny < 0 || nx > mapa.maks_x || ny > mapa.maks_y) continue;
+      if (osiagalne.has(k) || sciana.has(k)) continue;
+      osiagalne.add(k); kolejka.push([nx, ny]);
+    }
+  }
+  const dostepne = (x, y) => [[0, 1], [0, -1], [1, 0], [-1, 0]].some(([dx, dy]) => osiagalne.has(`${x + dx},${y + dy}`));
+  console.log(`Pól osiągalnych z rynku: ${osiagalne.size}`);
 
   let ziarno = 20260929;
   const los = () => { ziarno = (ziarno * 1103515245 + 12345) % 2147483648; return ziarno / 2147483648; };
@@ -56,7 +75,7 @@ async function main() {
       prob++;
       const x = losInt(x0, x1), y = losInt(y0, y1);
       if (x < 1 || y < 1 || x >= mapa.maks_x || y >= mapa.maks_y) continue;
-      if (zajete.has(`${x},${y}`)) continue;
+      if (zajete.has(`${x},${y}`) || !dostepne(x, y)) continue;
       await db.query(
         `INSERT INTO mob (obrazek,mapa,x,y,nazwa,poziom,typ,szerokosc,dlugosc,zycie,zycie_max,sa,ac,acm,obr_min,obr_max,exp,respawn_time,respawn,paczka)
          VALUES (?,?,?,?,?,?,0,32,32,?,?,?,?,0,?,?,?,?,0,?)`,
@@ -79,6 +98,22 @@ async function main() {
     }
     console.log(`  paczka ${paczka}: ${ok} pozycji`);
   }
+
+  // przestawiamy moby, które trafiły w zamknięte kieszenie (np. z wcześniejszego uruchomienia)
+  const [wszystkie] = await db.query('SELECT id,nazwa,x,y FROM mob WHERE mapa=?', [mapa.id]);
+  let przestawione = 0;
+  for (const mb of wszystkie) {
+    if (dostepne(mb.x, mb.y)) continue;
+    const kandydaci = [...osiagalne].map(k => k.split(',').map(Number))
+      .filter(([x, y]) => !zajete.has(`${x},${y}`))
+      .sort((a4, b4) => (Math.abs(a4[0] - mb.x) + Math.abs(a4[1] - mb.y)) - (Math.abs(b4[0] - mb.x) + Math.abs(b4[1] - mb.y)));
+    const cel = kandydaci[0];
+    if (!cel) continue;
+    await db.query('UPDATE mob SET x=?, y=? WHERE id=?', [cel[0], cel[1], mb.id]);
+    zajete.add(`${cel[0]},${cel[1]}`);
+    przestawione++;
+  }
+  if (przestawione) console.log(`Przestawiono mobów z niedostępnych pól: ${przestawione}`);
 
   const [[ile]] = await db.query('SELECT COUNT(*) c FROM mob WHERE mapa=?', [mapa.id]);
   console.log(`Mobów na mapie łącznie: ${ile.c}`);
