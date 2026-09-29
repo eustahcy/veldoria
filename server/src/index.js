@@ -193,6 +193,15 @@ setInterval(async () => {
   } catch (e) { logError('cron:bossEscape')(e); }
 }, 60 * 1000);
 
+// ── Regeneracja HP poza walką — co 20 s ──────────────────────────────────────
+// Bez tego jedyną drogą do pełnego życia jest mikstura albo śmierć.
+setInterval(() => {
+  db.query(
+    `UPDATE postac SET zycie = LEAST(zycie_max, zycie + GREATEST(2, ROUND(zycie_max * 0.06)))
+     WHERE zalogowany = 1 AND zycie > 0 AND zycie < zycie_max AND combat_state IS NULL`
+  ).catch(logError('regen'));
+}, 20000);
+
 // ── World Boss regen cron — every 30 seconds (gdy regeneracja aktywna) ────────
 setInterval(async () => {
   try {

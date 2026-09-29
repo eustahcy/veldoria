@@ -70,16 +70,30 @@ async function awardMobKill({ postac, mob, expMult, now = Math.floor(Date.now() 
     }
   }
 
-  // Loot (respects loot_chance multiplier)
+  // Złoto za zabicie — rośnie z poziomem moba, z losowym rozrzutem.
+  // Bez tego świeża postać nie ma z czego kupić nawet mikstury.
+  const goldMult = serverConfig.getNum('gold_mult', 1);
+  const baseGold = 2 + (mob.poziom || 1) * 3;
+  const goldGained = Math.max(1, Math.round(baseGold * (0.6 + Math.random() * 0.8) * goldMult));
+  await db.query('UPDATE postac SET zloto=zloto+? WHERE id=?', [goldGained, postac.id]);
+
+  // Łup: najpierw szansa na jakikolwiek drop, potem losowanie ważone kolumną „szansa"
   let loot = null;
   const lootChance = serverConfig.getNum('loot_chance', 1);
-  if (mob.paczka > 0 && Math.random() < lootChance) {
+  const dropChance = Math.min(1, serverConfig.getNum('drop_base', 0.34) * lootChance);
+  if (mob.paczka > 0 && Math.random() < dropChance) {
     const [lootItems] = await db.query(
-      `SELECT pp.*, pl.* FROM paczka_przedmiot pp
+      `SELECT pp.szansa AS waga, pl.* FROM paczka_przedmiot pp
        JOIN przedmiot_loot pl ON pp.przedmiot_id=pl.id
        WHERE pp.paczka_id=?`, [mob.paczka]);
     if (lootItems.length) {
-      const dropped = lootItems[Math.floor(Math.random() * lootItems.length)];
+      const suma = lootItems.reduce((a, it) => a + Math.max(1, Number(it.waga) || 1), 0);
+      let los = Math.random() * suma;
+      let dropped = lootItems[lootItems.length - 1];
+      for (const it of lootItems) {
+        los -= Math.max(1, Number(it.waga) || 1);
+        if (los <= 0) { dropped = it; break; }
+      }
       await giveItem(db, postac.id, dropped);
       loot = { nazwa: dropped.nazwa, typ: dropped.typ, klasa: dropped.klasa, obrazek: dropped.obrazek };
     }
@@ -88,7 +102,7 @@ async function awardMobKill({ postac, mob, expMult, now = Math.floor(Date.now() 
   // Efekty poboczne — nie blokują walki, ale błędy są logowane
   await recordKillProgress(postac, mob).catch(logError('combat:killProgress'));
 
-  return { expGained, levelUp: levelsGained > 0, newZycieMax, loot };
+  return { expGained, goldGained, levelUp: levelsGained > 0, newZycieMax, loot };
 }
 
 // Statystyki, questy, gildia, osiągnięcia i surowce po zabiciu moba
@@ -234,10 +248,10 @@ router.post('/action', requireSession, combatLimit, async (req, res, next) => {
         const xpLoss = Math.round(rawPostac.exp * xpLossPct / 100);
         const minXpForLevel = rawPostac.poziom > 1 ? Math.pow(rawPostac.poziom - 1, 4) + 10 : 0;
         const newExpAfterDeath = Math.max(minXpForLevel, rawPostac.exp - xpLoss);
-        await db.query('UPDATE postac SET zycie=1, mapa=?, x=?, y=?, exp=?, deaths=COALESCE(deaths,0)+1 WHERE id=?',
+        await db.query('UPDATE postac SET zycie=zycie_max, mapa=?, x=?, y=?, exp=?, deaths=COALESCE(deaths,0)+1 WHERE id=?',
           [dm.dead_map||1, dm.dead_x||35, dm.dead_y||37, newExpAfterDeath, postac.id]);
         log.push({ type: 'hero_dead', xpLoss });
-        return res.json({ ok: true, status: 'lost', log, heroHp: 1, mobHp, xpLoss });
+        return res.json({ ok: true, status: 'lost', log, heroHp: rawPostac.zycie_max, mobHp, xpLoss });
       }
       await db.query('UPDATE postac SET zycie=? WHERE id=?', [heroHp, postac.id]);
       return res.json({ ok: true, status: 'ongoing', log, heroHp, mobHp });
@@ -274,7 +288,7 @@ router.post('/action', requireSession, combatLimit, async (req, res, next) => {
         const xpLoss = Math.round(rawPostac.exp * xpLossPct / 100);
         const minXpForLevel = rawPostac.poziom > 1 ? Math.pow(rawPostac.poziom - 1, 4) + 10 : 0;
         const newExpAfterDeath = Math.max(minXpForLevel, rawPostac.exp - xpLoss);
-        await db.query('UPDATE postac SET zycie=1, mapa=?, x=?, y=?, exp=?, deaths=COALESCE(deaths,0)+1 WHERE id=?',
+        await db.query('UPDATE postac SET zycie=zycie_max, mapa=?, x=?, y=?, exp=?, deaths=COALESCE(deaths,0)+1 WHERE id=?',
           [dm.dead_map||1, dm.dead_x||35, dm.dead_y||37, newExpAfterDeath, postac.id]);
         log.push({ type: 'hero_dead', xpLoss });
         return res.json({ ok: true, status: 'lost', log, heroHp: 1, mobHp, heroMaxHp: postac.zycie_max, xpLoss });
@@ -352,7 +366,7 @@ router.post('/action', requireSession, combatLimit, async (req, res, next) => {
         deathXpLoss = Math.round(rawPostac.exp * xpLossPct / 100);
         const minXpForLevel = rawPostac.poziom > 1 ? Math.pow(rawPostac.poziom - 1, 4) + 10 : 0;
         const newExpAfterDeath = Math.max(minXpForLevel, rawPostac.exp - deathXpLoss);
-        await db.query('UPDATE postac SET zycie=1, mapa=?, x=?, y=?, exp=?, deaths=COALESCE(deaths,0)+1 WHERE id=?',
+        await db.query('UPDATE postac SET zycie=zycie_max, mapa=?, x=?, y=?, exp=?, deaths=COALESCE(deaths,0)+1 WHERE id=?',
           [dm.dead_map||1, dm.dead_x||35, dm.dead_y||37, newExpAfterDeath, postac.id]);
         log.push({ type: 'hero_dead', xpLoss: deathXpLoss });
         status = 'lost'; heroHp = 1;

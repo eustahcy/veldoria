@@ -192,16 +192,14 @@ router.post('/temple-heal', requireSession, async (req, res) => {
     const last = templeCooldowns.get(postacId) || 0;
     const remaining = COOLDOWN_MS - (Date.now() - last);
 
-    // Musi być blisko NPC Kapłanki (npc id=19, mapa 5)
+    // Leczy dowolny NPC oznaczony jako świątynia (typ=3) stojący na tej mapie
     const [[postac]] = await db.query('SELECT * FROM postac WHERE id=?', [postacId]);
     if (!postac) return res.json({ ok: false, error: 'Brak postaci' });
-    if (postac.mapa !== 5) return res.json({ ok: false, error: 'Musisz być w Świątyni Światła' });
 
-    const [[elara]] = await db.query('SELECT x,y FROM npc WHERE id=19 LIMIT 1');
-    if (elara) {
-      const dist = Math.max(Math.abs(postac.x - elara.x), Math.abs(postac.y - elara.y));
-      if (dist > 3) return res.json({ ok: false, error: 'Podejdź bliżej Kapłanki Elary' });
-    }
+    const [kaplani] = await db.query('SELECT nazwa,x,y FROM npc WHERE mapa=? AND typ=3', [postac.mapa]);
+    if (!kaplani.length) return res.json({ ok: false, error: 'Na tej mapie nie ma świątyni' });
+    const blisko = kaplani.find(k => Math.max(Math.abs(postac.x - k.x), Math.abs(postac.y - k.y)) <= 3);
+    if (!blisko) return res.json({ ok: false, error: `Podejdź bliżej: ${kaplani[0].nazwa}` });
 
     if (remaining > 0) {
       const mins = Math.ceil(remaining / 60000);
